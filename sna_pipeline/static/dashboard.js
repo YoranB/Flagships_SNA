@@ -2,6 +2,7 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
     const personsById = new Map(DATA.persons.map(p => [p.id, p]));
     const flagshipsById = new Map([...DATA.flagships, ...DATA.selected_flagship_groups].map(f => [f.id, f]));
     const edgesByPerson = new Map();
+    let globalSearchControl = null;
     const activeState = {
       view: 'flagships',
       selectedOnly: false,
@@ -11,7 +12,6 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
       selectedInstitution: '',
       selectedDepartment: '',
       keyword: '',
-      groupMode: 'none',
       minWeight: 1,
       hopDepth: 1,
       edgeMode: 'backbone',
@@ -42,13 +42,12 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
     }
     const colorForDepartment = (department) => department === 'Unknown' ? '#8a8f98' : hashColor(department);
     function groupColorForPerson(person) {
-      if (activeState.groupMode === 'department') return colorForDepartment(person.department_group);
+      if (activeState.selectedDepartment) return colorForDepartment(person.department_group);
       return colorForInstitution(person.institution_clean || person.institution);
     }
     function groupLabelForPerson(person) {
-      if (activeState.groupMode === 'department') return person.department_group || 'Unknown';
-      if (activeState.groupMode === 'institution') return person.institution_clean || person.institution || 'Unknown';
-      return person.institution || 'Unknown';
+      if (activeState.selectedDepartment) return person.department_group || 'Unknown';
+      return person.institution_clean || person.institution || 'Unknown';
     }
     const fmt = new Intl.NumberFormat('nl-NL');
 
@@ -87,6 +86,7 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
     function personNode(person, showLabel = false) {
       const size = 12 + Math.min(32, Math.sqrt(Math.max(person.weighted_degree, person.degree)) * 3.2);
       const color = groupColorForPerson(person);
+      const border = person.is_placeholder ? '#111827' : '#ffffff';
       return {
         id: person.id,
         label: showLabel ? person.name : '',
@@ -94,11 +94,27 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
         size,
         color: {
           background: color,
-          border: person.is_placeholder ? '#111827' : '#ffffff'
+          border,
+          highlight: { background: color, border },
+          hover: { background: color, border }
         },
         group: groupLabelForPerson(person),
         kind: 'person',
       };
+    }
+
+    function restorePersonNode(nodeId) {
+      const node = activeState.currentNodes.find(item => item.id === nodeId);
+      if (!node) return;
+      network.body.data.nodes.update({
+        id: node.id,
+        label: node.label || '',
+        value: node.value,
+        size: node.size,
+        color: node.color,
+        group: node.group,
+        kind: node.kind,
+      });
     }
 
     function departmentDisplay(person) {
@@ -162,8 +178,9 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
 
     function openPersonNetwork(personId) {
       activeState.selectedPerson = personId;
+      activeState.keyword = '';
       activeState.flagshipFocusPerson = '';
-      document.getElementById('personSearch').tomselect.setValue(personId, true);
+      if (globalSearchControl) globalSearchControl.setValue(personId, true);
       setView('person');
     }
 
@@ -471,16 +488,76 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
       setNetwork(nodes, edges, 'Top connectoren', `${people.length} personen gesorteerd op betweenness, flagships en weighted degree.`);
     }
 
+    function renderDepartmentNetwork(departmentGroup) {
+      const people = DATA.persons
+        .filter(person => person.department_group === departmentGroup && passInstitution(person) && passKeyword(person));
+      const ids = new Set(people.map(person => person.id));
+      const edges = DATA.edges
+        .filter(edge => ids.has(edge.source) && ids.has(edge.target) && passWeight(edge))
+        .map(edge => ({
+          id: edgeKey(edge),
+          from: edge.source,
+          to: edge.target,
+          width: personEdgeWidth(edge),
+          label: edge.weight > 2 ? String(edge.weight) : '',
+          title: `Weight: ${edge.weight}<br>${escapeHtml(edge.flagship_titles.join('; '))}`,
+          kind: 'person-edge',
+        }));
+      const topIds = new Set([...people]
+        .sort((a, b) => b.betweenness - a.betweenness || b.weighted_degree - a.weighted_degree || b.degree - a.degree)
+        .slice(0, 12)
+        .map(person => person.id));
+      const nodes = people.map(person => personNode(person, topIds.has(person.id)));
+      setNetwork(nodes, edges, `Afdeling: ${departmentGroup}`, `${people.length} personen, ${edges.length} relaties binnen deze afdeling.`);
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>${escapeHtml(departmentGroup)}</h3>
+        <div class="kv"><span>Personen</span><span>${people.length}</span></div>
+        <div class="kv"><span>Relaties</span><span>${edges.length}</span></div>
+        <div class="kv"><span>Instellingfilter</span><span>${escapeHtml(activeState.selectedInstitution || 'Alle instellingen')}</span></div>
+        <div class="kv"><span>Trefwoord</span><span>${escapeHtml(activeState.keyword || '-')}</span></div>
+      `;
+      markActiveFlagship('');
+    }
+
+    function renderInstitutionNetwork(institution) {
+      const people = DATA.persons
+        .filter(person => (person.institution_clean || person.institution) === institution && passDepartment(person) && passKeyword(person));
+      const ids = new Set(people.map(person => person.id));
+      const edges = DATA.edges
+        .filter(edge => ids.has(edge.source) && ids.has(edge.target) && passWeight(edge))
+        .map(edge => ({
+          id: edgeKey(edge),
+          from: edge.source,
+          to: edge.target,
+          width: personEdgeWidth(edge),
+          label: edge.weight > 2 ? String(edge.weight) : '',
+          title: `Weight: ${edge.weight}<br>${escapeHtml(edge.flagship_titles.join('; '))}`,
+          kind: 'person-edge',
+        }));
+      const topIds = new Set([...people]
+        .sort((a, b) => b.betweenness - a.betweenness || b.weighted_degree - a.weighted_degree || b.degree - a.degree)
+        .slice(0, 12)
+        .map(person => person.id));
+      const nodes = people.map(person => personNode(person, topIds.has(person.id)));
+      setNetwork(nodes, edges, `Instelling: ${institution}`, `${people.length} personen, ${edges.length} relaties binnen deze instelling.`);
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>${escapeHtml(institution)}</h3>
+        <div class="kv"><span>Personen</span><span>${people.length}</span></div>
+        <div class="kv"><span>Relaties</span><span>${edges.length}</span></div>
+        <div class="kv"><span>Afdelingfilter</span><span>${escapeHtml(activeState.selectedDepartment || 'Alle afdelingen')}</span></div>
+        <div class="kv"><span>Trefwoord</span><span>${escapeHtml(activeState.keyword || '-')}</span></div>
+      `;
+      markActiveFlagship('');
+    }
+
     function renderActiveView() {
       activeState.selectedOnly = document.getElementById('selectedOnlyToggle').checked;
       activeState.minWeight = Number(document.getElementById('minWeight').value || 1);
       activeState.selectedInstitution = document.getElementById('institutionFilter').value;
       activeState.selectedDepartment = document.getElementById('departmentFilter').value;
-      activeState.keyword = document.getElementById('keywordFilter').value.trim().toLowerCase();
-      activeState.groupMode = document.getElementById('groupMode').value;
       activeState.selectedFlagship = document.getElementById('flagshipSelect').value;
       activeState.hopDepth = Number(document.getElementById('hopDepth').value || 1);
-      activeState.edgeMode = document.getElementById('edgeMode').value;
+      activeState.edgeMode = 'backbone';
       updateFlagshipControls();
       renderFlagshipList();
 
@@ -490,6 +567,10 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
         renderTopConnectors();
       } else if (activeState.selectedFlagship) {
         renderFlagship(activeState.selectedFlagship);
+      } else if (activeState.selectedDepartment) {
+        renderDepartmentNetwork(activeState.selectedDepartment);
+      } else if (activeState.selectedInstitution) {
+        renderInstitutionNetwork(activeState.selectedInstitution);
       } else {
         renderFlagshipOverview();
       }
@@ -583,8 +664,8 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
     function setView(view) {
       activeState.view = view;
       document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.view === view));
-      if (view === 'flagships') {
-        document.getElementById('personSearch').tomselect.clear(true);
+      if (view === 'flagships' && activeState.selectedPerson) {
+        if (globalSearchControl) globalSearchControl.clear(true);
         activeState.selectedPerson = '';
       }
       renderActiveView();
@@ -601,18 +682,32 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
           department_group: person.department_group,
           email: person.email,
         }));
-      new TomSelect('#personSearch', {
+      globalSearchControl = new TomSelect('#globalSearch', {
         options: personOptions,
         valueField: 'value',
         labelField: 'text',
         searchField: ['text', 'institution', 'department', 'department_group', 'email'],
         maxOptions: 200,
+        maxItems: 1,
+        create: false,
         render: {
           option: (data, escape) => `<div><strong>${escape(data.text)}</strong><div class="subtle">${escape(data.institution)} · ${escape(data.department_group || data.department || 'Unknown')} · ${escape(data.email || '')}</div></div>`,
         },
+        onType: value => {
+          activeState.keyword = value.trim().toLowerCase();
+          if (activeState.selectedPerson) activeState.selectedPerson = '';
+          renderActiveView();
+        },
         onChange: value => {
-          activeState.selectedPerson = value;
-          if (value) setView('person');
+          if (value && personsById.has(value)) {
+            activeState.keyword = '';
+            activeState.selectedPerson = value;
+            setView('person');
+          } else if (!value) {
+            activeState.selectedPerson = '';
+            activeState.keyword = '';
+            renderActiveView();
+          }
         }
       });
 
@@ -627,10 +722,7 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
       document.getElementById('departmentFilter').innerHTML =
         '<option value="">Alle afdelingen</option>' +
         departments.map(dept => `<option value="${escapeHtml(dept)}">${escapeHtml(dept)}</option>`).join('');
-      new TomSelect('#departmentFilter', {
-        maxOptions: 300,
-        onChange: renderActiveView,
-      });
+      document.getElementById('departmentFilter').addEventListener('change', renderActiveView);
 
       document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => setView(tab.dataset.view)));
       document.getElementById('applyFilters').addEventListener('click', renderActiveView);
@@ -639,14 +731,12 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
         document.getElementById('selectedOnlyToggle').checked = false;
         document.getElementById('flagshipSelect').value = '';
         document.getElementById('institutionFilter').value = '';
-        document.getElementById('departmentFilter').tomselect.clear(true);
-        document.getElementById('keywordFilter').value = '';
-        document.getElementById('groupMode').value = 'none';
+        document.getElementById('departmentFilter').value = '';
         document.getElementById('minWeight').value = '1';
         document.getElementById('hopDepth').value = '1';
-        document.getElementById('edgeMode').value = 'backbone';
-        document.getElementById('personSearch').tomselect.clear(true);
+        if (globalSearchControl) globalSearchControl.clear(true);
         activeState.selectedPerson = '';
+        activeState.keyword = '';
         activeState.flagshipFocusPerson = '';
         setView('flagships');
       });
@@ -663,14 +753,8 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
         setView('flagships');
       });
       document.getElementById('institutionFilter').addEventListener('change', renderActiveView);
-      document.getElementById('keywordFilter').addEventListener('input', renderActiveView);
-      document.getElementById('groupMode').addEventListener('change', renderActiveView);
       document.getElementById('minWeight').addEventListener('change', renderActiveView);
       document.getElementById('hopDepth').addEventListener('change', renderActiveView);
-      document.getElementById('edgeMode').addEventListener('change', () => {
-        activeState.flagshipFocusPerson = '';
-        renderActiveView();
-      });
 
       document.addEventListener('click', event => {
         const flagshipItem = event.target.closest('[data-flagship]');
@@ -684,7 +768,8 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
         const personItem = event.target.closest('[data-person]');
         if (personItem) {
           activeState.selectedPerson = personItem.dataset.person;
-          document.getElementById('personSearch').tomselect.setValue(activeState.selectedPerson, true);
+          activeState.keyword = '';
+          if (globalSearchControl) globalSearchControl.setValue(activeState.selectedPerson, true);
           setView('person');
         }
       });
@@ -699,14 +784,11 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
         activeState.flagshipFocusPerson = '';
         renderFlagship(id);
       } else if (personsById.has(id)) {
-        if (activeState.view === 'person' || activeState.view === 'connectors') {
+        if (activeState.view === 'person' || activeState.view === 'connectors' || (activeState.view === 'flagships' && (activeState.selectedDepartment || activeState.selectedInstitution) && !activeState.selectedFlagship)) {
           openPersonNetwork(id);
           hidePersonTooltip();
         } else if (activeState.view === 'flagships' && activeState.selectedFlagship) {
           activeState.flagshipFocusPerson = id;
-          if (activeState.edgeMode === 'selection') {
-            document.getElementById('edgeMode').value = 'selection';
-          }
           renderFlagship(activeState.selectedFlagship);
           showPersonDetails(personsById.get(id));
         } else {
@@ -719,15 +801,27 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
       const nodeId = params.node;
       if (!personsById.has(nodeId)) return;
       const person = personsById.get(nodeId);
-      network.body.data.nodes.update({ id: nodeId, label: person.name });
+      const node = activeState.currentNodes.find(item => item.id === nodeId);
+      if (node) {
+        network.body.data.nodes.update({
+          id: nodeId,
+          label: person.name,
+          color: node.color,
+          group: node.group,
+          size: node.size,
+          value: node.value,
+          kind: node.kind,
+        });
+      } else {
+        network.body.data.nodes.update({ id: nodeId, label: person.name });
+      }
       showPersonTooltip(person, params.pointer?.DOM);
     });
 
     network.on('blurNode', params => {
       const nodeId = params.node;
       if (!personsById.has(nodeId)) return;
-      const node = activeState.currentNodes.find(item => item.id === nodeId);
-      if (node && !node.label) network.body.data.nodes.update({ id: nodeId, label: '' });
+      restorePersonNode(nodeId);
       hidePersonTooltip();
     });
 

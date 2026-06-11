@@ -34,8 +34,8 @@ __DASHBOARD_CSS__
       <section class="panel-section">
         <h2>Filters</h2>
         <div class="field">
-          <label for="personSearch">Persoon zoeken</label>
-          <select id="personSearch" placeholder="Zoek op naam, mail, instelling of afdeling"></select>
+          <label for="globalSearch">Zoeken</label>
+          <select id="globalSearch" placeholder="Zoek persoon of typ trefwoord"></select>
         </div>
         <div class="field">
           <label for="flagshipSelect">Flagship</label>
@@ -49,10 +49,6 @@ __DASHBOARD_CSS__
           <label for="departmentFilter">Afdeling</label>
           <select id="departmentFilter"></select>
         </div>
-        <div class="field">
-          <label for="keywordFilter">Trefwoord</label>
-          <input id="keywordFilter" type="search" placeholder="Naam, rol, afdeling, instelling of flagship">
-        </div>
         <div class="row">
           <div class="field">
             <label for="minWeight">Min edge weight</label>
@@ -65,22 +61,6 @@ __DASHBOARD_CSS__
               <option value="2">2-hop netwerk</option>
             </select>
           </div>
-        </div>
-        <div class="field">
-          <label for="edgeMode">Flagship edges</label>
-          <select id="edgeMode">
-            <option value="backbone">Backbone</option>
-            <option value="selection">Selectie</option>
-            <option value="all">Alles</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="groupMode">Groepering</label>
-          <select id="groupMode">
-            <option value="none">Geen groepering</option>
-            <option value="institution">Groepeer op instituut</option>
-            <option value="department">Groepeer op afdeling</option>
-          </select>
         </div>
         <div class="row" style="margin-top: 12px;">
           <button id="applyFilters" class="btn primary">Toon netwerk</button>
