@@ -1,4 +1,58 @@
     const DATA = JSON.parse(document.getElementById('sna-data').textContent);
+    const MANUAL_EXPERTISE_STORAGE_KEY = 'flagships_sna_manual_expertise_edits_v1';
+    function loadManualExpertiseEdits() {
+      try {
+        return JSON.parse(localStorage.getItem(MANUAL_EXPERTISE_STORAGE_KEY) || '{}');
+      } catch (error) {
+        return {};
+      }
+    }
+    function saveManualExpertiseEdits() {
+      try {
+        localStorage.setItem(MANUAL_EXPERTISE_STORAGE_KEY, JSON.stringify(manualExpertiseEdits));
+      } catch (error) {
+        console.warn('Manual expertise edits could not be saved to localStorage.', error);
+      }
+    }
+    function splitKeywords(value) {
+      return String(value || '').split(';').map(item => item.trim()).filter(Boolean);
+    }
+    function mergeKeywordText(left, right) {
+      const seen = new Map();
+      for (const keyword of [...splitKeywords(left), ...splitKeywords(right)]) {
+        const key = keyword.toLowerCase();
+        if (!seen.has(key)) seen.set(key, keyword);
+      }
+      return [...seen.values()].join('; ');
+    }
+    function expertiseHasContent(person) {
+      return Boolean((person.expertise_keywords || '').trim() || (person.expertise_summary || '').trim());
+    }
+    function applyManualExpertiseEdit(person, edit) {
+      if (!person || !edit) return;
+      if (!person._base_search_text) {
+        person._base_search_text = person.search_text || '';
+        person._base_expertise_keywords = person.expertise_keywords || '';
+        person._base_expertise_summary = person.expertise_summary || '';
+        person._base_expertise_confidence = person.expertise_confidence || '';
+        person._base_expertise_origin = person.expertise_origin || '';
+        person._base_expertise_manual_note = person.expertise_manual_note || '';
+      }
+      const hadOnline = person._base_expertise_origin === 'online_enriched' || person._base_expertise_origin === 'online_plus_manual';
+      person.expertise_keywords = mergeKeywordText(person._base_expertise_keywords, edit.expertise_keywords);
+      person.expertise_summary = edit.expertise_summary || person._base_expertise_summary || '';
+      person.expertise_confidence = edit.confidence || person._base_expertise_confidence || '';
+      person.expertise_manual_note = edit.source_note || '';
+      person.expertise_origin = hadOnline ? 'online_plus_manual' : 'manual';
+      person.search_text = `${person._base_search_text || ''} ${person.expertise_keywords || ''} ${person.expertise_summary || ''}`.toLowerCase();
+    }
+    function applyManualExpertiseEdits() {
+      for (const person of DATA.persons) {
+        applyManualExpertiseEdit(person, manualExpertiseEdits[person.id]);
+      }
+    }
+    let manualExpertiseEdits = loadManualExpertiseEdits();
+    applyManualExpertiseEdits();
     const personsById = new Map(DATA.persons.map(p => [p.id, p]));
     const flagshipsById = new Map([...DATA.flagships, ...DATA.selected_flagship_groups].map(f => [f.id, f]));
     const convergenceOverview = DATA.convergence_overview || { institution_groups: [], flagships: [], ranking: [], network_nodes: [], network_edges: [] };
@@ -13,6 +67,8 @@
       flagshipFocusPerson: '',
       selectedInstitution: '',
       selectedDepartment: '',
+      expertiseStatus: '',
+      expertiseConfidence: '',
       keyword: '',
       minWeight: 1,
       hopDepth: 1,
@@ -273,8 +329,16 @@
       return (person.search_text || '').includes(activeState.keyword);
     }
 
+    function passExpertiseFilters(person) {
+      const hasExpertise = expertiseHasContent(person);
+      if (activeState.expertiseStatus === 'with' && !hasExpertise) return false;
+      if (activeState.expertiseStatus === 'without' && hasExpertise) return false;
+      if (activeState.expertiseConfidence && person.expertise_confidence !== activeState.expertiseConfidence) return false;
+      return true;
+    }
+
     function passPersonFilters(person) {
-      return passInstitution(person) && passDepartment(person) && passKeyword(person);
+      return passInstitution(person) && passDepartment(person) && passKeyword(person) && passExpertiseFilters(person);
     }
 
     function passWeight(edge) {
@@ -727,6 +791,8 @@
       activeState.minWeight = Number(document.getElementById('minWeight').value || 1);
       activeState.selectedInstitution = document.getElementById('institutionFilter').value;
       activeState.selectedDepartment = document.getElementById('departmentFilter').value;
+      activeState.expertiseStatus = document.getElementById('expertiseStatusFilter').value;
+      activeState.expertiseConfidence = document.getElementById('expertiseConfidenceFilter').value;
       activeState.selectedFlagship = document.getElementById('flagshipSelect').value;
       activeState.hopDepth = Number(document.getElementById('hopDepth').value || 1);
       activeState.edgeMode = 'backbone';
@@ -752,6 +818,103 @@
       renderConnectorList();
     }
 
+    function renderExpertiseDetails(person) {
+      const hasExpertise = expertiseHasContent(person);
+      const source = person.expertise_source_url
+        ? `<a class="source-link" href="${escapeHtml(person.expertise_source_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(person.expertise_source_type || person.expertise_source_url)}</a>`
+        : escapeHtml(person.expertise_source_type || 'Not available');
+      return `
+        <div class="expertise-box">
+          <h3>Expertise</h3>
+          <div class="kv"><span>Keywords</span><span>${escapeHtml(person.expertise_keywords || 'Not available')}</span></div>
+          <div class="kv"><span>Summary</span><span>${escapeHtml(person.expertise_summary || 'Not available')}</span></div>
+          <div class="kv"><span>Source</span><span>${source}</span></div>
+          <div class="kv"><span>Confidence</span><span>${escapeHtml(person.expertise_confidence || 'Not available')}</span></div>
+          <div class="kv"><span>Last checked</span><span>${escapeHtml(person.expertise_last_checked || 'Not available')}</span></div>
+          <div class="kv"><span>Origin</span><span>${escapeHtml(person.expertise_origin || (hasExpertise ? 'manual' : 'Not available'))}</span></div>
+          ${person.expertise_manual_note ? `<div class="kv"><span>Manual note</span><span>${escapeHtml(person.expertise_manual_note)}</span></div>` : ''}
+          <div class="expertise-actions">
+            <button class="btn" type="button" data-edit-expertise="${escapeHtml(person.id)}">Add/edit expertise</button>
+          </div>
+          <div id="expertiseFormMount"></div>
+        </div>
+      `;
+    }
+
+    function renderExpertiseForm(person) {
+      const mount = document.getElementById('expertiseFormMount');
+      if (!mount) return;
+      const edit = manualExpertiseEdits[person.id] || {};
+      mount.innerHTML = `
+        <div class="expertise-form">
+          <div class="field">
+            <label for="expertiseKeywordsInput">Expertise keywords</label>
+            <input id="expertiseKeywordsInput" type="text" value="${escapeHtml(edit.expertise_keywords || person.expertise_keywords || '')}" placeholder="AI; medical imaging; implementation science">
+          </div>
+          <div class="field">
+            <label for="expertiseSummaryInput">Expertise summary</label>
+            <textarea id="expertiseSummaryInput" placeholder="Short expertise summary">${escapeHtml(edit.expertise_summary || person.expertise_summary || '')}</textarea>
+          </div>
+          <div class="field">
+            <label for="expertiseSourceNoteInput">Source / note</label>
+            <textarea id="expertiseSourceNoteInput" placeholder="Manual source, correction reason, or verification note">${escapeHtml(edit.source_note || person.expertise_manual_note || '')}</textarea>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="expertiseConfidenceInput">Confidence</label>
+              <select id="expertiseConfidenceInput">
+                ${['high', 'medium', 'low', 'needs_review'].map(value => `<option value="${value}" ${(edit.confidence || person.expertise_confidence || 'needs_review') === value ? 'selected' : ''}>${value}</option>`).join('')}
+              </select>
+            </div>
+            <button class="btn primary" type="button" data-save-expertise="${escapeHtml(person.id)}">Save</button>
+            <button class="btn" type="button" data-cancel-expertise>Cancel</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function saveExpertiseForm(personId) {
+      const person = personsById.get(personId);
+      if (!person) return;
+      const edit = {
+        person_id: person.id,
+        person_name: person.name,
+        expertise_keywords: document.getElementById('expertiseKeywordsInput')?.value.trim() || '',
+        expertise_summary: document.getElementById('expertiseSummaryInput')?.value.trim() || '',
+        source_note: document.getElementById('expertiseSourceNoteInput')?.value.trim() || '',
+        confidence: document.getElementById('expertiseConfidenceInput')?.value || 'needs_review',
+        edited_at: new Date().toISOString(),
+      };
+      manualExpertiseEdits[person.id] = edit;
+      saveManualExpertiseEdits();
+      applyManualExpertiseEdit(person, edit);
+      renderActiveView();
+      showPersonDetails(person);
+    }
+
+    function csvCell(value) {
+      const text = String(value ?? '');
+      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }
+
+    function exportManualExpertiseEdits() {
+      const rows = Object.values(manualExpertiseEdits);
+      const columns = ['person_id', 'person_name', 'expertise_keywords', 'expertise_summary', 'source_note', 'confidence', 'edited_at'];
+      const csv = [
+        columns.join(','),
+        ...rows.map(row => columns.map(column => csvCell(row[column] || '')).join(',')),
+      ].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'manual_expertise_edits.csv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
     function showPersonDetails(person) {
       const flagshipRows = person.flagships.map(item => `<div>${escapeHtml(item.id)} · ${escapeHtml(item.title)}</div>`).join('');
       document.getElementById('selectionDetails').innerHTML = `
@@ -768,6 +931,7 @@
         <div class="kv"><span>Betweenness</span><span>${person.betweenness.toFixed(4)}</span></div>
         <div class="kv"><span>Community</span><span>${person.community || '-'}</span></div>
         <div class="kv"><span>Flagships</span><span>${flagshipRows || '-'}</span></div>
+        ${renderExpertiseDetails(person)}
         ${person.is_placeholder ? '<div class="detail-card"><b>Datakwaliteit:</b> deze node gebruikt een fallback-id omdat de e-mail placeholder-achtig is.</div>' : ''}
       `;
     }
@@ -855,18 +1019,20 @@
           institution: person.institution_clean || person.institution,
           department: person.department_clean || person.department,
           department_group: person.department_group,
+          expertise_keywords: person.expertise_keywords,
+          expertise_summary: person.expertise_summary,
           email: person.email,
         }));
       globalSearchControl = new TomSelect('#globalSearch', {
         options: personOptions,
         valueField: 'value',
         labelField: 'text',
-        searchField: ['text', 'institution', 'department', 'department_group', 'email'],
+        searchField: ['text', 'institution', 'department', 'department_group', 'expertise_keywords', 'expertise_summary', 'email'],
         maxOptions: 200,
         maxItems: 1,
         create: false,
         render: {
-          option: (data, escape) => `<div><strong>${escape(data.text)}</strong><div class="subtle">${escape(data.institution)} · ${escape(data.department_group || data.department || 'Unknown')} · ${escape(data.email || '')}</div></div>`,
+          option: (data, escape) => `<div><strong>${escape(data.text)}</strong><div class="subtle">${escape(data.institution)} · ${escape(data.department_group || data.department || 'Unknown')} · ${escape(data.expertise_keywords || data.email || '')}</div></div>`,
         },
         onType: value => {
           activeState.keyword = value.trim().toLowerCase();
@@ -907,6 +1073,8 @@
         document.getElementById('flagshipSelect').value = '';
         document.getElementById('institutionFilter').value = '';
         document.getElementById('departmentFilter').value = '';
+        document.getElementById('expertiseStatusFilter').value = '';
+        document.getElementById('expertiseConfidenceFilter').value = '';
         document.getElementById('minWeight').value = '1';
         document.getElementById('hopDepth').value = '1';
         if (globalSearchControl) globalSearchControl.clear(true);
@@ -932,10 +1100,28 @@
         setView('flagships');
       });
       document.getElementById('institutionFilter').addEventListener('change', renderActiveView);
+      document.getElementById('expertiseStatusFilter').addEventListener('change', renderActiveView);
+      document.getElementById('expertiseConfidenceFilter').addEventListener('change', renderActiveView);
       document.getElementById('minWeight').addEventListener('change', renderActiveView);
       document.getElementById('hopDepth').addEventListener('change', renderActiveView);
+      document.getElementById('exportExpertiseEdits').addEventListener('click', exportManualExpertiseEdits);
 
       document.addEventListener('click', event => {
+        const editExpertiseItem = event.target.closest('[data-edit-expertise]');
+        if (editExpertiseItem) {
+          renderExpertiseForm(personsById.get(editExpertiseItem.dataset.editExpertise));
+          return;
+        }
+        const saveExpertiseItem = event.target.closest('[data-save-expertise]');
+        if (saveExpertiseItem) {
+          saveExpertiseForm(saveExpertiseItem.dataset.saveExpertise);
+          return;
+        }
+        if (event.target.closest('[data-cancel-expertise]')) {
+          const mount = document.getElementById('expertiseFormMount');
+          if (mount) mount.innerHTML = '';
+          return;
+        }
         const convergenceItem = event.target.closest('[data-convergence-flagship]');
         if (convergenceItem) {
           const flagshipId = convergenceItem.dataset.convergenceFlagship;

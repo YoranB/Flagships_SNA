@@ -52,6 +52,26 @@ __DASHBOARD_CSS__
         </div>
         <div class="row">
           <div class="field">
+            <label for="expertiseStatusFilter">Expertise</label>
+            <select id="expertiseStatusFilter">
+              <option value="">Alle</option>
+              <option value="with">Met expertise</option>
+              <option value="without">Zonder expertise</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="expertiseConfidenceFilter">Confidence</label>
+            <select id="expertiseConfidenceFilter">
+              <option value="">Alle</option>
+              <option value="high">high</option>
+              <option value="medium">medium</option>
+              <option value="low">low</option>
+              <option value="needs_review">needs_review</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
             <label for="minWeight">Min edge weight</label>
             <input id="minWeight" type="number" min="1" max="10" step="1" value="1">
           </div>
@@ -66,6 +86,9 @@ __DASHBOARD_CSS__
         <div class="row" style="margin-top: 12px;">
           <button id="applyFilters" class="btn primary">Toon netwerk</button>
           <button id="resetView" class="btn">Reset</button>
+        </div>
+        <div class="field">
+          <button id="exportExpertiseEdits" class="btn" type="button">Export manual expertise edits</button>
         </div>
       </section>
 

@@ -7,6 +7,10 @@ CLEANED_APPLICANTS = CLEANED_FOLDER / "flagship_applicants_sna_cleaned.csv"
 OUT_DEPARTMENT_CLEANING_REPORT = CLEANED_FOLDER / "department_cleaning_report.csv"
 OUT_INSTITUTION_CLEANING_REPORT = CLEANED_FOLDER / "institution_cleaning_report.csv"
 OUT_UNMAPPED_DEPARTMENTS = CLEANED_FOLDER / "unmapped_departments.csv"
+ENRICHED_FOLDER = Path("output_enriched")
+OUT_PERSON_EXPERTISE = ENRICHED_FOLDER / "person_expertise.csv"
+MANUAL_FOLDER = Path("input_manual")
+INPUT_MANUAL_EXPERTISE = MANUAL_FOLDER / "person_expertise_manual.csv"
 
 INPUT_APPLICANTS = CLEANED_APPLICANTS if CLEANED_APPLICANTS.exists() else READY_APPLICANTS
 INPUT_PERSON_EDGES = Path("output_ready/person_person_edges_sna_ready.csv")

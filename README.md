@@ -6,8 +6,9 @@ This repository builds a social network analysis (SNA) dashboard from the cleane
 
 1. `output_ready/` contains the SNA-ready CSV inputs.
 2. `python3 -m sna_pipeline.clean_fields` optionally creates audited institution and department fields in `output_cleaned/`.
-3. `sna_pipeline/` builds the person graph, calculates metrics, and renders the standalone dashboard.
-4. `output_sna/` contains the generated CSV, Excel, text summary, and HTML dashboard outputs.
+3. `python3 enrich_expertise.py` optionally enriches people with public expertise metadata in `output_enriched/`.
+4. `sna_pipeline/` builds the person graph, calculates metrics, merges optional expertise data, and renders the standalone dashboard.
+5. `output_sna/` contains the generated CSV, Excel, text summary, and HTML dashboard outputs.
 
 The extraction and cleaning scripts are kept as separate legacy pipeline steps and are not required to run the dashboard from the existing `output_ready/` files.
 
@@ -23,6 +24,7 @@ Preferred entrypoint:
 
 ```bash
 python3 -m sna_pipeline.clean_fields
+python3 enrich_expertise.py
 python3 -m sna_pipeline
 ```
 
@@ -51,6 +53,10 @@ The cleaning command writes:
 - `output_cleaned/institution_cleaning_report.csv`
 - `output_cleaned/unmapped_departments.csv`
 
+The expertise enrichment command writes:
+
+- `output_enriched/person_expertise.csv`
+
 ## Dashboard
 
 Open `output_sna/person_network_interactive.html` in a browser after running the pipeline. The dashboard is standalone: required local JavaScript and CSS libraries are embedded into the generated HTML.
@@ -58,13 +64,50 @@ Open `output_sna/person_network_interactive.html` in a browser after running the
 Useful controls:
 
 - `Alleen gekozen flagships`: limits the overview to the 10 selected flagship groups.
-- `Flagship edges`: switches between `Backbone`, `Selectie`, and `Alles`.
-- `Persoon zoeken`: shows an ego network around a selected person.
+- `Zoeken`: searches people by name, email, institution, department, role, flagship title, and expertise text.
 - `Instelling` and `Afdeling`: filter person views and flagship drilldowns on cleaned institution and department groups.
-- `Trefwoord`: searches across person name, email, institution, department, role, and flagship title.
-- `Groepering`: colors person nodes by institution or department.
+- `Expertise` and `Confidence`: filter people with/without expertise and by confidence level.
+- `Export manual expertise edits`: downloads local browser edits as `manual_expertise_edits.csv`.
 
 The selected flagship groups are configured in `sna_pipeline/config.py`. ALIVE combines source flagships `2022014` and `2022030`.
+
+## Expertise Enrichment
+
+The expertise layer is optional. If no expertise files exist, the dashboard still builds and shows expertise as `Not available`.
+
+Run no-key online enrichment:
+
+```bash
+python3 enrich_expertise.py
+```
+
+For a small smoke test:
+
+```bash
+python3 enrich_expertise.py --limit 5
+```
+
+The enrichment script uses public no-key sources where available, including OpenAlex, ORCID, Semantic Scholar, and institutional/research profile metadata when discoverable from those sources. It does not use LinkedIn and does not run inside the dashboard. Matches are conservative: name similarity alone is not enough; the script also checks institution, email domain, department, organisation, or publication affiliation signals.
+
+Confidence levels:
+
+- `high`: strong match evidence plus usable expertise keywords or topics.
+- `medium`: one clear institution/affiliation signal plus usable expertise data.
+- `low`: weak but plausible extra evidence.
+- `needs_review`: no reliable match or a result that should be manually checked.
+
+Manual expertise can be added in two ways:
+
+1. In the dashboard, select a person and click `Add/edit expertise`. Edits are stored in browser `localStorage` and immediately affect search/filtering in that browser.
+2. Click `Export manual expertise edits` to download `manual_expertise_edits.csv`, then place or merge it as `input_manual/person_expertise_manual.csv`.
+
+Manual data is merged into the dashboard by running:
+
+```bash
+python3 -m sna_pipeline
+```
+
+Manual expertise wins over online enrichment for summary, confidence, and notes. Keywords are merged and deduplicated so online discovery terms are not lost.
 
 ## Code Layout
 

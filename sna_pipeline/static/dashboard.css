@@ -103,6 +103,17 @@
       color: var(--text);
       min-height: 36px;
     }
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--text);
+      min-height: 84px;
+      resize: vertical;
+      font: inherit;
+    }
     .row {
       display: flex;
       gap: 8px;
@@ -358,6 +369,39 @@
     }
     .kv:last-child { border-bottom: 0; }
     .kv span:first-child { color: var(--muted); }
+    .expertise-box {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #eef0f4;
+    }
+    .expertise-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .expertise-form {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fafbfc;
+    }
+    .expertise-form .row {
+      align-items: flex-end;
+    }
+    .source-link {
+      color: var(--accent);
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+    .source-link:hover {
+      text-decoration: underline;
+    }
     .quality {
       display: grid;
       gap: 6px;
