@@ -1,0 +1,3 @@
+﻿flagship_id,flagship_title,source_file,page,person_name_raw,person_name_clean,institution,department,email,position,emc_applicant_type,role,extraction_method,confidence,raw_row
+2022003,HELIOS,2022003_2022003_full proposal HELIOS.pdf,4,cedric.steenbeke@microsoft.co,cedric.steenbeke@microsoft.co,Private,,cedric.steenbeke@microsoft.co,Private,,Private,table_settings_2,high,cedric.steenbeke@microsoft.co | Private
+2022003,HELIOS,2022003_2022003_full proposal HELIOS.pdf,3,conradi@erasmusmc.nl,conradi@erasmusmc.nl,Partner,board,conradi@erasmusmc.nl,Partner,board,board,table_settings_1,high,conradi@erasmusmc.nl | Partner | board

@@ -1,0 +1,374 @@
+﻿department_raw,department_clean,department_group,count
+Imaging Physics,Imaging Physics,Imaging Physics,18
+ESHPM,Eshpm,Eshpm,17
+Molecular Genetics,Molecular Genetics,Molecular Genetics,17
+Epidemiology,Epidemiology,Epidemiology,10
+Industrial Design Engineering,Industrial Design Engineering,Industrial Design Engineering,9
+Radiotherapy,Radiotherapy,Radiotherapy,9
+Rehabilitation Medicine,Rehabilitation Medicine,Rehabilitation Medicine,9
+Adult ICU,Adult ICU,Adult ICU,8
+Erasmus School of Economics,Erasmus School of Economics,Erasmus School of Economics,8
+ESHCC,Eshcc,Eshcc,7
+Microelectronics,Microelectronics,Microelectronics,7
+Developmental Biology,Developmental Biology,Developmental Biology,6
+Erasmus School of Social and Behavioural Sciences,Erasmus School of Social and Behavioural Sciences,Erasmus School of Social and Behavioural Sciences,6
+IDE,Ide,Ide,6
+Anesthesiology,Anesthesiology,Anesthesiology,5
+Applied Economics,Applied Economics,Applied Economics,5
+Bionanoscience,Bionanoscience,Bionanoscience,5
+Engineering Systems and Services,Engineering Systems and Services,Engineering Systems and Services,5
+Health Care Governance,Health Care Governance,Health Care Governance,5
+MMIZ,Mmiz,Mmiz,5
+Medical Oncology,Medical Oncology,Medical Oncology,5
+TPM,Tpm,Tpm,5
+Cell Biology,Cell Biology,Cell Biology,4
+ES Health Policy & Management,Es Health Policy and Management,Es Health Policy and Management,4
+Health Economics,Health Economics,Health Economics,4
+Precision and Microsystems Engineering,Precision and Microsystems Engineering,Precision and Microsystems Engineering,4
+Radio- therapy,Radio- Therapy,Radio- Therapy,4
+Rijndam Rehabilitation/ Dept Rehabilitation Medicine,Rijndam Rehabilitation / Rehabilitation Medicine,Rijndam Rehabilitation / Rehabilitation Medicine,4
+Tenured,Tenured,Tenured,4
+Web Information Systems,Web Information Systems,Web Information Systems,4
+Bionanoscienc e,Bionanoscienc E,Bionanoscienc E,3
+Chemical Engineering,Chemical Engineering,Chemical Engineering,3
+Clinical Epidemiology,Clinical Epidemiology,Clinical Epidemiology,3
+Cognitive Robotics,Cognitive Robotics,Cognitive Robotics,3
+Delft Institute Applied Mathematics,Delft Institute Applied Mathematics,Delft Institute Applied Mathematics,3
+Department of Cell Biology,Cell Biology,Cell Biology,3
+ESHCC Media and Communic ation,Eshcc Media and Communic Ation,Eshcc Media and Communic Ation,3
+ESPhil,Esphil,Esphil,3
+Erasmus School,Erasmus School,Erasmus School,3
+Erasmus School of Law,Erasmus School of Law,Erasmus School of Law,3
+"Fac. 3mE, dept. BMechE","Fac. 3me, Bmeche","Fac. 3me, Bmeche",3
+Health Policy & Management,Health Policy and Management,Health Policy and Management,3
+Health Policy and Management,Health Policy and Management,Health Policy and Management,3
+"Health Services, Management & Organization","Health Services, Management and Organization","Health Services, Management and Organization",3
+Health Technology Assessment (ESHPM),Health Technology Assessment (Eshpm),Health Technology Assessment (Eshpm),3
+Human-Centered Design,Human-Centered Design,Human-Centered Design,3
+Institute for Medical Technology Assessment,Institute for Medical Technology Assessment,Institute for Medical Technology Assessment,3
+Intelligent systems,Intelligent Systems,Intelligent Systems,3
+Medical Ethics,Medical Ethics,Medical Ethics,3
+Microsoft Europe,Microsoft Europe,Microsoft Europe,3
+Orthopedics & Sports medicine,Orthopedics and Sports Medicine,Orthopedics and Sports Medicine,3
+RSM,Rsm,Rsm,3
+Radiation Science and Technology,Radiation Science and Technology,Radiation Science and Technology,3
+Radiology,Radiology,Radiology,3
+Rotterdam School of Management,Rotterdam School of Management,Rotterdam School of Management,3
+Avegen Health,Avegen Health,Avegen Health,2
+Biomaterials and Tissue Bio- mechanics,Biomaterials and Tissue Bio- Mechanics,Biomaterials and Tissue Bio- Mechanics,2
+Bionanosc ience,Bionanosc Ience,Bionanosc Ience,2
+Biotechnology,Biotechnology,Biotechnology,2
+Center for Systems and Control,Center for Systems and Control,Center for Systems and Control,2
+Chemical engineering,Chemical Engineering,Chemical Engineering,2
+Clinical Chemistry,Clinical Chemistry,Clinical Chemistry,2
+Control and Operations,Control and Operations,Control and Operations,2
+Department of Bionanoscienc e,Bionanoscienc E,Bionanoscienc E,2
+Department of CAPP,Capp,Capp,2
+Department of Developmental Biology,Developmental Biology,Developmental Biology,2
+Department of Microelectronics,Microelectronics,Microelectronics,2
+"Department of Orthopedics, Section Physical Therapy","Orthopedics, Physical Therapy","Orthopedics, Physical Therapy",2
+Department of Pediatrics,Pediatrics,Pediatrics,2
+Dermatology/ Center for Pediatric Dermatology,Dermatology / Center for Pediatric Dermatology,Dermatology / Center for Pediatric Dermatology,2
+Development al Biology,Development Al Biology,Development Al Biology,2
+EEMCS,Eemcs,Eemcs,2
+ESE - Econometrics,Ese - Econometrics,Ese - Econometrics,2
+"ESHPM, Health Economics group","Eshpm, Health Economics Group","Eshpm, Health Economics Group",2
+"ESHPM, section Health Services Management and Organization","Eshpm, Health Services Management and Organization","Eshpm, Health Services Management and Organization",2
+ESHPM/ Law & Health Care (LHC),Eshpm / Law and Health Care (Lhc),Eshpm / Law and Health Care (Lhc),2
+"ESS, TPM","Ess, Tpm","Ess, Tpm",2
+ESSB,Essb,Essb,2
+EUR,Eur,Eur,2
+Erasmus,Erasmus,Erasmus,2
+Erasmus School of Health Policy & Manage- ment,Erasmus School of Health Policy and Manage- Ment,Erasmus School of Health Policy and Manage- Ment,2
+Erasmus School of Philosoph y,Erasmus School of Philosoph Y,Erasmus School of Philosoph Y,2
+Fac. Industrial Design Engineering,Fac. Industrial Design Engineering,Fac. Industrial Design Engineering,2
+Faculty of,Faculty of,Faculty of,2
+Faculty of Industrial Design Engineering,Faculty of Industrial Design Engineering,Faculty of Industrial Design Engineering,2
+Gastroenterology & Hepatology,Gastroenterology and Hepatology,Gastroenterology and Hepatology,2
+General Pediatrics,General Pediatrics,General Pediatrics,2
+Health Services Management & Organisation,Health Services Management and Organisation,Health Services Management and Organisation,2
+Health Technology Assessment,Health Technology Assessment,Health Technology Assessment,2
+Healthcare Governance,Healthcare Governance,Healthcare Governance,2
+Hematology,Hematology,Hematology,2
+Housing and Urban Development Studies,Housing and Urban Development Studies,Housing and Urban Development Studies,2
+ICU,ICU,ICU,2
+Industrial Design,Industrial Design,Industrial Design,2
+Intelligent Systems,Intelligent Systems,Intelligent Systems,2
+Intelligent Systems Department - CGV,Intelligent Systems Department - Cgv,Intelligent Systems Department - Cgv,2
+Internal,Internal,Internal,2
+Inwendige Geneeskunde,Inwendige Geneeskunde,Inwendige Geneeskunde,2
+Inwendige Geneeskunde / Kinderchirurgie,Inwendige Geneeskunde / Kinderchirurgie,Inwendige Geneeskunde / Kinderchirurgie,2
+Law & Healthcare,Law and Healthcare,Law and Healthcare,2
+"Medical Ethics, Philosophy and History of Medicine","Medical Ethics, Philosophy and History of Medicine","Medical Ethics, Philosophy and History of Medicine",2
+Multi-Actor Systems,Multi-Actor Systems,Multi-Actor Systems,2
+N.a.,N.A.,N.A.,2
+Oncology,Oncology,Oncology,2
+Optical Imaging Centre,Optical Imaging Centre,Optical Imaging Centre,2
+Paediatric ICU,Paediatric ICU,Paediatric ICU,2
+Paediatrics,Paediatrics,Paediatrics,2
+Pediatric Metabolic diseases,Pediatric Metabolic Diseases,Pediatric Metabolic Diseases,2
+"Psycholog y, Education and Child Studies","Psycholog Y, Education and Child Studies","Psycholog Y, Education and Child Studies",2
+Radiation Oncology,Radiation Oncology,Radiation Oncology,2
+"Safety & Security at VTI, TPM","Safety and Security At Vti, Tpm","Safety and Security At Vti, Tpm",2
+Surgical Oncology,Surgical Oncology,Surgical Oncology,2
+"TPM, Multi Actor Systems","Tpm, Multi Actor Systems","Tpm, Multi Actor Systems",2
+"TPM, Values, Technology and Innovation","Tpm, Values, Technology and Innovation","Tpm, Values, Technology and Innovation",2
+TU Delft,Tu Delft,Tu Delft,2
+Technology and Operations management,Technology and Operations Management,Technology and Operations Management,2
+"Values, Technology & Innovation","Values, Technology and Innovation","Values, Technology and Innovation",2
+iMGZ,Imgz,Imgz,2
+tnw,Tnw,Tnw,2
+3ME,3me,3me,1
+3ME/ Precision and Microsystems Engineering (PME),3me / Precision and Microsystems Engineering (Pme),3me / Precision and Microsystems Engineering (Pme),1
+Applie,Applie,Applie,1
+Applied Economics (ESE),Applied Economics (Ese),Applied Economics (Ese),1
+Applied Mathematics,Applied Mathematics,Applied Mathematics,1
+Applied Sciences,Applied Sciences,Applied Sciences,1
+Architectur e and the Built Environme nt,Architectur E and the Built Environme Nt,Architectur E and the Built Environme Nt,1
+Architecture & the Built Environment,Architecture and the Built Environment,Architecture and the Built Environment,1
+Bayer Nederland,Bayer Nederland,Bayer Nederland,1
+Biiomechanical Engineering,Biiomechanical Engineering,Biiomechanical Engineering,1
+Bio Electronics,Bio Electronics,Bio Electronics,1
+Biochemistry,Biochemistry,Biochemistry,1
+Bioinformatics Lab,Bioinformatics Lab,Bioinformatics Lab,1
+Biomechanical Eng.,Biomechanical Eng.,Biomechanical Eng.,1
+Biomed. Eng./ Biomechanical Eng.,Biomed. Eng. / Biomechanical Eng.,Biomed. Eng. / Biomechanical Eng.,1
+Biomedical Eng./ Medical Imaging,Biomedical Eng. / Medical Imaging,Biomedical Eng. / Medical Imaging,1
+Biomedical Imaging Applied Sciences,Biomedical Imaging Applied Sciences,Biomedical Imaging Applied Sciences,1
+Biostatistics,Biostatistics,Biostatistics,1
+"Business Economics, Erasmus School of Economics","Business Economics, Erasmus School of Economics","Business Economics, Erasmus School of Economics",1
+CEO and Founder,Ceo and Founder,Ceo and Founder,1
+Cell biology,Cell Biology,Cell Biology,1
+Centre for Safety in Healthcare,Centre for Safety in Healthcare,Centre for Safety in Healthcare,1
+Chemical Engi- neering,Chemical Engi- Neering,Chemical Engi- Neering,1
+Clinical oncology (ENT use case),Clinical Oncology (Ent Use Case),Clinical Oncology (Ent Use Case),1
+"Commercial Law, Corporate and Financial Law","Commercial Law, Corporate and Financial Law","Commercial Law, Corporate and Financial Law",1
+Comp. Graphics & visualisation,Comp. Graphics and Visualisation,Comp. Graphics and Visualisation,1
+Computer Science,Computer Science,Computer Science,1
+Copeland (TUD s.m.cope,Copeland (Tud S.M.Cope,Copeland (Tud S.M.Cope,1
+Corsano Health,Corsano Health,Corsano Health,1
+Critical Care,Critical Care,Critical Care,1
+Delft Institute of Applied Mathematics,Delft Institute of Applied Mathematics,Delft Institute of Applied Mathematics,1
+Delft Institute of Technology,Delft Institute of Technology,Delft Institute of Technology,1
+Department Developmental Biology,Department Developmental Biology,Department Developmental Biology,1
+"Department Medical Ethics, Philosophy and History of Medicine","Department Medical Ethics, Philosophy and History of Medicine","Department Medical Ethics, Philosophy and History of Medicine",1
+Department of Bionanoscience,Bionanoscience,Bionanoscience,1
+Department of Biotechnology,Biotechnology,Biotechnology,1
+Department of Cell Biology and Center for Biomics,Cell Biology and Center for Biomics,Cell Biology and Center for Biomics,1
+Department of Chemical Engineering,Chemical Engineering,Chemical Engineering,1
+"Department of Electrical Engineering, Mathematics and Computer Science","Electrical Engineering, Mathematics and Computer Science","Electrical Engineering, Mathematics and Computer Science",1
+Department of Hematology,Hematology,Hematology,1
+Department of Imaging Physics,Imaging Physics,Imaging Physics,1
+Department of Industrial Design,Industrial Design,Industrial Design,1
+Department of Internal Oncology,Internal Oncology,Internal Oncology,1
+"Department of Medical Ethics, Philosophy and History of Medicine)","Medical Ethics, Philosophy and History of Medicine)","Medical Ethics, Philosophy and History of Medicine)",1
+Department of Ophthalmology,Ophthalmology,Ophthalmology,1
+Department of Otorhinolaryngology,Otorhinolaryngology,Otorhinolaryngology,1
+Department of Otorhinolaryngology and Department of Neurophysiology,Otorhinolaryngology and Neurophysiology,Otorhinolaryngology and Neurophysiology,1
+Department of Precision and Microsystems Engineering (PME),Precision and Microsystems Engineering (Pme),Precision and Microsystems Engineering (Pme),1
+Department of Pulmonary Medicine,Pulmonary Medicine,Pulmonary Medicine,1
+Department of Radiology,Radiology,Radiology,1
+Department of Rehabilitation Medicine,Rehabilitation Medicine,Rehabilitation Medicine,1
+Department of Software Technology,Software Technology,Software Technology,1
+Department of Sustainable Design Engineering,Sustainable Design Engineering,Sustainable Design Engineering,1
+Department of pediatrics,Pediatrics,Pediatrics,1
+Departments of Hospital Phar macy and Oncology,Departments of Hospital Phar Macy and Oncology,Departments of Hospital Phar Macy and Oncology,1
+"Dept. Bionanoscience, Kavli Institute of Nanoscience","Bionanoscience, Kavli Institute of Nanoscience","Bionanoscience, Kavli Institute of Nanoscience",1
+Dermatology,Dermatology,Dermatology,1
+Developm. Biology,Developm. Biology,Developm. Biology,1
+"Developm. Biology,",Developm. Biology,Developm. Biology,1
+"Director, pharmaco- epidemiologis t","Director, Pharmaco- Epidemiologis T","Director, Pharmaco- Epidemiologis T",1
+Director:,Director:,Director:,1
+Dutch Nutrition Center,Dutch Nutrition Center,Dutch Nutrition Center,1
+EMC Graduate School,EMC Graduate School,EMC Graduate School,1
+ENT oncology,Ent Oncology,Ent Oncology,1
+ESE -Applied Economics,Ese -Applied Economics,Ese -Applied Economics,1
+ESE-Applied Economics,Ese-Applied Economics,Ese-Applied Economics,1
+"ESHPM, Healthcare governance group","Eshpm, Healthcare Governance Group","Eshpm, Healthcare Governance Group",1
+ESHPM/ Health Care Governance,Eshpm / Health Care Governance,Eshpm / Health Care Governance,1
+ESHPM/ Health Services Management & Organization,Eshpm / Health Services Management and Organization,Eshpm / Health Services Management and Organization,1
+ESHPM/ Medical Technology Assessment,Eshpm / Medical Technology Assessment,Eshpm / Medical Technology Assessment,1
+ESPHIL,Esphil,Esphil,1
+"ESPHM,",Esphm,Esphm,1
+"ETI at VTI, TPM","Eti At Vti, Tpm","Eti At Vti, Tpm",1
+EWI,Ewi,Ewi,1
+Econometric Institute,Econometric Institute,Econometric Institute,1
+Educational &,Educational and,Educational and,1
+Electrical Engineering Mathema- tics and Computer Science,Electrical Engineering Mathema- Tics and Computer Science,Electrical Engineering Mathema- Tics and Computer Science,1
+"Electrical Engineering, Mathematics and Computer Science (EWI)/ Electronic Components,","Electrical Engineering, Mathematics and Computer Science (Ewi) / Electronic Components","Electrical Engineering, Mathematics and Computer Science (Ewi) / Electronic Components",1
+"Electrical Engineering, Mathematics and Computer Science (EWI)/Bioelectronics (BE)/ Microelectronics","Electrical Engineering, Mathematics and Computer Science (Ewi) / Bioelectronics (Be) / Microelectronics","Electrical Engineering, Mathematics and Computer Science (Ewi) / Bioelectronics (Be) / Microelectronics",1
+"Elnathan Prinsen, directiesecretari aat@nvvp.net","Elnathan Prinsen, Directiesecretari Aat@Nvvp.Net","Elnathan Prinsen, Directiesecretari Aat@Nvvp.Net",1
+Endocrinolog y,Endocrinolog Y,Endocrinolog Y,1
+Erasmus Centre for Entrepreneur ship,Erasmus Centre for Entrepreneur Ship,Erasmus Centre for Entrepreneur Ship,1
+Erasmus School of Economics (ESE),Erasmus School of Economics (Ese),Erasmus School of Economics (Ese),1
+Erasmus School of Economics and Erasmus School of Health Policy Management,Erasmus School of Economics and Erasmus School of Health Policy Management,Erasmus School of Economics and Erasmus School of Health Policy Management,1
+Erasmus School of Health Policy &,Erasmus School of Health Policy and,Erasmus School of Health Policy and,1
+Erasmus School of Law/Health Law,Erasmus School of Law / Health Law,Erasmus School of Law / Health Law,1
+Erasmus School of Philosophy,Erasmus School of Philosophy,Erasmus School of Philosophy,1
+Erasmus School of Social and Behavioural,Erasmus School of Social and Behavioural,Erasmus School of Social and Behavioural,1
+Erasmus school of social and behavioural sciences (ESSB),Erasmus School of Social and Behavioural Sciences (Essb),Erasmus School of Social and Behavioural Sciences (Essb),1
+Ethics & Philosophy of Technology,Ethics and Philosophy of Technology,Ethics and Philosophy of Technology,1
+Ethics of Technologies,Ethics of Technologies,Ethics of Technologies,1
+"Faculteit Elektrotechniek, Wiskunde en Informatica","Faculteit Elektrotechniek, Wiskunde En Informatica","Faculteit Elektrotechniek, Wiskunde En Informatica",1
+"Faculty Technology,",Faculty Technology,Faculty Technology,1
+"Faculty Technology, Policy & Management","Faculty Technology, Policy and Management","Faculty Technology, Policy and Management",1
+"Faculty of Electrical Engineering,",Faculty of Electrical Engineering,Faculty of Electrical Engineering,1
+"Faculty of Electrical Engineering, Mathematics & Computer Science","Faculty of Electrical Engineering, Mathematics and Computer Science","Faculty of Electrical Engineering, Mathematics and Computer Science",1
+"Faculty of Electrical Engineering, Mathematics & Computer Science and Erasmus School of Social and Behavioural Sciences, Director of the Leiden-Delft- Erasmus Center for Education","Faculty of Electrical Engineering, Mathematics and Computer Science and Erasmus School of Social and Behavioural Sciences, Director of the Leiden-Delft- Erasmus Center for Education","Faculty of Electrical Engineering, Mathematics and Computer Science and Erasmus School of Social and Behavioural Sciences, Director of the Leiden-Delft- Erasmus Center for Education",1
+Faculty of Industrial Design,Faculty of Industrial Design,Faculty of Industrial Design,1
+Faculty of Technology & Management,Faculty of Technology and Management,Faculty of Technology and Management,1
+Generation R,Generation R,Generation R,1
+"Gynaecological Oncology & 3mE, dept. BMechE","Gynaecological Oncology and 3me, Bmeche","Gynaecological Oncology and 3me, Bmeche",1
+"HTA, Erasmus School of","Hta, Erasmus School of","Hta, Erasmus School of",1
+Head of Department of Sustainable Design Engineering,Head of Sustainable Design Engineering,Head of Sustainable Design Engineering,1
+Head of the Division of Internal and Geriatric Medicine,Head of the Division of Internal and Geriatric Medicine,Head of the Division of Internal and Geriatric Medicine,1
+Head of the Values Technology and Innovation Department,Head of the Values Technology and Innovation Department,Head of the Values Technology and Innovation Department,1
+Health Economics (ESHPM),Health Economics (Eshpm),Health Economics (Eshpm),1
+Health Economics / Applied Economics,Health Economics / Applied Economics,Health Economics / Applied Economics,1
+Health Holland,Health Holland,Health Holland,1
+Health Policy and Management (from 1-05-22),Health Policy and Management (From 1-05-22),Health Policy and Management (From 1-05-22),1
+Health Service Management and Organisation,Health Service Management and Organisation,Health Service Management and Organisation,1
+Health Services Management & Operation (ESHPM),Health Services Management and Operation (Eshpm),Health Services Management and Operation (Eshpm),1
+Health literacy,Health Literacy,Health Literacy,1
+Healthcare Governance / Dutch Inspectorate for Healthcare & Youth,Healthcare Governance / Dutch Inspectorate for Healthcare and Youth,Healthcare Governance / Dutch Inspectorate for Healthcare and Youth,1
+Healthcare Governance/ Dutch Healthcare Institute,Healthcare Governance / Dutch Healthcare Institute,Healthcare Governance / Dutch Healthcare Institute,1
+Healthcare Insurance,Healthcare Insurance,Healthcare Insurance,1
+Healthcare Quality and,Healthcare Quality and,Healthcare Quality and,1
+"Henk Mathijssen, voorzitter@plus minus.nl","Henk Mathijssen, Voorzitter@Plus Minus.Nl","Henk Mathijssen, Voorzitter@Plus Minus.Nl",1
+Human-centered Design Adult ICU,Human-Centered Design Adult ICU,Human-Centered Design Adult ICU,1
+ICU/PHARM,ICU / Pharm,ICU / Pharm,1
+IDE Human-,Ide Human-,Ide Human-,1
+IDE Serious Game Design,Ide Serious Game Design,Ide Serious Game Design,1
+Imaging Phyisics,Imaging Phyisics,Imaging Phyisics,1
+Imaging Physics/Bio medical Engineering,Imaging Physics / Bio Medical Engineering,Imaging Physics / Bio Medical Engineering,1
+Institute Medical Technology Assessment,Institute Medical Technology Assessment,Institute Medical Technology Assessment,1
+Institute of Medical Technology Assessment,Institute of Medical Technology Assessment,Institute of Medical Technology Assessment,1
+Integral Capacity management,Integral Capacity Management,Integral Capacity Management,1
+Intelligent Systems Department - Computer Graphics and Visualization (CGV),Intelligent Systems Department - Computer Graphics and Visualization (Cgv),Intelligent Systems Department - Computer Graphics and Visualization (Cgv),1
+Interactive Intelligence,Interactive Intelligence,Interactive Intelligence,1
+Internal Medi- cine,Internal Medi- Cine,Internal Medi- Cine,1
+Internal and Geriatric Medicine,Internal and Geriatric Medicine,Internal and Geriatric Medicine,1
+Interventional Radiology,Interventional Radiology,Interventional Radiology,1
+J.j.visser@erasmusmc.nl,J.J.Visser@Erasmusmc.Nl,J.J.Visser@Erasmusmc.Nl,1
+"Jean Monnet Chair of Economic Analysis of European Law, Erasmus School of Law, Co- director Jean","Jean Monnet Chair of Economic Analysis of European Law, Erasmus School of Law, Co- Director Jean","Jean Monnet Chair of Economic Analysis of European Law, Erasmus School of Law, Co- Director Jean",1
+Laboratory Medical,Laboratory Medical,Laboratory Medical,1
+Living labs Rijndam,Living Labs Rijndam,Living Labs Rijndam,1
+M.B.O.T.Klenk@tudelft.nl,M.B.O.T.Klenk@Tudelft.Nl,M.B.O.T.Klenk@Tudelft.Nl,1
+MC,Mc,Mc,1
+MDL,Mdl,Mdl,1
+Maatschap pelijke Ontwikkeli ng/Social Developme nt,Maatschap Pelijke Ontwikkeli Ng / Social Developme Nt,Maatschap Pelijke Ontwikkeli Ng / Social Developme Nt,1
+Management &,Management and,Management and,1
+Marketing Management,Marketing Management,Marketing Management,1
+Mathematics and,Mathematics and,Mathematics and,1
+Mathematics/Compute,Mathematics / Compute,Mathematics / Compute,1
+Medical Ethics and Philosophy and History of Medicine,Medical Ethics and Philosophy and History of Medicine,Medical Ethics and Philosophy and History of Medicine,1
+Medical Ethics and Philosophy of Medicine,Medical Ethics and Philosophy of Medicine,Medical Ethics and Philosophy of Medicine,1
+"Medical Ethics, Philosophy and history of Medi- cine","Medical Ethics, Philosophy and History of Medi- Cine","Medical Ethics, Philosophy and History of Medi- Cine",1
+Medical Oncol- ogy,Medical Oncol- Ogy,Medical Oncol- Ogy,1
+Medical microbiology and infectious diseases,Medical Microbiology and Infectious Diseases,Medical Microbiology and Infectious Diseases,1
+Medical oncology,Medical Oncology,Medical Oncology,1
+Medicine ErasmusMC Orthopedics & medicine TUDelft Intelligent syst ErasmusMC Orthopedics &,Medicine Erasmusmc Orthopedics and Medicine Tudelft Intelligent Syst Erasmusmc Orthopedics and,Medicine Erasmusmc Orthopedics and Medicine Tudelft Intelligent Syst Erasmusmc Orthopedics and,1
+"Medicine,",Medicine,Medicine,1
+Metabolic Health Research,Metabolic Health Research,Metabolic Health Research,1
+Micro- electronic s,Micro- Electronic S,Micro- Electronic S,1
+Molecular genetics,Molecular Genetics,Molecular Genetics,1
+"Municipality, Advisor","Municipality, Advisor","Municipality, Advisor",1
+Nanotechnology,Nanotechnology,Nanotechnology,1
+National program,National Program,National Program,1
+Neonatal ICU,Neonatal ICU,Neonatal ICU,1
+OBS,Obs,Obs,1
+Obstetrics Education,Obstetrics Education,Obstetrics Education,1
+"Obstetrics and Gynaecolog y, Paediatrics /Neonatolo gy","Obstetrics and Gynaecolog Y, Paediatrics / Neonatolo Gy","Obstetrics and Gynaecolog Y, Paediatrics / Neonatolo Gy",1
+Obstetrics and Gynaecology,Obstetrics and Gynaecology,Obstetrics and Gynaecology,1
+Operations,Operations,Operations,1
+Optical Imaging Center,Optical Imaging Center,Optical Imaging Center,1
+Organizational Dynamics in the Digital Society,Organizational Dynamics in the Digital Society,Organizational Dynamics in the Digital Society,1
+Orthopedics & Sportsmedicine General practise,Orthopedics and Sportsmedicine General Practise,Orthopedics and Sportsmedicine General Practise,1
+Orthopedics & Sportsmedicine; Otorhinolaryngology BioMechanical Engineering,Orthopedics and Sportsmedicine; Biomechanical Engineering,Orthopedics and Sportsmedicine,1
+Otorhinolaryngol,Otorhinolaryngol,Otorhinolaryngol,1
+Otorhinolaryngology,Otorhinolaryngology,Otorhinolaryngology,1
+Paediatric Nephrology,Paediatric Nephrology,Paediatric Nephrology,1
+Pediatric Gastroenterol ogy,Pediatric Gastroenterol Ogy,Pediatric Gastroenterol Ogy,1
+Pediatric Hematology,Pediatric Hematology,Pediatric Hematology,1
+Pediatric Metabolic Diseases,Pediatric Metabolic Diseases,Pediatric Metabolic Diseases,1
+Pediatric metabolic diseases,Pediatric Metabolic Diseases,Pediatric Metabolic Diseases,1
+Pediatrics,Pediatrics,Pediatrics,1
+Philosophy and Ethics of Technology,Philosophy and Ethics of Technology,Philosophy and Ethics of Technology,1
+President of the Australian Academy of Health and,President of the Australian Academy of Health and,President of the Australian Academy of Health and,1
+"Professor of medical genetics, rare disease expert","Professor of Medical Genetics, Rare Disease Expert","Professor of Medical Genetics, Rare Disease Expert",1
+Proteomics Center,Proteomics Center,Proteomics Center,1
+Public,Public,Public,1
+Public Admin. and Sociology,Public Admin. and Sociology,Public Admin. and Sociology,1
+Public and private partnerships,Public and Private Partnerships,Public and Private Partnerships,1
+Pulmonary Medicine,Pulmonary Medicine,Pulmonary Medicine,1
+Pulmonary medicine,Pulmonary Medicine,Pulmonary Medicine,1
+Quality and Patientcare,Quality and Patientcare,Quality and Patientcare,1
+"RSM, department Technology & Operations Management; ESHPM, section Health Services Management and Organization","Rsm, Department Technology and Operations Management; Eshpm, Health Services Management and Organization","Rsm, Department Technology and Operations Management",1
+Radio therapy,Radio Therapy,Radio Therapy,1
+Radiology & Nuclear,Radiology and Nuclear,Radiology and Nuclear,1
+Radiology NuclMed/epidemiolo gy,Radiology Nuclmed / Epidemiolo Gy,Radiology Nuclmed / Epidemiolo Gy,1
+Radiology/ Biomedical Imaging,Radiology / Biomedical Imaging,Radiology / Biomedical Imaging,1
+Regie op registers,Regie Op Registers,Regie Op Registers,1
+Research Policy Officer at Academic Affairs · Erasmus University Rotterdam,Research Policy Officer At Academic Affairs · Erasmus University Rotterdam,Research Policy Officer At Academic Affairs · Erasmus University Rotterdam,1
+Research Suite (IT),Research Suite (It),Research Suite (It),1
+Respiratory medicine,Respiratory Medicine,Respiratory Medicine,1
+SPIN,Spin,Spin,1
+School of Health Policy & Manageme nt,School of Health Policy and Manageme Nt,School of Health Policy and Manageme Nt,1
+School of Phi- losophy,School of Phi- Losophy,School of Phi- Losophy,1
+School of Social and Behavioura l Sciences,School of Social and Behavioura L Sciences,School of Social and Behavioura L Sciences,1
+Software Technology,Software Technology,Software Technology,1
+Somnox,Somnox,Somnox,1
+TBM,Tbm,Tbm,1
+TNW,Tnw,Tnw,1
+"TPM Values, Technology and Innovation","Tpm Values, Technology and Innovation","Tpm Values, Technology and Innovation",1
+"TPM, Engineering Systems & Services","Tpm, Engineering Systems and Services","Tpm, Engineering Systems and Services",1
+"TPM, department Engineering Systems and Services","Tpm, Department Engineering Systems and Services","Tpm, Department Engineering Systems and Services",1
+"Technology,",Technology,Technology,1
+"Technology, Policy & Management","Technology, Policy and Management","Technology, Policy and Management",1
+"Technology, Policy and Management","Technology, Policy and Management","Technology, Policy and Management",1
+"Technology, Policy and Management (TPM), Centre for Safety in Healthcare","Technology, Policy and Management (Tpm), Centre for Safety in Healthcare","Technology, Policy and Management (Tpm), Centre for Safety in Healthcare",1
+Tenure-track 1,Tenure-Track 1,Tenure-Track 1,1
+Thoracic oncology,Thoracic Oncology,Thoracic Oncology,1
+Translational Cardiol Research,Translational Cardiol Research,Translational Cardiol Research,1
+Transport Phe- nomena Lab,Transport Phe- Nomena Lab,Transport Phe- Nomena Lab,1
+Urban and Transport Economics,Urban and Transport Economics,Urban and Transport Economics,1
+"VTI, TPM","Vti, Tpm","Vti, Tpm",1
+"Values, Technology and Innovation","Values, Technology and Innovation","Values, Technology and Innovation",1
+Viroscience,Viroscience,Viroscience,1
+[EMC]:,[EMC]:,[EMC]:,1
+[EMC]: Molecular Genetics [TUD]: Imaging Physics,[EMC]: Molecular Genetics [Tud]: Imaging Physics,[EMC]: Molecular Genetics [Tud]: Imaging Physics,1
+a.boor@erasmusmc.nl,A.Boor@Erasmusmc.Nl,A.Boor@Erasmusmc.Nl,1
+a.omidvari@erasmusmc.nl,A.Omidvari@Erasmusmc.Nl,A.Omidvari@Erasmusmc.Nl,1
+aat@nvvp.ne,Aat@Nvvp.Ne,Aat@Nvvp.Ne,1
+c.vandeweg@erasmusmc.nl,C.Vandeweg@Erasmusmc.Nl,C.Vandeweg@Erasmusmc.Nl,1
+e.vanrossum@erasmusmc.nl,E.Vanrossum@Erasmusmc.Nl,E.Vanrossum@Erasmusmc.Nl,1
+eken@erasmusmc.nl,Eken@Erasmusmc.Nl,Eken@Erasmusmc.Nl,1
+ewi,Ewi,Ewi,1
+g.vanderhorst@erasmusmc.nl,G.Vanderhorst@Erasmusmc.Nl,G.Vanderhorst@Erasmusmc.Nl,1
+h.ernst-smelt@erasmusmc.nl,H.Ernst-Smelt@Erasmusmc.Nl,H.Ernst-Smelt@Erasmusmc.Nl,1
+iPS core facility,Ips Core Facility,Ips Core Facility,1
+info@soulve.nu,Info@Soulve.Nu,Info@Soulve.Nu,1
+j.a.hazelzet@erasmusmc.nl,J.A.Hazelzet@Erasmusmc.Nl,J.A.Hazelzet@Erasmusmc.Nl,1
+j.hays@erasmusmc.nl,J.Hays@Erasmusmc.Nl,J.Hays@Erasmusmc.Nl,1
+j.laven@erasmusmc.nl,J.Laven@Erasmusmc.Nl,J.Laven@Erasmusmc.Nl,1
+j.vanmeurs@erasmusmc.nl,J.Vanmeurs@Erasmusmc.Nl,J.Vanmeurs@Erasmusmc.Nl,1
+jan.cornelissen@ema.eu ropa.eu,Jan.Cornelissen@Ema.Eu Ropa.Eu,Jan.Cornelissen@Ema.Eu Ropa.Eu,1
+kimvandenauweele@hellp.nl,Kimvandenauweele@Hellp.Nl,Kimvandenauweele@Hellp.Nl,1
+l.vanderlaan@erasmusmc.nl,L.Vanderlaan@Erasmusmc.Nl,L.Vanderlaan@Erasmusmc.Nl,1
+m.kalshoven@erasmusmc.nl,M.Kalshoven@Erasmusmc.Nl,M.Kalshoven@Erasmusmc.Nl,1
+m.l.lupetti@tudelft.nl,M.L.Lupetti@Tudelft.Nl,M.L.Lupetti@Tudelft.Nl,1
+m.rousian@erasmusmc.nl,M.Rousian@Erasmusmc.Nl,M.Rousian@Erasmusmc.Nl,1
+medicine Erasmus MC,Medicine Erasmus Mc,Medicine Erasmus Mc,1
+r.al@erasmusmc.nl,R.Al@Erasmusmc.Nl,R.Al@Erasmusmc.Nl,1
+r.steegers@erasmusmc.nl,R.Steegers@Erasmusmc.Nl,R.Steegers@Erasmusmc.Nl,1
+r.veen@erasmusmc.nl,R.Veen@Erasmusmc.Nl,R.Veen@Erasmusmc.Nl,1
+r.wiegel@erasmusmc.nl,R.Wiegel@Erasmusmc.Nl,R.Wiegel@Erasmusmc.Nl,1
+s.mulder@erasmusmc.nl,S.Mulder@Erasmusmc.Nl,S.Mulder@Erasmusmc.Nl,1
+s.vermeer@erasmusmc.nl,S.Vermeer@Erasmusmc.Nl,S.Vermeer@Erasmusmc.Nl,1
+t.huysmans@tudelft.nl,T.Huysmans@Tudelft.Nl,T.Huysmans@Tudelft.Nl,1
+t.laffree@erasmusmc.nl,T.Laffree@Erasmusmc.Nl,T.Laffree@Erasmusmc.Nl,1
+themabureau Sophia,Themabureau Sophia,Themabureau Sophia,1
+v.jaddoe@erasmusmc.nl,V.Jaddoe@Erasmusmc.Nl,V.Jaddoe@Erasmusmc.Nl,1
+v.janmaat@erasmusmc.nl,V.Janmaat@Erasmusmc.Nl,V.Janmaat@Erasmusmc.Nl,1
+vanbaal@eshpm.eur.nl,Vanbaal@Eshpm.Eur.Nl,Vanbaal@Eshpm.Eur.Nl,1
+vietze@essb.eur.nl,Vietze@Essb.Eur.Nl,Vietze@Essb.Eur.Nl,1

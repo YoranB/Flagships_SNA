@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flagships SNA Explorer</title>
+  <style>
+__VIS_CSS__
+  </style>
+  <style>
+__TOM_SELECT_CSS__
+  </style>
+  <style>
+__DASHBOARD_CSS__
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <section class="panel-section">
+        <h1>Flagships SNA Explorer</h1>
+        <div class="subtle">Standalone netwerkverkenner met gefilterde views</div>
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-view="flagships">Flagships</button>
+          <button class="tab" data-view="person">Persoon</button>
+          <button class="tab" data-view="connectors">Connectors</button>
+        </div>
+        <label class="toggle-row" for="selectedOnlyToggle">
+          <input id="selectedOnlyToggle" type="checkbox">
+          Alleen gekozen flagships
+        </label>
+      </section>
+
+      <section class="panel-section">
+        <h2>Filters</h2>
+        <div class="field">
+          <label for="personSearch">Persoon zoeken</label>
+          <select id="personSearch" placeholder="Zoek op naam, mail, instelling of afdeling"></select>
+        </div>
+        <div class="field">
+          <label for="flagshipSelect">Flagship</label>
+          <select id="flagshipSelect"></select>
+        </div>
+        <div class="field">
+          <label for="institutionFilter">Instelling</label>
+          <select id="institutionFilter"></select>
+        </div>
+        <div class="field">
+          <label for="departmentFilter">Afdeling</label>
+          <select id="departmentFilter"></select>
+        </div>
+        <div class="field">
+          <label for="keywordFilter">Trefwoord</label>
+          <input id="keywordFilter" type="search" placeholder="Naam, rol, afdeling, instelling of flagship">
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="minWeight">Min edge weight</label>
+            <input id="minWeight" type="number" min="1" max="10" step="1" value="1">
+          </div>
+          <div class="field">
+            <label for="hopDepth">Person view</label>
+            <select id="hopDepth">
+              <option value="1">Directe buren</option>
+              <option value="2">2-hop netwerk</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="edgeMode">Flagship edges</label>
+          <select id="edgeMode">
+            <option value="backbone">Backbone</option>
+            <option value="selection">Selectie</option>
+            <option value="all">Alles</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="groupMode">Groepering</label>
+          <select id="groupMode">
+            <option value="none">Geen groepering</option>
+            <option value="institution">Groepeer op instituut</option>
+            <option value="department">Groepeer op afdeling</option>
+          </select>
+        </div>
+        <div class="row" style="margin-top: 12px;">
+          <button id="applyFilters" class="btn primary">Toon netwerk</button>
+          <button id="resetView" class="btn">Reset</button>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <h2>Huidige view</h2>
+        <div class="stats">
+          <div class="stat"><strong id="viewNodes">0</strong><span class="subtle">nodes</span></div>
+          <div class="stat"><strong id="viewEdges">0</strong><span class="subtle">edges</span></div>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <h2>Flagships</h2>
+        <div id="flagshipList" class="list"></div>
+      </section>
+    </aside>
+
+    <main class="network-wrap">
+      <div class="toolbar">
+        <div>
+          <h3 id="viewTitle">Flagship-overzicht</h3>
+          <div id="viewSubtitle" class="subtle">Klik op een flagship om deelnemers en relaties te verkennen.</div>
+        </div>
+        <div class="row" style="flex: 0 0 auto;">
+          <button id="fitNetwork" class="btn">Fit</button>
+        </div>
+      </div>
+      <div id="network"></div>
+      <div id="personTooltip" class="person-tooltip" aria-hidden="true"></div>
+    </main>
+
+    <aside class="details">
+      <section class="panel-section">
+        <h2>Selectie</h2>
+        <div id="selectionDetails" class="detail-card subtle">Selecteer een node of edge in het netwerk.</div>
+      </section>
+      <section class="panel-section">
+        <h2>Datakwaliteit</h2>
+        <div id="qualityPanel" class="quality"></div>
+      </section>
+      <section class="panel-section">
+        <h2>Top connectoren</h2>
+        <div id="connectorList" class="list"></div>
+      </section>
+    </aside>
+  </div>
+
+  <script>
+__VIS_JS__
+  </script>
+  <script>
+__TOM_SELECT_JS__
+  </script>
+  <script id="sna-data" type="application/json">__SNA_DATA__</script>
+  <script>
+__DASHBOARD_JS__
+  </script>
+</body>
+</html>

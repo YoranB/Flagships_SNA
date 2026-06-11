@@ -1,0 +1,351 @@
+﻿institution_a,institution_b,weight,n_flagships,flagships
+Erasmus MC,TU Delft,3117,35,2022001; 2022002; 2022003; 2022004; 2022005; 2022006; 2022007; 2022008; 2022009; 2022010; 2022011; 2022012; 2022013; 2022014; 2022015; 2022016; 2022017; 2022018; 2022019; 2022020; 2022021; 2022022; 2022023; 2022024; 2022025; 2022026; 2022027; 2022029; 2022030; 2022031; 2022032; 2022033; 2022034; 2022035; 2022036
+Erasmus MC,Erasmus University Rotterdam,2541,36,2022001; 2022002; 2022003; 2022004; 2022005; 2022006; 2022007; 2022008; 2022009; 2022010; 2022011; 2022012; 2022013; 2022014; 2022015; 2022016; 2022017; 2022018; 2022019; 2022020; 2022021; 2022022; 2022023; 2022024; 2022025; 2022026; 2022027; 2022028; 2022029; 2022030; 2022031; 2022032; 2022033; 2022034; 2022035; 2022036
+Erasmus University Rotterdam,TU Delft,1240,35,2022001; 2022002; 2022003; 2022004; 2022005; 2022006; 2022007; 2022008; 2022009; 2022010; 2022011; 2022012; 2022013; 2022014; 2022015; 2022016; 2022017; 2022018; 2022019; 2022020; 2022021; 2022022; 2022023; 2022024; 2022025; 2022026; 2022027; 2022029; 2022030; 2022031; 2022032; 2022033; 2022034; 2022035; 2022036
+Erasmus MC,Multiple core institutions,375,13,2022005; 2022011; 2022012; 2022013; 2022014; 2022016; 2022018; 2022020; 2022021; 2022023; 2022024; 2022032; 2022035
+Multiple core institutions,TU Delft,179,13,2022005; 2022011; 2022012; 2022013; 2022014; 2022016; 2022018; 2022020; 2022021; 2022023; 2022024; 2022032; 2022035
+Erasmus MC,Microsoft,123,1,2022003
+Erasmus University Rotterdam,Multiple core institutions,122,13,2022005; 2022011; 2022012; 2022013; 2022014; 2022016; 2022018; 2022020; 2022021; 2022023; 2022024; 2022032; 2022035
+Approach ed and interested,Erasmus MC,87,1,2022009
+Avegen,Erasmus MC,82,1,2022003
+Erasmus MC,Internal Medicine,41,1,2022003
+Erasmus MC,Surgery,41,1,2022003
+Bayer,Erasmus MC,41,1,2022003
+Erasmus MC,yeverdingen@rsm.nl,41,1,2022003
+Erasmus MC,lab / Obstetrics and,41,1,2022003
+Erasmus MC,info@ankeschrage.nl,41,1,2022003
+Erasmus MC,VGZ,41,1,2022003
+Erasmus MC,University,41,1,2022003
+Corsano,Erasmus MC,41,1,2022003
+Erasmus MC,Health Holland,41,1,2022003
+Erasmus MC,Soulve,41,1,2022003
+Erasmus MC,Somnox,41,1,2022003
+Erasmus MC,HELLP Stichting,41,1,2022003
+Erasmus MC,RIVM,41,1,2022003
+Erasmus MC,Molecular Genetics,41,1,2022003
+Erasmus MC,Rotterdam,41,1,2022003
+Erasmus MC,Voedingscentrum,41,1,2022003
+Approach ed and interested,Erasmus University Rotterdam,33,1,2022009
+Erasmus MC,"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",29,1,2022009
+Erasmus MC,TKI Health Holland,29,1,2022009
+Erasmus MC,GenomeS can BV,29,1,2022009
+Erasmus MC,PHARMO Institute,29,1,2022009
+Erasmus MC,VSOP,29,1,2022009
+"Dept. Medicine University Melbourn e, Melbourn",Erasmus MC,29,1,2022009
+Approach ed and interested,TU Delft,24,1,2022009
+Microsoft,TU Delft,21,1,2022003
+Erasmus MC,ricola Van,17,1,2022020
+Duncan arcel,Erasmus MC,17,1,2022020
+Erasmus University Rotterdam,Microsoft,15,1,2022003
+Erasmus University Rotterdam,"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",15,1,2022012
+Erasmus University Rotterdam,Prof. dr. Mark,15,1,2022012
+Dutch Patient Association for patients with bipolar disorder and their relatives,Erasmus University Rotterdam,15,1,2022012
+Erasmus MC,Unknown,15,1,2022026
+Erasmus University Rotterdam,nd,15,1,2022012
+Avegen,TU Delft,14,1,2022003
+Erasmus MC,Inspired Ambitions,13,1,2022005
+Dr. Ernst Huls,Erasmus MC,13,1,2022021
+Erasmus MC,Prof.dr. Claartje,13,1,2022021
+TU Delft,ricola Van,12,1,2022020
+Erasmus University Rotterdam,Public a.vangri,12,1,2022034
+Erasmus MC,LUMC,12,1,2022028
+Duncan arcel,TU Delft,12,1,2022020
+Erasmus University Rotterdam,TKI Health Holland,11,1,2022009
+Erasmus University Rotterdam,GenomeS can BV,11,1,2022009
+"Dept. Medicine University Melbourn e, Melbourn",Erasmus University Rotterdam,11,1,2022009
+Dr. Ernst Huls,Erasmus University Rotterdam,11,1,2022021
+Erasmus University Rotterdam,"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",11,1,2022009
+Dr . Sandra Sülz,Erasmus MC,11,1,2022018
+Erasmus University Rotterdam,Prof.dr. Claartje,11,1,2022021
+Erasmus University Rotterdam,VSOP,11,1,2022009
+Erasmus University Rotterdam,PHARMO Institute,11,1,2022009
+Avegen,Erasmus University Rotterdam,10,1,2022003
+Erasmus University Rotterdam,Unknown,10,1,2022026
+Erasmus MC,"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",9,1,2022012
+Erasmus MC,"Human Medicines, Hematology- Oncology Department",9,1,2022022
+Erasmus MC,nd,9,1,2022012
+Dutch Patient Association for patients with bipolar disorder and their relatives,Erasmus MC,9,1,2022012
+Erasmus MC,Prof. dr. Mark,9,1,2022012
+Erasmus MC,Garvan Institute,8,1,2022035
+"Dept. Medicine University Melbourn e, Melbourn",TU Delft,8,1,2022009
+"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",TU Delft,8,1,2022009
+Erasmus University Rotterdam,LUMC,8,1,2022028
+Dr. Ernst Huls,TU Delft,8,1,2022021
+TKI Health Holland,TU Delft,8,1,2022009
+PHARMO Institute,TU Delft,8,1,2022009
+GenomeS can BV,TU Delft,8,1,2022009
+TU Delft,VSOP,8,1,2022009
+Prof.dr. Claartje,TU Delft,8,1,2022021
+Erasmus MC,TNO,8,1,2022035
+Inspired Ambitions,TU Delft,8,1,2022005
+Internal Medicine,TU Delft,7,1,2022003
+Prof. dr. Mark,TU Delft,7,1,2022012
+Soulve,TU Delft,7,1,2022003
+RIVM,TU Delft,7,1,2022003
+Dutch Patient Association for patients with bipolar disorder and their relatives,TU Delft,7,1,2022012
+Health Holland,TU Delft,7,1,2022003
+Rotterdam,TU Delft,7,1,2022003
+HELLP Stichting,TU Delft,7,1,2022003
+Somnox,TU Delft,7,1,2022003
+Molecular Genetics,TU Delft,7,1,2022003
+Bayer,TU Delft,7,1,2022003
+Surgery,TU Delft,7,1,2022003
+TU Delft,lab / Obstetrics and,7,1,2022003
+TU Delft,yeverdingen@rsm.nl,7,1,2022003
+TU Delft,info@ankeschrage.nl,7,1,2022003
+TU Delft,Voedingscentrum,7,1,2022003
+TU Delft,VGZ,7,1,2022003
+TU Delft,University,7,1,2022003
+Corsano,TU Delft,7,1,2022003
+TU Delft,"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",7,1,2022012
+TU Delft,nd,7,1,2022012
+Avegen,Microsoft,6,1,2022003
+Erasmus University Rotterdam,Inspired Ambitions,6,1,2022005
+Public a.vangri,TU Delft,6,1,2022034
+Erasmus University Rotterdam,Somnox,5,1,2022003
+: Samantha,Erasmus University Rotterdam,5,1,2022027
+Erasmus University Rotterdam,info@ankeschrage.nl,5,1,2022003
+Erasmus University Rotterdam,Voedingscentrum,5,1,2022003
+Prof. Dr. ir. Erik van,TU Delft,5,1,2022006
+Erasmus University Rotterdam,VGZ,5,1,2022003
+Erasmus University Rotterdam,yeverdingen@rsm.nl,5,1,2022003
+Erasmus University Rotterdam,University,5,1,2022003
+Erasmus University Rotterdam,HELLP Stichting,5,1,2022003
+Garvan Institute,TU Delft,5,1,2022035
+Erasmus University Rotterdam,Soulve,5,1,2022003
+Erasmus University Rotterdam,Surgery,5,1,2022003
+Erasmus University Rotterdam,Health Holland,5,1,2022003
+Erasmus University Rotterdam,Internal Medicine,5,1,2022003
+Bayer,Erasmus University Rotterdam,5,1,2022003
+Corsano,Erasmus University Rotterdam,5,1,2022003
+Erasmus University Rotterdam,RIVM,5,1,2022003
+Erasmus University Rotterdam,Rotterdam,5,1,2022003
+Erasmus University Rotterdam,Molecular Genetics,5,1,2022003
+Erasmus University Rotterdam,lab / Obstetrics and,5,1,2022003
+Dr . Sandra Sülz,TU Delft,5,1,2022018
+TNO,TU Delft,5,1,2022035
+TU Delft,Unknown,5,1,2022026
+: Samantha,Erasmus MC,4,1,2022027
+Erasmus University Rotterdam,Prof. Dr. ir. Erik van,4,1,2022006
+Dr . Sandra Sülz,Multiple core institutions,4,1,2022018
+"Human Medicines, Hematology- Oncology Department",TU Delft,4,1,2022022
+Erasmus MC,Prof. Dr. ir. Erik van,4,1,2022006
+: Samantha,TU Delft,4,1,2022027
+Microsoft,Soulve,3,1,2022003
+Microsoft,Rotterdam,3,1,2022003
+HELLP Stichting,Microsoft,3,1,2022003
+Microsoft,Somnox,3,1,2022003
+Microsoft,University,3,1,2022003
+Microsoft,Surgery,3,1,2022003
+Microsoft,Molecular Genetics,3,1,2022003
+Microsoft,VGZ,3,1,2022003
+Erasmus University Rotterdam,TNO,3,1,2022035
+Microsoft,Voedingscentrum,3,1,2022003
+Microsoft,info@ankeschrage.nl,3,1,2022003
+Microsoft,lab / Obstetrics and,3,1,2022003
+Microsoft,yeverdingen@rsm.nl,3,1,2022003
+Microsoft,RIVM,3,1,2022003
+Corsano,Microsoft,3,1,2022003
+Internal Medicine,Microsoft,3,1,2022003
+Bayer,Microsoft,3,1,2022003
+Approach ed and interested,GenomeS can BV,3,1,2022009
+Approach ed and interested,"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",3,1,2022009
+Approach ed and interested,PHARMO Institute,3,1,2022009
+Erasmus MC,Public a.vangri,3,1,2022034
+Approach ed and interested,TKI Health Holland,3,1,2022009
+Approach ed and interested,VSOP,3,1,2022009
+Health Holland,Microsoft,3,1,2022003
+Erasmus University Rotterdam,Garvan Institute,3,1,2022035
+Approach ed and interested,"Dept. Medicine University Melbourn e, Melbourn",3,1,2022009
+Inspired Ambitions,Multiple core institutions,2,1,2022005
+Avegen,Bayer,2,1,2022003
+Avegen,HELLP Stichting,2,1,2022003
+Avegen,Molecular Genetics,2,1,2022003
+Avegen,Corsano,2,1,2022003
+Duncan arcel,Erasmus University Rotterdam,2,1,2022020
+Garvan Institute,Multiple core institutions,2,1,2022035
+Multiple core institutions,Prof.dr. Claartje,2,1,2022021
+Avegen,Internal Medicine,2,1,2022003
+Erasmus University Rotterdam,ricola Van,2,1,2022020
+Multiple core institutions,ricola Van,2,1,2022020
+Avegen,Health Holland,2,1,2022003
+Multiple core institutions,TNO,2,1,2022035
+Avegen,RIVM,2,1,2022003
+Avegen,Rotterdam,2,1,2022003
+Avegen,Somnox,2,1,2022003
+Avegen,yeverdingen@rsm.nl,2,1,2022003
+Avegen,lab / Obstetrics and,2,1,2022003
+Dr . Sandra Sülz,Erasmus University Rotterdam,2,1,2022018
+Dr. Ernst Huls,Multiple core institutions,2,1,2022021
+Avegen,Voedingscentrum,2,1,2022003
+Duncan arcel,Multiple core institutions,2,1,2022020
+Avegen,info@ankeschrage.nl,2,1,2022003
+Avegen,VGZ,2,1,2022003
+Avegen,Surgery,2,1,2022003
+Avegen,Soulve,2,1,2022003
+Avegen,University,2,1,2022003
+Prof. dr. Mark,nd,1,1,2022012
+Surgery,yeverdingen@rsm.nl,1,1,2022003
+University,info@ankeschrage.nl,1,1,2022003
+PHARMO Institute,VSOP,1,1,2022009
+University,Voedingscentrum,1,1,2022003
+University,lab / Obstetrics and,1,1,2022003
+Prof. dr. Mark,"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",1,1,2022012
+PHARMO Institute,TKI Health Holland,1,1,2022009
+Molecular Genetics,VGZ,1,1,2022003
+Multiple core institutions,nd,1,1,2022012
+Multiple core institutions,"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",1,1,2022012
+University,yeverdingen@rsm.nl,1,1,2022003
+University,VGZ,1,1,2022003
+"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",nd,1,1,2022012
+TKI Health Holland,VSOP,1,1,2022009
+Surgery,University,1,1,2022003
+Surgery,lab / Obstetrics and,1,1,2022003
+Surgery,info@ankeschrage.nl,1,1,2022003
+Surgery,Voedingscentrum,1,1,2022003
+Surgery,VGZ,1,1,2022003
+VGZ,info@ankeschrage.nl,1,1,2022003
+Soulve,University,1,1,2022003
+Soulve,VGZ,1,1,2022003
+Soulve,Voedingscentrum,1,1,2022003
+Soulve,info@ankeschrage.nl,1,1,2022003
+Soulve,lab / Obstetrics and,1,1,2022003
+Multiple core institutions,Prof. dr. Mark,1,1,2022012
+Molecular Genetics,yeverdingen@rsm.nl,1,1,2022003
+Molecular Genetics,lab / Obstetrics and,1,1,2022003
+Molecular Genetics,info@ankeschrage.nl,1,1,2022003
+Molecular Genetics,Voedingscentrum,1,1,2022003
+VGZ,Voedingscentrum,1,1,2022003
+RIVM,Rotterdam,1,1,2022003
+VGZ,lab / Obstetrics and,1,1,2022003
+Somnox,Surgery,1,1,2022003
+Rotterdam,VGZ,1,1,2022003
+Rotterdam,Voedingscentrum,1,1,2022003
+Rotterdam,info@ankeschrage.nl,1,1,2022003
+Rotterdam,lab / Obstetrics and,1,1,2022003
+Rotterdam,yeverdingen@rsm.nl,1,1,2022003
+Somnox,Soulve,1,1,2022003
+Somnox,University,1,1,2022003
+Rotterdam,Surgery,1,1,2022003
+Somnox,VGZ,1,1,2022003
+Somnox,Voedingscentrum,1,1,2022003
+Somnox,info@ankeschrage.nl,1,1,2022003
+Somnox,lab / Obstetrics and,1,1,2022003
+Somnox,yeverdingen@rsm.nl,1,1,2022003
+Soulve,Surgery,1,1,2022003
+Rotterdam,University,1,1,2022003
+Rotterdam,Soulve,1,1,2022003
+VGZ,yeverdingen@rsm.nl,1,1,2022003
+RIVM,University,1,1,2022003
+Voedingscentrum,info@ankeschrage.nl,1,1,2022003
+Voedingscentrum,lab / Obstetrics and,1,1,2022003
+RIVM,Somnox,1,1,2022003
+RIVM,Soulve,1,1,2022003
+RIVM,Surgery,1,1,2022003
+Voedingscentrum,yeverdingen@rsm.nl,1,1,2022003
+info@ankeschrage.nl,lab / Obstetrics and,1,1,2022003
+info@ankeschrage.nl,yeverdingen@rsm.nl,1,1,2022003
+RIVM,VGZ,1,1,2022003
+RIVM,Voedingscentrum,1,1,2022003
+RIVM,info@ankeschrage.nl,1,1,2022003
+RIVM,lab / Obstetrics and,1,1,2022003
+RIVM,yeverdingen@rsm.nl,1,1,2022003
+Rotterdam,Somnox,1,1,2022003
+Soulve,yeverdingen@rsm.nl,1,1,2022003
+Garvan Institute,TNO,1,1,2022035
+Molecular Genetics,University,1,1,2022003
+Molecular Genetics,Surgery,1,1,2022003
+Corsano,Surgery,1,1,2022003
+Corsano,University,1,1,2022003
+Corsano,VGZ,1,1,2022003
+Corsano,Voedingscentrum,1,1,2022003
+Corsano,info@ankeschrage.nl,1,1,2022003
+Corsano,lab / Obstetrics and,1,1,2022003
+Corsano,yeverdingen@rsm.nl,1,1,2022003
+"Dept. Medicine University Melbourn e, Melbourn",GenomeS can BV,1,1,2022009
+"Dept. Medicine University Melbourn e, Melbourn","Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",1,1,2022009
+"Dept. Medicine University Melbourn e, Melbourn",PHARMO Institute,1,1,2022009
+"Dept. Medicine University Melbourn e, Melbourn",TKI Health Holland,1,1,2022009
+"Dept. Medicine University Melbourn e, Melbourn",VSOP,1,1,2022009
+Dr. Ernst Huls,Prof.dr. Claartje,1,1,2022021
+Duncan arcel,ricola Van,1,1,2022020
+Dutch Patient Association for patients with bipolar disorder and their relatives,Multiple core institutions,1,1,2022012
+Dutch Patient Association for patients with bipolar disorder and their relatives,Prof. dr. Mark,1,1,2022012
+Dutch Patient Association for patients with bipolar disorder and their relatives,"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",1,1,2022012
+Dutch Patient Association for patients with bipolar disorder and their relatives,nd,1,1,2022012
+Erasmus University Rotterdam,"Human Medicines, Hematology- Oncology Department",1,1,2022022
+GenomeS can BV,"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",1,1,2022009
+GenomeS can BV,PHARMO Institute,1,1,2022009
+Corsano,Soulve,1,1,2022003
+Corsano,Somnox,1,1,2022003
+Corsano,Rotterdam,1,1,2022003
+Bayer,Surgery,1,1,2022003
+Bayer,Corsano,1,1,2022003
+Bayer,HELLP Stichting,1,1,2022003
+Bayer,Health Holland,1,1,2022003
+Bayer,Internal Medicine,1,1,2022003
+Bayer,Molecular Genetics,1,1,2022003
+Bayer,RIVM,1,1,2022003
+Bayer,Rotterdam,1,1,2022003
+Bayer,Somnox,1,1,2022003
+Bayer,Soulve,1,1,2022003
+Bayer,University,1,1,2022003
+Corsano,RIVM,1,1,2022003
+Bayer,VGZ,1,1,2022003
+Bayer,Voedingscentrum,1,1,2022003
+Bayer,info@ankeschrage.nl,1,1,2022003
+Bayer,lab / Obstetrics and,1,1,2022003
+Bayer,yeverdingen@rsm.nl,1,1,2022003
+Corsano,HELLP Stichting,1,1,2022003
+Corsano,Health Holland,1,1,2022003
+Corsano,Internal Medicine,1,1,2022003
+Corsano,Molecular Genetics,1,1,2022003
+GenomeS can BV,TKI Health Holland,1,1,2022009
+GenomeS can BV,VSOP,1,1,2022009
+HELLP Stichting,Health Holland,1,1,2022003
+Internal Medicine,Voedingscentrum,1,1,2022003
+Health Holland,yeverdingen@rsm.nl,1,1,2022003
+Internal Medicine,Molecular Genetics,1,1,2022003
+Internal Medicine,RIVM,1,1,2022003
+Internal Medicine,Rotterdam,1,1,2022003
+Internal Medicine,Somnox,1,1,2022003
+Internal Medicine,Soulve,1,1,2022003
+Internal Medicine,Surgery,1,1,2022003
+Internal Medicine,University,1,1,2022003
+Internal Medicine,VGZ,1,1,2022003
+Internal Medicine,info@ankeschrage.nl,1,1,2022003
+Health Holland,info@ankeschrage.nl,1,1,2022003
+Internal Medicine,lab / Obstetrics and,1,1,2022003
+Internal Medicine,yeverdingen@rsm.nl,1,1,2022003
+"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",PHARMO Institute,1,1,2022009
+"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",TKI Health Holland,1,1,2022009
+"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",VSOP,1,1,2022009
+Molecular Genetics,RIVM,1,1,2022003
+Molecular Genetics,Rotterdam,1,1,2022003
+Molecular Genetics,Somnox,1,1,2022003
+Molecular Genetics,Soulve,1,1,2022003
+Health Holland,lab / Obstetrics and,1,1,2022003
+Health Holland,Voedingscentrum,1,1,2022003
+HELLP Stichting,Internal Medicine,1,1,2022003
+HELLP Stichting,info@ankeschrage.nl,1,1,2022003
+HELLP Stichting,Molecular Genetics,1,1,2022003
+HELLP Stichting,RIVM,1,1,2022003
+HELLP Stichting,Rotterdam,1,1,2022003
+HELLP Stichting,Somnox,1,1,2022003
+HELLP Stichting,Soulve,1,1,2022003
+HELLP Stichting,Surgery,1,1,2022003
+HELLP Stichting,University,1,1,2022003
+HELLP Stichting,VGZ,1,1,2022003
+HELLP Stichting,Voedingscentrum,1,1,2022003
+HELLP Stichting,lab / Obstetrics and,1,1,2022003
+Health Holland,VGZ,1,1,2022003
+HELLP Stichting,yeverdingen@rsm.nl,1,1,2022003
+Health Holland,Internal Medicine,1,1,2022003
+Health Holland,Molecular Genetics,1,1,2022003
+Health Holland,RIVM,1,1,2022003
+Health Holland,Rotterdam,1,1,2022003
+Health Holland,Somnox,1,1,2022003
+Health Holland,Soulve,1,1,2022003
+Health Holland,Surgery,1,1,2022003
+Health Holland,University,1,1,2022003
+lab / Obstetrics and,yeverdingen@rsm.nl,1,1,2022003
