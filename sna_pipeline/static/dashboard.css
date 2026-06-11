@@ -46,7 +46,7 @@
     .subtle { color: var(--muted); font-size: 13px; }
     .tabs {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 6px;
       margin-top: 14px;
     }
@@ -111,7 +111,7 @@
     .row > * { flex: 1; }
     .network-wrap {
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: auto auto minmax(0, 1fr);
       min-height: 0;
       height: 100vh;
     }
@@ -129,6 +129,106 @@
       height: 100%;
       min-height: 0;
       background: #fff;
+    }
+    .convergence-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(260px, .85fr);
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      max-height: 300px;
+      overflow: auto;
+    }
+    .convergence-panel[hidden] {
+      display: none;
+    }
+    .convergence-card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+    .convergence-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .convergence-bars {
+      display: grid;
+      gap: 8px;
+    }
+    .convergence-bar-row {
+      display: grid;
+      grid-template-columns: minmax(130px, 220px) minmax(140px, 1fr) 54px;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+      border-radius: 7px;
+      padding: 6px;
+      cursor: pointer;
+    }
+    .convergence-bar-row:hover,
+    .convergence-table tr:hover {
+      background: #f8fbff;
+    }
+    .convergence-bar-title {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .stacked-bar {
+      display: flex;
+      min-width: 0;
+      height: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f2f4f7;
+    }
+    .bar-segment {
+      min-width: 0;
+      height: 100%;
+    }
+    .bar-segment.empty {
+      display: none;
+    }
+    .convergence-total {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .convergence-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .convergence-table th,
+    .convergence-table td {
+      padding: 6px 5px;
+      border-bottom: 1px solid #eef0f4;
+      text-align: left;
+      vertical-align: top;
+    }
+    .convergence-table th {
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .convergence-table tr {
+      cursor: pointer;
+    }
+    .convergence-table td:first-child {
+      max-width: 180px;
+      overflow-wrap: anywhere;
+      font-weight: 700;
     }
     .person-tooltip {
       position: fixed;
@@ -284,6 +384,16 @@
       .network-wrap {
         min-height: 72vh;
         height: 72vh;
+      }
+      .convergence-panel {
+        grid-template-columns: 1fr;
+        max-height: none;
+      }
+      .convergence-bar-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .convergence-total {
+        text-align: left;
       }
       #network {
         min-height: 560px;

@@ -24,6 +24,7 @@ __DASHBOARD_CSS__
           <button class="tab active" data-view="flagships">Flagships</button>
           <button class="tab" data-view="person">Persoon</button>
           <button class="tab" data-view="connectors">Connectors</button>
+          <button class="tab" data-view="convergence">Convergence</button>
         </div>
         <label class="toggle-row" for="selectedOnlyToggle">
           <input id="selectedOnlyToggle" type="checkbox">
@@ -91,6 +92,22 @@ __DASHBOARD_CSS__
         <div class="row" style="flex: 0 0 auto;">
           <button id="fitNetwork" class="btn">Fit</button>
         </div>
+      </div>
+      <div id="convergencePanel" class="convergence-panel" hidden>
+        <section class="convergence-card">
+          <div class="convergence-heading">
+            <h3>Institutionele samenstelling</h3>
+            <div class="subtle">10 gekozen flagships</div>
+          </div>
+          <div id="convergenceBars" class="convergence-bars"></div>
+        </section>
+        <section class="convergence-card">
+          <div class="convergence-heading">
+            <h3>Diversiteit ranking</h3>
+            <div class="subtle">Simpson score</div>
+          </div>
+          <div id="convergenceRanking"></div>
+        </section>
       </div>
       <div id="network"></div>
       <div id="personTooltip" class="person-tooltip" aria-hidden="true"></div>

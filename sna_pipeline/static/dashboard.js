@@ -1,6 +1,8 @@
-const DATA = JSON.parse(document.getElementById('sna-data').textContent);
+    const DATA = JSON.parse(document.getElementById('sna-data').textContent);
     const personsById = new Map(DATA.persons.map(p => [p.id, p]));
     const flagshipsById = new Map([...DATA.flagships, ...DATA.selected_flagship_groups].map(f => [f.id, f]));
+    const convergenceOverview = DATA.convergence_overview || { institution_groups: [], flagships: [], ranking: [], network_nodes: [], network_edges: [] };
+    const convergenceProfilesById = new Map(convergenceOverview.flagships.map(profile => [profile.id, profile]));
     const edgesByPerson = new Map();
     let globalSearchControl = null;
     const activeState = {
@@ -550,6 +552,176 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
       markActiveFlagship('');
     }
 
+    function convergenceTooltip(profile) {
+      const composition = convergenceOverview.institution_groups
+        .map(group => `${escapeHtml(group)}: ${fmt.format(profile.counts[group] || 0)}`)
+        .join('<br>');
+      const bridgePeople = (profile.top_bridge_people || [])
+        .slice(0, 4)
+        .map(person => `${escapeHtml(person.name)} (${fmt.format(person.cross_institution_edges)})`)
+        .join('<br>') || 'Geen cross-institution bridge people';
+      return `<b>${escapeHtml(profile.title)}</b><br>${composition}<br><br><b>Top bridge people</b><br>${bridgePeople}`;
+    }
+
+    function convergenceFlagshipNode(flagship) {
+      const profile = convergenceProfilesById.get(flagship.id);
+      return {
+        id: flagship.id,
+        label: flagship.title.length > 32 ? flagship.title.slice(0, 29) + '...' : flagship.title,
+        title: profile ? convergenceTooltip(profile) : `<b>${escapeHtml(flagship.title)}</b>`,
+        value: flagship.n_applicants,
+        size: 18 + Math.min(36, flagship.n_applicants / 2),
+        color: {
+          background: '#7c3aed',
+          border: '#ffffff',
+          highlight: { background: '#6d28d9', border: '#ffffff' },
+          hover: { background: '#6d28d9', border: '#ffffff' }
+        },
+        font: { size: 12 },
+        kind: 'convergence-flagship',
+      };
+    }
+
+    function renderConvergenceBars() {
+      const bars = document.getElementById('convergenceBars');
+      bars.innerHTML = convergenceOverview.flagships.map(profile => {
+        const total = Math.max(1, profile.total_applicants || 0);
+        const segments = convergenceOverview.institution_groups.map(group => {
+          const count = profile.counts[group] || 0;
+          const width = (count / total) * 100;
+          const label = `${group}: ${count}`;
+          return `<span class="bar-segment ${count ? '' : 'empty'}" style="width:${width}%;background:${colorForInstitution(group)}" title="${escapeHtml(label)}"></span>`;
+        }).join('');
+        const tooltip = convergenceOverview.institution_groups
+          .map(group => `${group}: ${profile.counts[group] || 0}`)
+          .join(' · ');
+        return `
+          <div class="convergence-bar-row" data-convergence-flagship="${escapeHtml(profile.id)}" title="${escapeHtml(tooltip)}">
+            <div class="convergence-bar-title">${escapeHtml(profile.title)}</div>
+            <div class="stacked-bar" aria-label="${escapeHtml(profile.title)}">${segments}</div>
+            <div class="convergence-total">${fmt.format(profile.total_applicants)} pers.</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderConvergenceRanking() {
+      const target = document.getElementById('convergenceRanking');
+      target.innerHTML = `
+        <table class="convergence-table">
+          <thead>
+            <tr>
+              <th>Flagship</th>
+              <th>Score</th>
+              <th>Groepen</th>
+              <th>Grootste</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${convergenceOverview.ranking.map(profile => `
+              <tr data-convergence-flagship="${escapeHtml(profile.id)}">
+                <td>${escapeHtml(profile.title)}</td>
+                <td>${profile.diversity_score.toFixed(3)}</td>
+                <td>${profile.n_institution_groups}</td>
+                <td>${escapeHtml(profile.largest_group)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function bindConvergenceItems() {
+      document.querySelectorAll('[data-convergence-flagship]').forEach(item => {
+        item.addEventListener('click', event => {
+          event.stopPropagation();
+          showConvergenceFlagshipDetails(item.dataset.convergenceFlagship);
+        });
+      });
+    }
+
+    function showConvergenceFlagshipDetails(profileOrId) {
+      const profile = typeof profileOrId === 'string' ? convergenceProfilesById.get(profileOrId) : profileOrId;
+      if (!profile) return;
+      const composition = convergenceOverview.institution_groups.map(group => `
+        <span class="chip"><span class="swatch" style="background:${colorForInstitution(group)}"></span>${escapeHtml(group)}: ${fmt.format(profile.counts[group] || 0)}</span>
+      `).join('');
+      const bridgePeople = (profile.top_bridge_people || []).map(person => `
+        <div class="list-item" data-person="${escapeHtml(person.id)}">
+          <div class="list-item-title">${escapeHtml(person.name)}</div>
+          <div class="subtle">${escapeHtml(person.institution)} · ${fmt.format(person.cross_institution_edges)} cross-institution relaties · betw. ${person.betweenness.toFixed(4)}</div>
+        </div>
+      `).join('');
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>${escapeHtml(profile.title)}</h3>
+        <div class="kv"><span>Bron ids</span><span>${escapeHtml(profile.member_ids.join(' + '))}</span></div>
+        <div class="kv"><span>Applicants</span><span>${fmt.format(profile.total_applicants)}</span></div>
+        <div class="kv"><span>Diversiteit</span><span>${profile.diversity_score.toFixed(4)}</span></div>
+        <div class="kv"><span>Instellinggroepen</span><span>${profile.n_institution_groups}</span></div>
+        <div class="kv"><span>Grootste groep</span><span>${escapeHtml(profile.largest_group)}</span></div>
+        <div class="chips">${composition}</div>
+        <div class="kv"><span>Top bridges</span><span>${bridgePeople || '-'}</span></div>
+      `;
+    }
+
+    function showConvergenceEdgeDetails(edge) {
+      const source = convergenceProfilesById.get(edge.source) || flagshipsById.get(edge.source);
+      const target = convergenceProfilesById.get(edge.target) || flagshipsById.get(edge.target);
+      const shared = (edge.shared_people || []).map(id => personsById.get(id)).filter(Boolean);
+      const peopleRows = shared
+        .slice(0, 18)
+        .map(person => `<div class="list-item" data-person="${escapeHtml(person.id)}"><div class="list-item-title">${escapeHtml(person.name)}</div><div class="subtle">${escapeHtml(person.institution_clean || person.institution)} · ${escapeHtml(person.department_group || 'Unknown')}</div></div>`)
+        .join('');
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>Gedeelde personen</h3>
+        <div class="kv"><span>Flagships</span><span>${escapeHtml(source?.title || edge.source)} ↔ ${escapeHtml(target?.title || edge.target)}</span></div>
+        <div class="kv"><span>Aantal</span><span>${fmt.format(edge.weight || shared.length)}</span></div>
+        <div class="kv"><span>Personen</span><span>${peopleRows || '-'}</span></div>
+      `;
+    }
+
+    function renderConvergenceOverview() {
+      document.getElementById('convergencePanel').hidden = false;
+      renderConvergenceBars();
+      renderConvergenceRanking();
+      bindConvergenceItems();
+
+      const nodes = convergenceOverview.network_nodes.map(convergenceFlagshipNode);
+      const edges = convergenceOverview.network_edges
+        .filter(link => link.weight >= activeState.minWeight)
+        .map(link => ({
+          id: `convergence:${link.source}--${link.target}`,
+          from: link.source,
+          to: link.target,
+          value: link.weight,
+          width: 1 + Math.sqrt(link.weight),
+          label: edgeLabel(link.weight),
+          title: `${link.weight} gedeelde persoon/personen`,
+          kind: 'convergence-flagship-link',
+          raw: link,
+        }));
+
+      setNetwork(nodes, edges, 'Convergence overview', `${nodes.length} gekozen flagships, ${edges.length}/${convergenceOverview.network_edges.length} shared-person relaties getoond.`);
+      markActiveFlagship('');
+      const multiGroup = convergenceOverview.flagships.filter(profile => profile.n_institution_groups > 1).length;
+      const strongest = [...convergenceOverview.network_edges]
+        .sort((a, b) => b.weight - a.weight)
+        .slice(0, 5)
+        .map(edge => {
+          const source = convergenceProfilesById.get(edge.source);
+          const target = convergenceProfilesById.get(edge.target);
+          return `<div>${escapeHtml(source?.title || edge.source)} ↔ ${escapeHtml(target?.title || edge.target)}: ${fmt.format(edge.weight)}</div>`;
+        })
+        .join('');
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>Convergence</h3>
+        <div class="kv"><span>Flagships</span><span>${convergenceOverview.flagships.length}</span></div>
+        <div class="kv"><span>Multi-instelling</span><span>${multiGroup}</span></div>
+        <div class="kv"><span>Binnen 1 groep</span><span>${convergenceOverview.flagships.length - multiGroup}</span></div>
+        <div class="kv"><span>Sterkste links</span><span>${strongest || '-'}</span></div>
+      `;
+    }
+
     function renderActiveView() {
       activeState.selectedOnly = document.getElementById('selectedOnlyToggle').checked;
       activeState.minWeight = Number(document.getElementById('minWeight').value || 1);
@@ -560,8 +732,11 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
       activeState.edgeMode = 'backbone';
       updateFlagshipControls();
       renderFlagshipList();
+      document.getElementById('convergencePanel').hidden = activeState.view !== 'convergence';
 
-      if (activeState.view === 'person' && activeState.selectedPerson) {
+      if (activeState.view === 'convergence') {
+        renderConvergenceOverview();
+      } else if (activeState.view === 'person' && activeState.selectedPerson) {
         renderPersonNeighborhood(activeState.selectedPerson);
       } else if (activeState.view === 'connectors') {
         renderTopConnectors();
@@ -747,6 +922,10 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
       });
       document.getElementById('selectedOnlyToggle').addEventListener('change', () => {
         activeState.selectedOnly = document.getElementById('selectedOnlyToggle').checked;
+        if (activeState.view === 'convergence') {
+          renderActiveView();
+          return;
+        }
         activeState.selectedFlagship = '';
         activeState.flagshipFocusPerson = '';
         updateFlagshipControls();
@@ -757,6 +936,13 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
       document.getElementById('hopDepth').addEventListener('change', renderActiveView);
 
       document.addEventListener('click', event => {
+        const convergenceItem = event.target.closest('[data-convergence-flagship]');
+        if (convergenceItem) {
+          const flagshipId = convergenceItem.dataset.convergenceFlagship;
+          setView('convergence');
+          showConvergenceFlagshipDetails(flagshipId);
+          return;
+        }
         const flagshipItem = event.target.closest('[data-flagship]');
         if (flagshipItem) {
           document.getElementById('flagshipSelect').value = flagshipItem.dataset.flagship;
@@ -776,9 +962,18 @@ const DATA = JSON.parse(document.getElementById('sna-data').textContent);
     }
 
     network.on('click', params => {
+      if (!params.nodes.length && params.edges.length) {
+        const selectedEdge = activeState.currentEdges.find(edge => edge.id === params.edges[0]);
+        if (selectedEdge?.kind === 'convergence-flagship-link') {
+          showConvergenceEdgeDetails(selectedEdge.raw);
+        }
+        return;
+      }
       if (!params.nodes.length) return;
       const id = params.nodes[0];
-      if (flagshipsById.has(id)) {
+      if (activeState.view === 'convergence' && convergenceProfilesById.has(id)) {
+        showConvergenceFlagshipDetails(id);
+      } else if (flagshipsById.has(id)) {
         document.getElementById('flagshipSelect').value = id;
         activeState.selectedFlagship = id;
         activeState.flagshipFocusPerson = '';
