@@ -1381,6 +1381,7 @@ var tomSelect=function(e,t){return new TomSelect(e,t)}
       selectedInstitution: '',
       selectedDepartment: '',
       keyword: '',
+      keywordLabel: '',
       minWeight: 1,
       hopDepth: 1,
       edgeMode: 'backbone',
@@ -1548,6 +1549,7 @@ var tomSelect=function(e,t){return new TomSelect(e,t)}
     function openPersonNetwork(personId) {
       activeState.selectedPerson = personId;
       activeState.keyword = '';
+      activeState.keywordLabel = '';
       activeState.flagshipFocusPerson = '';
       if (globalSearchControl) globalSearchControl.setValue(personId, true);
       setView('person');
@@ -1670,6 +1672,25 @@ var tomSelect=function(e,t){return new TomSelect(e,t)}
     function passKeyword(person) {
       if (!activeState.keyword) return true;
       return (person.search_text || '').includes(activeState.keyword);
+    }
+
+    function passFlagshipScope(person) {
+      if (!activeState.selectedFlagship) return true;
+      const flagship = flagshipsById.get(activeState.selectedFlagship);
+      if (!flagship) return true;
+      const memberIds = flagshipMemberIds(flagship);
+      return person.flagships.some(item => memberIds.includes(item.id));
+    }
+
+    function passKeywordNetworkFilters(person) {
+      return passInstitution(person) && passDepartment(person) && passFlagshipScope(person) && passKeyword(person);
+    }
+
+    function sortPeopleByConnectorScore(left, right) {
+      return right.betweenness - left.betweenness ||
+        right.n_flagships - left.n_flagships ||
+        right.weighted_degree - left.weighted_degree ||
+        left.name.localeCompare(right.name);
     }
 
     function passPersonFilters(person) {
@@ -1872,7 +1893,7 @@ var tomSelect=function(e,t){return new TomSelect(e,t)}
     function renderTopConnectors() {
       const people = DATA.persons
         .filter(passPersonFilters)
-        .sort((a, b) => b.betweenness - a.betweenness || b.n_flagships - a.n_flagships || b.weighted_degree - a.weighted_degree)
+        .sort(sortPeopleByConnectorScore)
         .slice(0, 50);
       const ids = new Set(people.map(person => person.id));
       const edges = DATA.edges
@@ -1887,6 +1908,58 @@ var tomSelect=function(e,t){return new TomSelect(e,t)}
         }));
       const nodes = people.map(person => personNode(person, true));
       setNetwork(nodes, edges, 'Top connectoren', `${people.length} personen gesorteerd op betweenness, flagships en weighted degree.`);
+    }
+
+    function renderKeywordNetwork() {
+      const keyword = activeState.keywordLabel || activeState.keyword;
+      const allMatches = DATA.persons
+        .filter(passKeywordNetworkFilters)
+        .sort(sortPeopleByConnectorScore);
+      const people = allMatches.slice(0, 50);
+      const ids = new Set(people.map(person => person.id));
+      const edges = DATA.edges
+        .filter(edge => ids.has(edge.source) && ids.has(edge.target) && passWeight(edge))
+        .map(edge => ({
+          id: edgeKey(edge),
+          from: edge.source,
+          to: edge.target,
+          width: personEdgeWidth(edge),
+          label: edge.weight > 2 ? String(edge.weight) : '',
+          title: `Weight: ${edge.weight}<br>${escapeHtml(edge.flagship_titles.join('; '))}`,
+          kind: 'person-edge',
+        }));
+      const nodes = people.map(person => personNode(person, true));
+      const scopeParts = [
+        activeState.selectedFlagship ? `flagship ${flagshipsById.get(activeState.selectedFlagship)?.title || activeState.selectedFlagship}` : '',
+        activeState.selectedInstitution || '',
+        activeState.selectedDepartment || '',
+      ].filter(Boolean);
+      const scope = scopeParts.length ? ` binnen ${scopeParts.join(' · ')}` : '';
+      setNetwork(
+        nodes,
+        edges,
+        `Zoekresultaten: ${keyword}`,
+        `${people.length} van ${allMatches.length} matches getoond${scope}; ${edges.length} relaties met min weight ${activeState.minWeight}.`
+      );
+      markActiveFlagship(activeState.selectedFlagship || '');
+
+      const topPeople = people.slice(0, 8).map(person => `
+        <div class="list-item" data-person="${escapeHtml(person.id)}">
+          <div class="list-item-title">${escapeHtml(person.name)}</div>
+          <div class="subtle">${escapeHtml(person.institution_clean || person.institution)} · ${escapeHtml(person.department_group || 'Unknown')} · ${person.n_flagships} flagships · degree ${person.degree}</div>
+        </div>
+      `).join('');
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>Zoekresultaten</h3>
+        <div class="kv"><span>Trefwoord</span><span>${escapeHtml(keyword)}</span></div>
+        <div class="kv"><span>Matches</span><span>${fmt.format(allMatches.length)}</span></div>
+        <div class="kv"><span>Getoond</span><span>${fmt.format(people.length)}</span></div>
+        <div class="kv"><span>Relaties</span><span>${fmt.format(edges.length)}</span></div>
+        <div class="kv"><span>Instelling</span><span>${escapeHtml(activeState.selectedInstitution || 'Alle instellingen')}</span></div>
+        <div class="kv"><span>Afdeling</span><span>${escapeHtml(activeState.selectedDepartment || 'Alle afdelingen')}</span></div>
+        <div class="kv"><span>Flagship</span><span>${escapeHtml(activeState.selectedFlagship ? (flagshipsById.get(activeState.selectedFlagship)?.title || activeState.selectedFlagship) : 'Alle flagships')}</span></div>
+        <div class="kv"><span>Top matches</span><span>${topPeople || '-'}</span></div>
+      `;
     }
 
     function renderDepartmentNetwork(departmentGroup) {
@@ -2137,6 +2210,8 @@ var tomSelect=function(e,t){return new TomSelect(e,t)}
         renderConvergenceOverview();
       } else if (activeState.view === 'person' && activeState.selectedPerson) {
         renderPersonNeighborhood(activeState.selectedPerson);
+      } else if (activeState.view === 'person' && activeState.keyword) {
+        renderKeywordNetwork();
       } else if (activeState.view === 'connectors') {
         renderTopConnectors();
       } else if (activeState.selectedFlagship) {
@@ -2328,6 +2403,11 @@ var tomSelect=function(e,t){return new TomSelect(e,t)}
       renderActiveView();
     }
 
+    function markActiveViewTab(view) {
+      activeState.view = view;
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.view === view));
+    }
+
     function scheduleSearchRender() {
       if (searchRenderTimer) window.clearTimeout(searchRenderTimer);
       searchRenderTimer = window.setTimeout(() => {
@@ -2361,8 +2441,14 @@ var tomSelect=function(e,t){return new TomSelect(e,t)}
           option: (data, escape) => `<div><strong>${escape(data.text)}</strong><div class="subtle">${escape(data.institution)} · ${escape(data.department_group || data.department || 'Unknown')} · ${escape(data.expertise_keywords || data.email || '')}</div></div>`,
         },
         onType: value => {
-          activeState.keyword = value.trim().toLowerCase();
+          activeState.keywordLabel = value.trim();
+          activeState.keyword = activeState.keywordLabel.toLowerCase();
           if (activeState.selectedPerson) activeState.selectedPerson = '';
+          if (activeState.keyword) {
+            markActiveViewTab('person');
+          } else if (activeState.view === 'person') {
+            markActiveViewTab('flagships');
+          }
           scheduleSearchRender();
         },
         onChange: value => {
@@ -2372,11 +2458,14 @@ var tomSelect=function(e,t){return new TomSelect(e,t)}
           }
           if (value && personsById.has(value)) {
             activeState.keyword = '';
+            activeState.keywordLabel = '';
             activeState.selectedPerson = value;
             setView('person');
           } else if (!value) {
             activeState.selectedPerson = '';
             activeState.keyword = '';
+            activeState.keywordLabel = '';
+            if (activeState.view === 'person') markActiveViewTab('flagships');
             renderActiveView();
           }
         }
@@ -2408,12 +2497,18 @@ var tomSelect=function(e,t){return new TomSelect(e,t)}
         if (globalSearchControl) globalSearchControl.clear(true);
         activeState.selectedPerson = '';
         activeState.keyword = '';
+        activeState.keywordLabel = '';
         activeState.flagshipFocusPerson = '';
         setView('flagships');
       });
       document.getElementById('flagshipSelect').addEventListener('change', event => {
         activeState.selectedFlagship = event.target.value;
         activeState.flagshipFocusPerson = '';
+        if (activeState.keyword) {
+          markActiveViewTab('person');
+          renderActiveView();
+          return;
+        }
         setView('flagships');
       });
       document.getElementById('selectedOnlyToggle').addEventListener('change', () => {
@@ -2460,6 +2555,11 @@ var tomSelect=function(e,t){return new TomSelect(e,t)}
           document.getElementById('flagshipSelect').value = flagshipItem.dataset.flagship;
           activeState.selectedFlagship = flagshipItem.dataset.flagship;
           activeState.flagshipFocusPerson = '';
+          if (activeState.keyword) {
+            markActiveViewTab('person');
+            renderActiveView();
+            return;
+          }
           setView('flagships');
           return;
         }
@@ -2467,6 +2567,7 @@ var tomSelect=function(e,t){return new TomSelect(e,t)}
         if (personItem) {
           activeState.selectedPerson = personItem.dataset.person;
           activeState.keyword = '';
+          activeState.keywordLabel = '';
           if (globalSearchControl) globalSearchControl.setValue(activeState.selectedPerson, true);
           setView('person');
         }
