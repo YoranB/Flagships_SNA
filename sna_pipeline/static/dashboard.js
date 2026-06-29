@@ -59,6 +59,10 @@
     const convergenceProfilesById = new Map(convergenceOverview.flagships.map(profile => [profile.id, profile]));
     const edgesByPerson = new Map();
     let globalSearchControl = null;
+    let searchRenderTimer = null;
+    let networkFitTimer = null;
+    let networkPhysicsTimer = null;
+    let lastNetworkSignature = '';
     const activeState = {
       view: 'flagships',
       selectedOnly: false,
@@ -67,8 +71,6 @@
       flagshipFocusPerson: '',
       selectedInstitution: '',
       selectedDepartment: '',
-      expertiseStatus: '',
-      expertiseConfidence: '',
       keyword: '',
       minWeight: 1,
       hopDepth: 1,
@@ -296,6 +298,29 @@
       }
     }
 
+    function networkSignature(nodes, edges) {
+      const nodePart = nodes
+        .map(node => `${node.id}:${node.label || ''}:${node.value || ''}:${node.size || ''}:${node.group || ''}`)
+        .sort()
+        .join('|');
+      const edgePart = edges
+        .map(edge => `${edge.id || `${edge.from}--${edge.to}`}:${edge.from}:${edge.to}:${edge.width || ''}:${edge.label || ''}`)
+        .sort()
+        .join('|');
+      return `${nodePart}::${edgePart}`;
+    }
+
+    function clearNetworkTimers() {
+      if (networkFitTimer) {
+        window.clearTimeout(networkFitTimer);
+        networkFitTimer = null;
+      }
+      if (networkPhysicsTimer) {
+        window.clearTimeout(networkPhysicsTimer);
+        networkPhysicsTimer = null;
+      }
+    }
+
     function setNetwork(nodes, edges, title, subtitle) {
       activeState.currentNodes = nodes;
       activeState.currentEdges = edges;
@@ -304,15 +329,24 @@
       document.getElementById('viewTitle').textContent = title;
       document.getElementById('viewSubtitle').textContent = subtitle;
 
+      const signature = networkSignature(nodes, edges);
+      if (signature === lastNetworkSignature) return;
+      lastNetworkSignature = signature;
+      clearNetworkTimers();
+
       network.setData({
         nodes: new vis.DataSet(nodes),
         edges: new vis.DataSet(edges),
       });
       network.setOptions({ physics: { enabled: true } });
-      window.setTimeout(() => {
+      networkFitTimer = window.setTimeout(() => {
         network.fit({ animation: { duration: 350, easingFunction: 'easeInOutQuad' } });
+        networkFitTimer = null;
       }, 120);
-      window.setTimeout(() => network.setOptions({ physics: false }), 900);
+      networkPhysicsTimer = window.setTimeout(() => {
+        network.setOptions({ physics: false });
+        networkPhysicsTimer = null;
+      }, 900);
     }
 
     function passInstitution(person) {
@@ -329,16 +363,8 @@
       return (person.search_text || '').includes(activeState.keyword);
     }
 
-    function passExpertiseFilters(person) {
-      const hasExpertise = expertiseHasContent(person);
-      if (activeState.expertiseStatus === 'with' && !hasExpertise) return false;
-      if (activeState.expertiseStatus === 'without' && hasExpertise) return false;
-      if (activeState.expertiseConfidence && person.expertise_confidence !== activeState.expertiseConfidence) return false;
-      return true;
-    }
-
     function passPersonFilters(person) {
-      return passInstitution(person) && passDepartment(person) && passKeyword(person) && passExpertiseFilters(person);
+      return passInstitution(person) && passDepartment(person) && passKeyword(person);
     }
 
     function passWeight(edge) {
@@ -791,8 +817,6 @@
       activeState.minWeight = Number(document.getElementById('minWeight').value || 1);
       activeState.selectedInstitution = document.getElementById('institutionFilter').value;
       activeState.selectedDepartment = document.getElementById('departmentFilter').value;
-      activeState.expertiseStatus = document.getElementById('expertiseStatusFilter').value;
-      activeState.expertiseConfidence = document.getElementById('expertiseConfidenceFilter').value;
       activeState.selectedFlagship = document.getElementById('flagshipSelect').value;
       activeState.hopDepth = Number(document.getElementById('hopDepth').value || 1);
       activeState.edgeMode = 'backbone';
@@ -815,7 +839,6 @@
       } else {
         renderFlagshipOverview();
       }
-      renderConnectorList();
     }
 
     function renderExpertiseDetails(person) {
@@ -968,20 +991,6 @@
       `).join('');
     }
 
-    function renderConnectorList() {
-      const list = document.getElementById('connectorList');
-      const sorted = [...DATA.persons]
-        .filter(passPersonFilters)
-        .sort((a, b) => b.betweenness - a.betweenness || b.n_flagships - a.n_flagships || b.degree - a.degree)
-        .slice(0, 12);
-      list.innerHTML = sorted.map(person => `
-        <div class="list-item" data-person="${escapeHtml(person.id)}">
-          <div class="list-item-title">${escapeHtml(person.name)}</div>
-          <div class="subtle">${escapeHtml(person.institution_clean || person.institution)} · ${escapeHtml(person.department_group || 'Unknown')} · ${person.n_flagships} flagships · degree ${person.degree}</div>
-        </div>
-      `).join('');
-    }
-
     function renderQualityPanel() {
       const quality = DATA.quality;
       document.getElementById('qualityPanel').innerHTML = `
@@ -1008,6 +1017,14 @@
         activeState.selectedPerson = '';
       }
       renderActiveView();
+    }
+
+    function scheduleSearchRender() {
+      if (searchRenderTimer) window.clearTimeout(searchRenderTimer);
+      searchRenderTimer = window.setTimeout(() => {
+        searchRenderTimer = null;
+        renderActiveView();
+      }, 180);
     }
 
     function initControls() {
@@ -1037,9 +1054,13 @@
         onType: value => {
           activeState.keyword = value.trim().toLowerCase();
           if (activeState.selectedPerson) activeState.selectedPerson = '';
-          renderActiveView();
+          scheduleSearchRender();
         },
         onChange: value => {
+          if (searchRenderTimer) {
+            window.clearTimeout(searchRenderTimer);
+            searchRenderTimer = null;
+          }
           if (value && personsById.has(value)) {
             activeState.keyword = '';
             activeState.selectedPerson = value;
@@ -1073,8 +1094,6 @@
         document.getElementById('flagshipSelect').value = '';
         document.getElementById('institutionFilter').value = '';
         document.getElementById('departmentFilter').value = '';
-        document.getElementById('expertiseStatusFilter').value = '';
-        document.getElementById('expertiseConfidenceFilter').value = '';
         document.getElementById('minWeight').value = '1';
         document.getElementById('hopDepth').value = '1';
         if (globalSearchControl) globalSearchControl.clear(true);
@@ -1100,8 +1119,6 @@
         setView('flagships');
       });
       document.getElementById('institutionFilter').addEventListener('change', renderActiveView);
-      document.getElementById('expertiseStatusFilter').addEventListener('change', renderActiveView);
-      document.getElementById('expertiseConfidenceFilter').addEventListener('change', renderActiveView);
       document.getElementById('minWeight').addEventListener('change', renderActiveView);
       document.getElementById('hopDepth').addEventListener('change', renderActiveView);
       document.getElementById('exportExpertiseEdits').addEventListener('click', exportManualExpertiseEdits);
@@ -1207,7 +1224,6 @@
     });
 
     renderFlagshipList();
-    renderConnectorList();
     renderQualityPanel();
     initControls();
     renderFlagshipOverview();

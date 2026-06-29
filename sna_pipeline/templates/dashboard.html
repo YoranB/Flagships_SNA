@@ -52,26 +52,6 @@ __DASHBOARD_CSS__
         </div>
         <div class="row">
           <div class="field">
-            <label for="expertiseStatusFilter">Expertise</label>
-            <select id="expertiseStatusFilter">
-              <option value="">Alle</option>
-              <option value="with">Met expertise</option>
-              <option value="without">Zonder expertise</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="expertiseConfidenceFilter">Confidence</label>
-            <select id="expertiseConfidenceFilter">
-              <option value="">Alle</option>
-              <option value="high">high</option>
-              <option value="medium">medium</option>
-              <option value="low">low</option>
-              <option value="needs_review">needs_review</option>
-            </select>
-          </div>
-        </div>
-        <div class="row">
-          <div class="field">
             <label for="minWeight">Min edge weight</label>
             <input id="minWeight" type="number" min="1" max="10" step="1" value="1">
           </div>
@@ -144,10 +124,6 @@ __DASHBOARD_CSS__
       <section class="panel-section">
         <h2>Datakwaliteit</h2>
         <div id="qualityPanel" class="quality"></div>
-      </section>
-      <section class="panel-section">
-        <h2>Top connectoren</h2>
-        <div id="connectorList" class="list"></div>
       </section>
     </aside>
   </div>
