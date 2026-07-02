@@ -19,6 +19,25 @@ def convergence_institution_group(institution):
     return value if value in CORE_INSTITUTIONS else EXTERNAL_INSTITUTION_GROUP
 
 
+def member_mask(group, member_id):
+    mask = group["flagship_id"] == member_id
+    if "proposal_id" in group:
+        mask = mask | (group["proposal_id"] == member_id)
+    if "proposal_key" in group:
+        mask = mask | (group["proposal_key"] == member_id)
+    return mask
+
+
+def selected_mask(applicants, member_ids):
+    members = set(member_ids)
+    mask = applicants["flagship_id"].isin(members)
+    if "proposal_id" in applicants:
+        mask = mask | applicants["proposal_id"].isin(members)
+    if "proposal_key" in applicants:
+        mask = mask | applicants["proposal_key"].isin(members)
+    return mask
+
+
 def build_top_bridge_people(group, member_ids, person_metrics):
     metric_map = person_metrics.set_index("person_id").to_dict("index")
     name_column = "person_name_clean" if "person_name_clean" in group.columns else "person_id"
@@ -36,7 +55,7 @@ def build_top_bridge_people(group, member_ids, person_metrics):
 
     for member_id in member_ids:
         member_people = (
-            group[group["flagship_id"] == member_id]
+            group[member_mask(group, member_id)]
             [["person_id", "institution_simplified"]]
             .drop_duplicates("person_id")
             .copy()
@@ -72,8 +91,12 @@ def build_top_bridge_people(group, member_ids, person_metrics):
 
 def build_convergence_overview(applicants, person_metrics, selected_flagship_groups, selected_flagship_links):
     profiles = []
+    selected_group_map = {group["id"]: group for group in selected_flagship_groups}
+
     for selected in SELECTED_FLAGSHIP_GROUPS:
-        group = applicants[applicants["flagship_id"].isin(selected["member_ids"])].copy()
+        dashboard_group = selected_group_map.get(selected["id"], {})
+        resolved_member_ids = dashboard_group.get("member_ids") or selected["member_ids"]
+        group = applicants[selected_mask(applicants, selected["member_ids"])].copy()
         people = (
             group[["person_id", "institution_simplified"]]
             .drop_duplicates("person_id")
@@ -97,13 +120,14 @@ def build_convergence_overview(applicants, person_metrics, selected_flagship_gro
         profiles.append({
             "id": selected["id"],
             "title": selected["title"],
-            "member_ids": selected["member_ids"],
+            "member_ids": resolved_member_ids,
+            "legacy_member_ids": selected["member_ids"],
             "counts": counts,
             "total_applicants": total,
             "diversity_score": round(safe_float(diversity), 4),
             "n_institution_groups": int(len(present)),
             "largest_group": largest_group if total else "Unknown",
-            "top_bridge_people": build_top_bridge_people(group, selected["member_ids"], person_metrics),
+            "top_bridge_people": build_top_bridge_people(group, resolved_member_ids, person_metrics),
         })
 
     ranking = sorted(
