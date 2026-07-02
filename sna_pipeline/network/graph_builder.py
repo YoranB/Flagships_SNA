@@ -7,6 +7,10 @@ def join_unique(values):
     return "; ".join(sorted(set(v for v in values if v)))
 
 
+def merge_unique(left, right):
+    return sorted(set((left or []) + (right or [])))
+
+
 def choose_group(values):
     cleaned = [v for v in values if v]
     if not cleaned:
@@ -15,6 +19,26 @@ def choose_group(values):
     for value in cleaned:
         counts[value] = counts.get(value, 0) + 1
     return sorted(counts, key=lambda item: (-counts[item], item))[0]
+
+
+def add_placeholder_node(G, node_id, row, side):
+    G.add_node(
+        node_id,
+        name=row.get(f"{side}_name", node_id),
+        institution="Unknown",
+        institution_raw="",
+        institution_clean="Unknown",
+        department="",
+        department_raw="",
+        department_clean="",
+        department_group="Unknown",
+        department_tokens="",
+        role="",
+        email=row.get(side, ""),
+        call_ids="",
+        call_names="",
+        proposal_keys="",
+    )
 
 
 def build_person_graph(applicants, person_edges):
@@ -36,6 +60,7 @@ def build_person_graph(applicants, person_edges):
             email=("email", join_unique),
             call_ids=("call_id", join_unique),
             call_names=("call_name", join_unique),
+            proposal_keys=("proposal_key", join_unique),
             is_placeholder_id=("is_placeholder_id", "max"),
         )
         .reset_index()
@@ -57,6 +82,7 @@ def build_person_graph(applicants, person_edges):
             email=row["email"],
             call_ids=row["call_ids"],
             call_names=row["call_names"],
+            proposal_keys=row["proposal_keys"],
             is_placeholder_id=bool(row["is_placeholder_id"]),
         )
 
@@ -68,28 +94,35 @@ def build_person_graph(applicants, person_edges):
             continue
 
         if source not in G:
-            G.add_node(source, name=row.get("source_name", source), institution="Unknown", institution_raw="", institution_clean="Unknown", department="", department_raw="", department_clean="", department_group="Unknown", department_tokens="", role="", email=row.get("source", ""), call_ids="", call_names="")
+            add_placeholder_node(G, source, row, "source")
         if target not in G:
-            G.add_node(target, name=row.get("target_name", target), institution="Unknown", institution_raw="", institution_clean="Unknown", department="", department_raw="", department_clean="", department_group="Unknown", department_tokens="", role="", email=row.get("target", ""), call_ids="", call_names="")
+            add_placeholder_node(G, target, row, "target")
 
         weight = float(row["weight"])
-        flagships = split_semicolon_values(row.get("flagships", ""))
+        proposal_keys = split_semicolon_values(row.get("proposal_keys", ""))
+        legacy_flagship_ids = split_semicolon_values(row.get("flagships", ""))
         flagship_titles = split_semicolon_values(row.get("flagship_titles", ""))
         call_ids = split_semicolon_values(row.get("call_ids", ""))
         call_names = split_semicolon_values(row.get("call_names", ""))
+        display_flagships = proposal_keys or legacy_flagship_ids
 
         if G.has_edge(source, target):
-            G[source][target]["weight"] += weight
-            G[source][target]["flagships"] = sorted(set(G[source][target]["flagships"] + flagships))
-            G[source][target]["flagship_titles"] = sorted(set(G[source][target]["flagship_titles"] + flagship_titles))
-            G[source][target]["call_ids"] = sorted(set(G[source][target]["call_ids"] + call_ids))
-            G[source][target]["call_names"] = sorted(set(G[source][target]["call_names"] + call_names))
+            edge = G[source][target]
+            edge["weight"] += weight
+            edge["proposal_keys"] = merge_unique(edge.get("proposal_keys", []), proposal_keys)
+            edge["flagships"] = merge_unique(edge.get("flagships", []), display_flagships)
+            edge["legacy_flagship_ids"] = merge_unique(edge.get("legacy_flagship_ids", []), legacy_flagship_ids)
+            edge["flagship_titles"] = merge_unique(edge.get("flagship_titles", []), flagship_titles)
+            edge["call_ids"] = merge_unique(edge.get("call_ids", []), call_ids)
+            edge["call_names"] = merge_unique(edge.get("call_names", []), call_names)
         else:
             G.add_edge(
                 source,
                 target,
                 weight=weight,
-                flagships=flagships,
+                proposal_keys=proposal_keys,
+                flagships=display_flagships,
+                legacy_flagship_ids=legacy_flagship_ids,
                 flagship_titles=flagship_titles,
                 call_ids=call_ids,
                 call_names=call_names,
