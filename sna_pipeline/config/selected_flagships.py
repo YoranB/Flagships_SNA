@@ -40,6 +40,15 @@ SELECTED_FLAGSHIP_GROUPS = [
         "member_ids": ["2022019"],
     },
     {
+        "id": "selected:sustainable-health-programs",
+        "title": "Sustainable health programs",
+        "member_ids": [
+            "sustainable-health-programs::shp-smart-or2030",
+            "sustainable-health-programs::shp-technological-innovations-for-nurses",
+            "sustainable-health-programs::shp-zero-emission-endoscopy",
+        ],
+    },
+    {
         "id": "selected:cific",
         "title": "CIFIC",
         "member_ids": ["2022017"],

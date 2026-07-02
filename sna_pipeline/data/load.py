@@ -2,6 +2,7 @@ import pandas as pd
 
 from ..config import CLEANED_APPLICANTS, INPUT_ORG_EDGES, INPUT_PERSON_EDGES, READY_APPLICANTS
 from ..text_utils import clean_text, is_placeholder_email, normalize_for_id, simplify_institution, split_semicolon_values
+from .manual_programs import build_manual_org_edges, build_manual_person_edges
 
 
 DEFAULT_CALL_ID = "flagship"
@@ -254,6 +255,29 @@ def load_data():
     org_edges = ensure_call_columns(org_edges)
     org_edges = ensure_proposal_columns(org_edges)
     person_edges = ensure_person_edge_call_columns(person_edges)
+
+    manual_person_edges = build_manual_person_edges(applicants)
+    if not manual_person_edges.empty:
+        person_edges = pd.concat(
+            [
+                person_edges.reindex(columns=sorted(set(person_edges.columns) | set(manual_person_edges.columns))),
+                manual_person_edges.reindex(columns=sorted(set(person_edges.columns) | set(manual_person_edges.columns))),
+            ],
+            ignore_index=True,
+        ).fillna("")
+        person_edges = ensure_person_edge_call_columns(person_edges)
+
+    manual_org_edges = build_manual_org_edges(applicants)
+    if not manual_org_edges.empty:
+        org_edges = pd.concat(
+            [
+                org_edges.reindex(columns=sorted(set(org_edges.columns) | set(manual_org_edges.columns))),
+                manual_org_edges.reindex(columns=sorted(set(org_edges.columns) | set(manual_org_edges.columns))),
+            ],
+            ignore_index=True,
+        ).fillna("")
+        org_edges = ensure_call_columns(org_edges)
+        org_edges = ensure_proposal_columns(org_edges)
 
     if "institution_raw" not in applicants.columns:
         applicants["institution_raw"] = applicants["institution"]

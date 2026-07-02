@@ -57,6 +57,9 @@ The expertise enrichment command writes:
 
 - `output_enriched/person_expertise.csv`
 
+Manual program data can be added through `input_manual/sustainable_health_programs.csv`.
+The cleaning step appends those rows to the cleaned applicant dataset and the SNA step derives the corresponding person-person and person-organisation edges from the same rows.
+
 ## Dashboard
 
 Open `output_sna/person_network_interactive.html` in a browser after running the pipeline. The dashboard is standalone: required local JavaScript and CSS libraries are embedded into the generated HTML.

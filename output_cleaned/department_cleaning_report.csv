@@ -5,13 +5,13 @@ Molecular Genetics,Molecular Genetics,Molecular Genetics,17
 Public Health,Public Health,Public Health,17
 Cardiology,Cardiology,Cardiology,15
 Internal Medicine,Internal Medicine,Internal Medicine,15
+Erasmus School of Health Policy & Management,Erasmus School of Health Policy and Management,Erasmus School of Health Policy and Management,14
 Biomechanical Engineering,Biomechanical Engineering,Biomechanical Engineering,12
-Erasmus School of Health Policy & Management,Erasmus School of Health Policy and Management,Erasmus School of Health Policy and Management,12
 Radiology & Nuclear Medicine,Radiology and Nuclear Medicine,Radiology and Nuclear Medicine,12
 Surgery,Surgery,Surgery,11
 Epidemiology,Epidemiology,Epidemiology,10
+Industrial Design Engineering,Industrial Design Engineering,Industrial Design Engineering,10
 Clinical Genetics,Clinical Genetics,Clinical Genetics,9
-Industrial Design Engineering,Industrial Design Engineering,Industrial Design Engineering,9
 Radiology and Nuclear Medicine,Radiology and Nuclear Medicine,Radiology and Nuclear Medicine,9
 Radiotherapy,Radiotherapy,Radiotherapy,9
 Rehabilitation Medicine,Rehabilitation Medicine,Rehabilitation Medicine,9
@@ -72,6 +72,7 @@ Intelligent systems,Intelligent Systems,Intelligent Systems,3
 Medical Ethics,Medical Ethics,Medical Ethics,3
 Microsoft Europe,Microsoft Europe,Microsoft Europe,3
 Neuroscience,Neuroscience,Neuroscience,3
+Oral & Maxillofacial Surgery,Surgery,Surgery,3
 Orthopedics & Sports medicine,Orthopedics and Sports Medicine,Orthopedics and Sports Medicine,3
 Pathology & bioinformatics,Pathology,Pathology,3
 Psychiatry,Psychiatry,Psychiatry,3
@@ -80,6 +81,7 @@ Radiation Science and Technology,Radiation Science and Technology,Radiation Scie
 Radiology,Radiology,Radiology,3
 Rotterdam School of Management,Rotterdam School of Management,Rotterdam School of Management,3
 Urology,Urology,Urology,3
+Applied Mathematics,Applied Mathematics,Applied Mathematics,2
 Avegen Health,Avegen Health,Avegen Health,2
 Biomaterials and Tissue Bio- mechanics,Biomaterials and Tissue Bio- Mechanics,Biomaterials and Tissue Bio- Mechanics,2
 Bionanosc ience,Bionanosc Ience,Bionanosc Ience,2
@@ -118,6 +120,7 @@ Experimental Urology,Urology,Urology,2
 Fac. Industrial Design Engineering,Fac. Industrial Design Engineering,Fac. Industrial Design Engineering,2
 Faculty of,Faculty of,Faculty of,2
 Faculty of Industrial Design Engineering,Faculty of Industrial Design Engineering,Faculty of Industrial Design Engineering,2
+Gastroenterology,Gastroenterology,Gastroenterology,2
 Gastroenterology & Hepatology,Gastroenterology and Hepatology,Gastroenterology and Hepatology,2
 General Pediatrics,General Pediatrics,General Pediatrics,2
 Health Services Management & Organisation,Health Services Management and Organisation,Health Services Management and Organisation,2
@@ -141,7 +144,6 @@ Multi-Actor Systems,Multi-Actor Systems,Multi-Actor Systems,2
 N.a.,N.A.,N.A.,2
 Oncology,Oncology,Oncology,2
 Optical Imaging Centre,Optical Imaging Centre,Optical Imaging Centre,2
-Oral & Maxillofacial Surgery,Surgery,Surgery,2
 Orthopaedics & Sports Medicine,Orthopaedics,Orthopaedics,2
 Paediatric ICU,Paediatric ICU,Paediatric ICU,2
 Paediatrics,Paediatrics,Paediatrics,2
@@ -164,7 +166,6 @@ tnw,Tnw,Tnw,2
 3ME/ Precision and Microsystems Engineering (PME),3me / Precision and Microsystems Engineering (Pme),3me / Precision and Microsystems Engineering (Pme),1
 Applie,Applie,Applie,1
 Applied Economics (ESE),Applied Economics (Ese),Applied Economics (Ese),1
-Applied Mathematics,Applied Mathematics,Applied Mathematics,1
 Applied Sciences,Applied Sciences,Applied Sciences,1
 Architectur e and the Built Environme nt,Architectur E and the Built Environme Nt,Architectur E and the Built Environme Nt,1
 Architecture & the Built Environment,Architecture and the Built Environment,Architecture and the Built Environment,1
@@ -317,6 +318,7 @@ Healthcare Governance/ Dutch Healthcare Institute,Healthcare Governance / Dutch 
 Healthcare Insurance,Healthcare Insurance,Healthcare Insurance,1
 Healthcare Quality and,Healthcare Quality and,Healthcare Quality and,1
 "Henk Mathijssen, voorzitter@plus minus.nl","Henk Mathijssen, Voorzitter@Plus Minus.Nl","Henk Mathijssen, Voorzitter@Plus Minus.Nl",1
+Human-Robot Interaction,Human-Robot Interaction,Human-Robot Interaction,1
 Human-centered Design Adult ICU,Human-Centered Design Adult ICU,Human-Centered Design Adult ICU,1
 ICU/PHARM,ICU / Pharm,ICU / Pharm,1
 IDE Human-,Ide Human-,Ide Human-,1
@@ -328,6 +330,7 @@ Institute Medical Technology Assessment,Institute Medical Technology Assessment,
 Institute of Medical Technology Assessment,Institute of Medical Technology Assessment,Institute of Medical Technology Assessment,1
 Integral Capacity management,Integral Capacity Management,Integral Capacity Management,1
 Intelligent Systems Department - Computer Graphics and Visualization (CGV),Intelligent Systems Department - Computer Graphics and Visualization (Cgv),Intelligent Systems Department - Computer Graphics and Visualization (Cgv),1
+Intensive Care,Intensive Care,Intensive Care,1
 Interactive Intelligence,Interactive Intelligence,Interactive Intelligence,1
 Internal Medi- cine,Internal Medi- Cine,Internal Medi- Cine,1
 Internal Medicine Erasmus MC Orthopedics & Sports medicine,Internal Medicine,Internal Medicine,1
@@ -367,6 +370,7 @@ Neonatal ICU,Neonatal ICU,Neonatal ICU,1
 Neurology and Clinical Genetics,Neurology,Neurology,1
 Neuroscie nce/Clinic al genetics,Neuroscience,Neuroscience,1
 Neurosurgery,Neurosurgery,Neurosurgery,1
+Nursing Science,Nursing Science,Nursing Science,1
 OBS,Obs,Obs,1
 Obstetrics Education,Obstetrics Education,Obstetrics Education,1
 "Obstetrics and Gynaecolog y, Paediatrics /Neonatolo gy","Obstetrics and Gynaecolog Y, Paediatrics / Neonatolo Gy","Obstetrics and Gynaecolog Y, Paediatrics / Neonatolo Gy",1
@@ -411,6 +415,7 @@ Public and private partnerships,Public and Private Partnerships,Public and Priva
 Pulmonary Medicine,Pulmonary Medicine,Pulmonary Medicine,1
 Pulmonary medicine,Pulmonary Medicine,Pulmonary Medicine,1
 Quality and Patientcare,Quality and Patientcare,Quality and Patientcare,1
+RSM & ESHPM,Rsm and Eshpm,Rsm and Eshpm,1
 "RSM, department Technology & Operations Management; ESHPM, section Health Services Management and Organization","Rsm, Department Technology and Operations Management; Eshpm, Health Services Management and Organization","Rsm, Department Technology and Operations Management",1
 Radio therapy,Radio Therapy,Radio Therapy,1
 Radiology & Nuclear,Radiology and Nuclear,Radiology and Nuclear,1
