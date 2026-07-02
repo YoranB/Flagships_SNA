@@ -26,7 +26,7 @@ def calculate_person_metrics(G, applicants):
             community_map[node] = idx
 
     flagship_counts = (
-        applicants.groupby("person_id")["flagship_id"]
+        applicants.groupby("person_id")["proposal_key"]
         .nunique()
         .rename("n_flagships")
         .reset_index()
@@ -60,6 +60,13 @@ def calculate_person_metrics(G, applicants):
         .reset_index()
     )
 
+    proposal_key_summary = (
+        applicants.groupby("person_id")["proposal_key"]
+        .apply(lambda x: "; ".join(sorted(set(v for v in x if v))))
+        .rename("proposal_keys_all")
+        .reset_index()
+    )
+
     rows = []
 
     for node, attrs in G.nodes(data=True):
@@ -76,6 +83,7 @@ def calculate_person_metrics(G, applicants):
             "department_group": attrs.get("department_group", "Unknown"),
             "call_ids": attrs.get("call_ids", ""),
             "call_names": attrs.get("call_names", ""),
+            "proposal_keys": attrs.get("proposal_keys", ""),
             "is_placeholder_id": attrs.get("is_placeholder_id", False),
             "degree": degree.get(node, 0),
             "weighted_degree": weighted_degree.get(node, 0),
@@ -93,6 +101,7 @@ def calculate_person_metrics(G, applicants):
     metrics = metrics.merge(role_summary, on="person_id", how="left")
     metrics = metrics.merge(flagship_summary, on="person_id", how="left")
     metrics = metrics.merge(call_summary, on="person_id", how="left")
+    metrics = metrics.merge(proposal_key_summary, on="person_id", how="left")
 
     metrics["n_flagships"] = metrics["n_flagships"].fillna(0).astype(int)
     metrics["n_calls"] = metrics["n_calls"].fillna(0).astype(int)
@@ -104,10 +113,11 @@ def calculate_person_metrics(G, applicants):
 
     return metrics
 
+
 def calculate_flagship_metrics(applicants):
     rows = []
 
-    for flagship_id, group in applicants.groupby("flagship_id"):
+    for proposal_key, group in applicants.groupby("proposal_key"):
         institutions = group["institution_simplified"].dropna().unique()
         people = group["person_id"].nunique()
 
@@ -118,12 +128,14 @@ def calculate_flagship_metrics(applicants):
         )
 
         rows.append({
-            "flagship_id": flagship_id,
+            "proposal_key": proposal_key,
+            "flagship_id": group["flagship_id"].iloc[0],
             "proposal_id": group["proposal_id"].iloc[0],
             "call_id": group["call_id"].iloc[0],
             "call_name": group["call_name"].iloc[0],
             "flagship_title": group["flagship_title"].iloc[0],
-            "source_file": group["source_file"].iloc[0],
+            "proposal_title": group["proposal_title"].iloc[0] if "proposal_title" in group else group["flagship_title"].iloc[0],
+            "source_file": group["source_file"].iloc[0] if "source_file" in group else "",
             "n_applicants": people,
             "n_institutions": len(institutions),
             "institutions": "; ".join(sorted(institutions)),
@@ -138,10 +150,11 @@ def calculate_flagship_metrics(applicants):
 
     return pd.DataFrame(rows).sort_values("n_applicants", ascending=False)
 
+
 def calculate_institution_collaboration(applicants):
     rows = []
 
-    for flagship_id, group in applicants.groupby("flagship_id"):
+    for proposal_key, group in applicants.groupby("proposal_key"):
         people = group[["person_id", "institution_simplified"]].drop_duplicates()
 
         for (_, row_a), (_, row_b) in combinations(people.iterrows(), 2):
@@ -156,7 +169,9 @@ def calculate_institution_collaboration(applicants):
             rows.append({
                 "institution_a": pair[0],
                 "institution_b": pair[1],
-                "flagship_id": flagship_id,
+                "proposal_key": proposal_key,
+                "flagship_id": group["flagship_id"].iloc[0],
+                "call_id": group["call_id"].iloc[0],
                 "weight": 1,
             })
 
@@ -169,8 +184,8 @@ def calculate_institution_collaboration(applicants):
         df.groupby(["institution_a", "institution_b"], as_index=False)
         .agg(
             weight=("weight", "sum"),
-            n_flagships=("flagship_id", lambda x: len(set(x))),
-            flagships=("flagship_id", lambda x: "; ".join(sorted(set(map(str, x))))),
+            n_flagships=("proposal_key", lambda x: len(set(x))),
+            flagships=("proposal_key", lambda x: "; ".join(sorted(set(map(str, x))))),
         )
         .sort_values("weight", ascending=False)
     )
