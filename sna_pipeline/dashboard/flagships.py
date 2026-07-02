@@ -22,6 +22,7 @@ def make_flagship_record(group_id, title, member_ids, applicants, person_metrics
     proposal_ids = sorted(set(group["proposal_id"].dropna().map(clean_text)) - {""}) if "proposal_id" in group else []
     call_ids = sorted(set(group["call_id"].dropna().map(clean_text)) - {""})
     call_names = sorted(set(group["call_name"].dropna().map(clean_text)) - {""})
+    dashboard_member_ids = sorted(set(proposal_keys) | set(member_ids))
     top = (
         person_metrics[person_metrics["person_id"].isin(people)]
         .sort_values(["betweenness_centrality", "weighted_degree", "degree"], ascending=False)
@@ -31,7 +32,7 @@ def make_flagship_record(group_id, title, member_ids, applicants, person_metrics
     return {
         "id": group_id,
         "title": title,
-        "member_ids": proposal_keys or list(member_ids),
+        "member_ids": dashboard_member_ids,
         "legacy_member_ids": list(member_ids),
         "proposal_key": "; ".join(proposal_keys),
         "proposal_id": "; ".join(proposal_ids),
@@ -91,14 +92,16 @@ def build_flagship_records(applicants, person_metrics, flagship_metrics):
     flagships = []
     for _, row in flagship_metrics.sort_values("proposal_key").iterrows():
         proposal_key = row["proposal_key"]
+        legacy_id = row["flagship_id"]
+        member_ids = sorted(set([proposal_key, legacy_id]))
         flagships.append({
             "id": proposal_key,
             "title": row["flagship_title"],
-            "member_ids": [proposal_key],
-            "legacy_member_ids": [row["flagship_id"]],
+            "member_ids": member_ids,
+            "legacy_member_ids": [legacy_id],
             "proposal_key": proposal_key,
-            "proposal_id": row.get("proposal_id", row["flagship_id"]),
-            "flagship_id": row["flagship_id"],
+            "proposal_id": row.get("proposal_id", legacy_id),
+            "flagship_id": legacy_id,
             "call_id": row.get("call_id", ""),
             "call_name": row.get("call_name", ""),
             "n_applicants": int(row["n_applicants"]),
