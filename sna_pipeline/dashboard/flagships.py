@@ -4,11 +4,22 @@ from ..config import SELECTED_FLAGSHIP_GROUPS
 from ..text_utils import clean_text, safe_float, split_semicolon_values
 
 
+def membership_mask(applicants, member_ids):
+    members = set(member_ids)
+    mask = applicants["flagship_id"].isin(members)
+    if "proposal_id" in applicants:
+        mask = mask | applicants["proposal_id"].isin(members)
+    if "proposal_key" in applicants:
+        mask = mask | applicants["proposal_key"].isin(members)
+    return mask
+
+
 def make_flagship_record(group_id, title, member_ids, applicants, person_metrics):
-    group = applicants[applicants["flagship_id"].isin(member_ids)]
+    group = applicants[membership_mask(applicants, member_ids)]
     people = set(group["person_id"])
     institutions = sorted(set(group["institution_simplified"].dropna().map(clean_text)) - {""})
-    proposal_ids = sorted(set(group["proposal_id"].dropna().map(clean_text)) - {""})
+    proposal_keys = sorted(set(group["proposal_key"].dropna().map(clean_text)) - {""}) if "proposal_key" in group else []
+    proposal_ids = sorted(set(group["proposal_id"].dropna().map(clean_text)) - {""}) if "proposal_id" in group else []
     call_ids = sorted(set(group["call_id"].dropna().map(clean_text)) - {""})
     call_names = sorted(set(group["call_name"].dropna().map(clean_text)) - {""})
     top = (
@@ -20,7 +31,9 @@ def make_flagship_record(group_id, title, member_ids, applicants, person_metrics
     return {
         "id": group_id,
         "title": title,
-        "member_ids": member_ids,
+        "member_ids": proposal_keys or list(member_ids),
+        "legacy_member_ids": list(member_ids),
+        "proposal_key": "; ".join(proposal_keys),
         "proposal_id": "; ".join(proposal_ids),
         "call_id": "; ".join(call_ids),
         "call_name": "; ".join(call_names),
@@ -56,15 +69,15 @@ def build_flagship_links(flagship_people):
 
 
 def build_flagship_records(applicants, person_metrics, flagship_metrics):
-    top_by_flagship = {}
-    for flagship_id, group in applicants.groupby("flagship_id"):
+    top_by_proposal = {}
+    for proposal_key, group in applicants.groupby("proposal_key"):
         people = set(group["person_id"])
         top = (
             person_metrics[person_metrics["person_id"].isin(people)]
             .sort_values(["betweenness_centrality", "weighted_degree", "degree"], ascending=False)
             .head(5)
         )
-        top_by_flagship[flagship_id] = [
+        top_by_proposal[proposal_key] = [
             {
                 "id": row["person_id"],
                 "name": row["person_name"],
@@ -76,18 +89,22 @@ def build_flagship_records(applicants, person_metrics, flagship_metrics):
         ]
 
     flagships = []
-    for _, row in flagship_metrics.sort_values("flagship_id").iterrows():
+    for _, row in flagship_metrics.sort_values("proposal_key").iterrows():
+        proposal_key = row["proposal_key"]
         flagships.append({
-            "id": row["flagship_id"],
+            "id": proposal_key,
             "title": row["flagship_title"],
-            "member_ids": [row["flagship_id"]],
+            "member_ids": [proposal_key],
+            "legacy_member_ids": [row["flagship_id"]],
+            "proposal_key": proposal_key,
             "proposal_id": row.get("proposal_id", row["flagship_id"]),
+            "flagship_id": row["flagship_id"],
             "call_id": row.get("call_id", ""),
             "call_name": row.get("call_name", ""),
             "n_applicants": int(row["n_applicants"]),
             "n_institutions": int(row["n_institutions"]),
             "institutions": split_semicolon_values(row["institutions"]),
-            "top_connectors": top_by_flagship.get(row["flagship_id"], []),
+            "top_connectors": top_by_proposal.get(proposal_key, []),
         })
 
     selected_flagship_groups = [
@@ -102,14 +119,15 @@ def build_flagship_records(applicants, person_metrics, flagship_metrics):
     ]
 
     flagship_people = {
-        flagship_id: set(group["person_id"])
-        for flagship_id, group in applicants.groupby("flagship_id")
+        proposal_key: set(group["person_id"])
+        for proposal_key, group in applicants.groupby("proposal_key")
     }
     selected_flagship_people = {
         selected["id"]: set(
-            applicants[applicants["flagship_id"].isin(selected["member_ids"])]["person_id"]
+            applicants[applicants["proposal_key"].isin(selected["member_ids"])]
+            ["person_id"]
         )
-        for selected in SELECTED_FLAGSHIP_GROUPS
+        for selected in selected_flagship_groups
     }
 
     return {
