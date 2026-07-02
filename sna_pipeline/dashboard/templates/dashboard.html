@@ -22,9 +22,8 @@ __DASHBOARD_CSS__
         <div class="subtle">Standalone netwerkverkenner met gefilterde views</div>
         <div class="tabs" role="tablist">
           <button class="tab active" data-view="flagships">Flagships</button>
-          <button class="tab" data-view="person">Persoon</button>
-          <button class="tab" data-view="connectors">Connectors</button>
           <button class="tab" data-view="convergence">Convergence</button>
+          <button class="tab" data-view="campus">Campus</button>
           <button class="tab" data-view="partners">Partners</button>
         </div>
         <label class="toggle-row" for="selectedOnlyToggle">
@@ -51,6 +50,18 @@ __DASHBOARD_CSS__
           <label for="departmentFilter">Afdeling</label>
           <select id="departmentFilter"></select>
         </div>
+        <div class="field">
+          <label for="campusSourceTypeFilter">Campus bronsoort</label>
+          <select id="campusSourceTypeFilter"></select>
+        </div>
+        <div class="field">
+          <label for="campusClusterFilter">Thematic cluster</label>
+          <select id="campusClusterFilter"></select>
+        </div>
+        <label class="toggle-row" for="showCampusClustersToggle">
+          <input id="showCampusClustersToggle" type="checkbox" checked>
+          Toon campusclusters
+        </label>
         <div class="field">
           <label for="partnerCategoryFilter">Partner categorie</label>
           <select id="partnerCategoryFilter"></select>
@@ -102,6 +113,7 @@ __DASHBOARD_CSS__
           <div id="viewSubtitle" class="subtle">Klik op een flagship om deelnemers en relaties te verkennen.</div>
         </div>
         <div class="row" style="flex: 0 0 auto;">
+          <button id="backOneStep" class="btn" type="button" disabled>Terug</button>
           <button id="fitNetwork" class="btn">Fit</button>
         </div>
       </div>
@@ -119,6 +131,22 @@ __DASHBOARD_CSS__
             <div class="subtle">Simpson score</div>
           </div>
           <div id="convergenceRanking"></div>
+        </section>
+      </div>
+      <div id="campusPanel" class="convergence-panel" hidden>
+        <section class="convergence-card">
+          <div class="convergence-heading">
+            <h3>Campus cluster overview</h3>
+            <div class="subtle">Selected Flagships en Sustainable Health</div>
+          </div>
+          <div id="campusClusterOverview"></div>
+        </section>
+        <section class="convergence-card">
+          <div class="convergence-heading">
+            <h3>Project/programme overview</h3>
+            <div class="subtle">CSV mapping als bron</div>
+          </div>
+          <div id="campusProjectOverview"></div>
         </section>
       </div>
       <div id="network"></div>

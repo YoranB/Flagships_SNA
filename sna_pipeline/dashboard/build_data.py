@@ -1,4 +1,5 @@
 from ..config import INSTITUTION_COLORS
+from .campus import build_campus_dashboard_data
 from .convergence import build_convergence_overview
 from .flagships import build_flagship_records
 from .partners import build_partner_dashboard_data
@@ -34,6 +35,7 @@ def build_dashboard_data(G, applicants, person_metrics, flagship_metrics, partne
         flagship_data["selected_flagship_links"],
     )
     partner_data = build_partner_dashboard_data(partners, applicants, flagship_metrics)
+    campus_data = build_campus_dashboard_data(applicants, flagship_data, partner_data)
 
     return {
         "persons": persons,
@@ -47,5 +49,6 @@ def build_dashboard_data(G, applicants, person_metrics, flagship_metrics, partne
         "quality": quality,
         "institution_colors": INSTITUTION_COLORS,
         "department_groups": department_groups,
+        "campus": campus_data,
         **partner_data,
     }

@@ -4,7 +4,12 @@ from tempfile import TemporaryDirectory
 
 import pandas as pd
 
-from sna_pipeline.config import SELECTED_FLAGSHIP_GROUPS
+from sna_pipeline.config import CAMPUS_CLUSTER_MAPPING, SELECTED_FLAGSHIP_GROUPS
+from sna_pipeline.dashboard.campus import (
+    CLUSTER_MAPPING_COLUMNS,
+    build_campus_dashboard_data,
+    read_csv_mapping,
+)
 from sna_pipeline.dashboard.persons import build_person_records_and_edges
 from sna_pipeline.data.load import (
     DEFAULT_CALL_ID,
@@ -202,11 +207,16 @@ class MultiCallFoundationTest(unittest.TestCase):
         org_edges = build_manual_org_edges(manual)
         with_ids = add_person_ids(manual)
 
-        self.assertEqual(len(manual), 11)
-        self.assertEqual(len(person_edges), 16)
-        self.assertEqual(len(org_edges), 11)
-        self.assertEqual(set(manual["role"]), {"Lead"})
+        self.assertEqual(len(manual), 22)
+        self.assertEqual(len(person_edges), 71)
+        self.assertEqual(len(org_edges), 22)
+        self.assertEqual(set(manual["role"]), {"Lead", "Participant"})
+        self.assertEqual(len(manual[manual["role"] == "Participant"]), 11)
         self.assertEqual(with_ids[with_ids["email"] == "b.cornelissen@erasmusmc.nl"]["person_id"].nunique(), 1)
+        self.assertEqual(with_ids[with_ids["email"] == "belsteen@tudelft.nl"]["person_id"].iloc[0], "belsteen@tudelft.nl")
+        tamara_id = with_ids[with_ids["person_name_clean"] == "Tamara Hoveling"]["person_id"].iloc[0]
+        self.assertIn("missing-email|", tamara_id)
+        self.assertIn("shp-zero-emission-endoscopy", tamara_id)
 
     def test_sustainable_health_selected_group_matches_proposal_keys(self):
         selected = next(
@@ -223,6 +233,55 @@ class MultiCallFoundationTest(unittest.TestCase):
                 "sustainable-health-programs::shp-zero-emission-endoscopy",
             ],
         )
+
+    def test_campus_cluster_mapping_has_unique_projects(self):
+        mapping = read_csv_mapping(CAMPUS_CLUSTER_MAPPING, CLUSTER_MAPPING_COLUMNS)
+
+        self.assertEqual(len(mapping), 13)
+        self.assertEqual(mapping["project_id"].nunique(), 13)
+        self.assertEqual(set(mapping["source_type"]), {"Flagship", "Sustainable Health"})
+        self.assertIn("flagship_smart_or_2030", set(mapping["project_id"]))
+        self.assertIn("sh_smart_or_2030", set(mapping["project_id"]))
+
+    def test_campus_keeps_smart_or_flagship_and_sustainable_health_separate(self):
+        applicants = pd.DataFrame({
+            "person_id": ["flagship-person", "sustainable-person"],
+            "flagship_id": ["2022019", "shp-smart-or2030"],
+            "proposal_id": ["2022019", "shp-smart-or2030"],
+            "proposal_key": ["flagship::2022019", "sustainable-health-programs::shp-smart-or2030"],
+        })
+        flagship_data = {
+            "flagships": [
+                {
+                    "id": "sustainable-health-programs::shp-smart-or2030",
+                    "member_ids": ["sustainable-health-programs::shp-smart-or2030", "shp-smart-or2030"],
+                    "n_institutions": 1,
+                    "institutions": ["Erasmus MC"],
+                },
+            ],
+            "selected_flagship_groups": [
+                {
+                    "id": "selected:smart-or2030",
+                    "member_ids": ["2022019", "flagship::2022019"],
+                    "n_institutions": 1,
+                    "institutions": ["Erasmus MC"],
+                },
+            ],
+        }
+        campus = build_campus_dashboard_data(
+            applicants,
+            flagship_data,
+            {
+                "partner_flagship_links": [],
+            },
+        )
+        projects = {project["project_id"]: project for project in campus["projects"]}
+
+        self.assertEqual(projects["flagship_smart_or_2030"]["source_type"], "Flagship")
+        self.assertEqual(projects["sh_smart_or_2030"]["source_type"], "Sustainable Health")
+        self.assertEqual(projects["flagship_smart_or_2030"]["n_people"], 1)
+        self.assertEqual(projects["sh_smart_or_2030"]["n_people"], 1)
+        self.assertEqual(len(campus["project_cluster_edges"]), 13)
 
 
 if __name__ == "__main__":

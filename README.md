@@ -60,6 +60,9 @@ The expertise enrichment command writes:
 Manual program data can be added through `input_manual/sustainable_health_programs.csv`.
 The cleaning step appends those rows to the cleaned applicant dataset and the SNA step derives the corresponding person-person and person-organisation edges from the same rows.
 
+HealthTech Campus thematic mapping is editable in `Data/campus_project_cluster_mapping.csv`.
+Optional project-partner additions can be added in `Data/campus_project_partner_mapping.csv`; existing flagship partner records are still merged where they match selected campus projects.
+
 ## Dashboard
 
 Open `output_sna/person_network_interactive.html` in a browser after running the pipeline. The dashboard is standalone: required local JavaScript and CSS libraries are embedded into the generated HTML.

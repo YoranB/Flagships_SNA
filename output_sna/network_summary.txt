@@ -1,11 +1,11 @@
 SOCIAL NETWORK ANALYSIS SUMMARY
 ==================================================
 
-Nodes, people: 720
-Edges, co-applicant relations: 14970
-Network density: 0.0578
+Nodes, people: 723
+Edges, co-applicant relations: 14997
+Network density: 0.0575
 Connected components: 1
-Largest component size: 720
+Largest component size: 723
 Flagships: 39
 
 Top 10 by degree
@@ -23,35 +23,35 @@ Hester Lingsma | Erasmus MC | degree=116 | flagships=4
 
 Top 10 by betweenness centrality
 --------------------------------------------------
-Kees Ahaus | Erasmus University Rotterdam | betweenness=0.0839 | flagships=7
-Joost Gribnau | Erasmus MC | betweenness=0.0809 | flagships=6
-Pieter Jan Stappers | TU Delft | betweenness=0.0559 | flagships=3
-Marleen de Mul | Erasmus University Rotterdam | betweenness=0.0438 | flagships=5
-Maartje Schermer | Erasmus MC | betweenness=0.0399 | flagships=4
-Ken Redekop | Erasmus University Rotterdam | betweenness=0.0360 | flagships=6
-Pauline Jansen | Erasmus MC | betweenness=0.0314 | flagships=2
-Pieter van Baal | Erasmus University Rotterdam | betweenness=0.0279 | flagships=3
-Carin Uyl – de Groot | Erasmus University Rotterdam | betweenness=0.0278 | flagships=5
-Rik Wehrens | Erasmus University Rotterdam | betweenness=0.0270 | flagships=3
+Kees Ahaus | Erasmus University Rotterdam | betweenness=0.0848 | flagships=7
+Joost Gribnau | Erasmus MC | betweenness=0.0805 | flagships=6
+Pieter Jan Stappers | TU Delft | betweenness=0.0563 | flagships=3
+Marleen de Mul | Erasmus University Rotterdam | betweenness=0.0444 | flagships=5
+Maartje Schermer | Erasmus MC | betweenness=0.0392 | flagships=4
+Ken Redekop | Erasmus University Rotterdam | betweenness=0.0358 | flagships=6
+Pauline Jansen | Erasmus MC | betweenness=0.0317 | flagships=2
+Carin Uyl – de Groot | Erasmus University Rotterdam | betweenness=0.0277 | flagships=5
+Pieter van Baal | Erasmus University Rotterdam | betweenness=0.0272 | flagships=3
+André Uitterlinden | Erasmus MC | betweenness=0.0270 | flagships=3
 
 Top 10 cross-flagship people
 --------------------------------------------------
 Kees Ahaus | Erasmus University Rotterdam | flagships=7 | degree=259
 Ken Redekop | Erasmus University Rotterdam | flagships=6 | degree=146
 Joost Gribnau | Erasmus MC | flagships=6 | degree=202
+Marcel Reinders | TU Delft | flagships=5 | degree=215
 Marleen de Mul | Erasmus University Rotterdam | flagships=5 | degree=104
 Massimo Mastrangeli | TU Delft | flagships=5 | degree=95
 Carin Uyl – de Groot | Erasmus University Rotterdam | flagships=5 | degree=154
-Marcel Reinders | TU Delft | flagships=5 | degree=215
+Eline Bunnik | Erasmus MC | flagships=4 | degree=80
+Hub Zwart | Erasmus University Rotterdam | flagships=4 | degree=101
 Gijsje Koender- ink | TU Delft | flagships=4 | degree=92
-Iris Wallenburg | Erasmus University Rotterdam | flagships=4 | degree=89
-Stefan Barakat | Erasmus MC | flagships=4 | degree=96
 
 Top institution collaborations
 --------------------------------------------------
-Erasmus MC <-> TU Delft | weight=3122 | flagships=38
-Erasmus MC <-> Erasmus University Rotterdam | weight=2546 | flagships=39
-Erasmus University Rotterdam <-> TU Delft | weight=1243 | flagships=38
+Erasmus MC <-> TU Delft | weight=3140 | flagships=38
+Erasmus MC <-> Erasmus University Rotterdam | weight=2558 | flagships=39
+Erasmus University Rotterdam <-> TU Delft | weight=1252 | flagships=38
 Erasmus MC <-> Multiple core institutions | weight=375 | flagships=13
 Multiple core institutions <-> TU Delft | weight=179 | flagships=13
 Erasmus MC <-> Microsoft | weight=123 | flagships=1

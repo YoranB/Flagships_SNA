@@ -62,6 +62,11 @@
       if (!partnerLinksByFlagship.has(link.flagship_id)) partnerLinksByFlagship.set(link.flagship_id, []);
       partnerLinksByFlagship.get(link.flagship_id).push(link);
     }
+    const campusData = DATA.campus || { clusters: [], projects: [], project_cluster_edges: [], cluster_overview: [], project_partner_links: [], partners_by_project: {}, filters: { source_types: [], clusters: [] }, quality: {} };
+    const campusProjectsById = new Map((campusData.projects || []).map(project => [project.project_id, project]));
+    const campusProjectsByNodeId = new Map((campusData.projects || []).map(project => [project.id, project]));
+    const campusClustersById = new Map((campusData.clusters || []).map(cluster => [cluster.id, cluster]));
+    const campusEdgesById = new Map((campusData.project_cluster_edges || []).map(edge => [edge.id, edge]));
     const convergenceOverview = DATA.convergence_overview || { institution_groups: [], flagships: [], ranking: [], network_nodes: [], network_edges: [] };
     const convergenceProfilesById = new Map(convergenceOverview.flagships.map(profile => [profile.id, profile]));
     const edgesByPerson = new Map();
@@ -70,6 +75,8 @@
     let networkFitTimer = null;
     let networkPhysicsTimer = null;
     let lastNetworkSignature = '';
+    let viewHistory = [];
+    let isRestoringHistory = false;
     const activeState = {
       view: 'flagships',
       selectedOnly: false,
@@ -82,12 +89,98 @@
       keywordLabel: '',
       selectedPartnerCategory: '',
       selectedPartnerCollaboration: '',
+      selectedCampusSourceType: '',
+      selectedCampusCluster: '',
+      showCampusClusters: true,
       minWeight: 1,
       hopDepth: 1,
       edgeMode: 'backbone',
       currentNodes: [],
       currentEdges: [],
     };
+
+    function snapshotState() {
+      return {
+        view: activeState.view,
+        selectedOnly: Boolean(activeState.selectedOnly),
+        selectedFlagship: activeState.selectedFlagship || '',
+        selectedPerson: activeState.selectedPerson || '',
+        flagshipFocusPerson: activeState.flagshipFocusPerson || '',
+        selectedInstitution: activeState.selectedInstitution || '',
+        selectedDepartment: activeState.selectedDepartment || '',
+        keyword: activeState.keyword || '',
+        keywordLabel: activeState.keywordLabel || '',
+        selectedPartnerCategory: activeState.selectedPartnerCategory || '',
+        selectedPartnerCollaboration: activeState.selectedPartnerCollaboration || '',
+        selectedCampusSourceType: activeState.selectedCampusSourceType || '',
+        selectedCampusCluster: activeState.selectedCampusCluster || '',
+        showCampusClusters: Boolean(activeState.showCampusClusters),
+        minWeight: Number(activeState.minWeight || 1),
+        hopDepth: Number(activeState.hopDepth || 1),
+        edgeMode: activeState.edgeMode || 'backbone',
+      };
+    }
+
+    function snapshotKey(snapshot) {
+      return JSON.stringify(snapshot);
+    }
+
+    function updateBackButton() {
+      const button = document.getElementById('backOneStep');
+      if (!button) return;
+      button.disabled = viewHistory.length === 0;
+      button.title = viewHistory.length ? 'Ga een stap terug' : 'Geen vorige stap';
+    }
+
+    function pushHistory() {
+      if (isRestoringHistory) return;
+      const snapshot = snapshotState();
+      const last = viewHistory[viewHistory.length - 1];
+      if (last && snapshotKey(last) === snapshotKey(snapshot)) return;
+      viewHistory.push(snapshot);
+      if (viewHistory.length > 50) viewHistory = viewHistory.slice(-50);
+      updateBackButton();
+    }
+
+    function applySnapshotToControls(snapshot) {
+      document.getElementById('selectedOnlyToggle').checked = Boolean(snapshot.selectedOnly);
+      document.getElementById('flagshipSelect').value = snapshot.selectedFlagship || '';
+      document.getElementById('institutionFilter').value = snapshot.selectedInstitution || '';
+      document.getElementById('departmentFilter').value = snapshot.selectedDepartment || '';
+      document.getElementById('campusSourceTypeFilter').value = snapshot.selectedCampusSourceType || '';
+      document.getElementById('campusClusterFilter').value = snapshot.selectedCampusCluster || '';
+      document.getElementById('showCampusClustersToggle').checked = snapshot.showCampusClusters !== false;
+      document.getElementById('partnerCategoryFilter').value = snapshot.selectedPartnerCategory || '';
+      document.getElementById('partnerCollaborationFilter').value = snapshot.selectedPartnerCollaboration || '';
+      document.getElementById('minWeight').value = String(snapshot.minWeight || 1);
+      document.getElementById('hopDepth').value = String(snapshot.hopDepth || 1);
+      if (globalSearchControl) {
+        if (snapshot.selectedPerson) {
+          globalSearchControl.setValue(snapshot.selectedPerson, true);
+        } else {
+          globalSearchControl.clear(true);
+          if (snapshot.keywordLabel && typeof globalSearchControl.setTextboxValue === 'function') {
+            globalSearchControl.setTextboxValue(snapshot.keywordLabel);
+          }
+        }
+      }
+    }
+
+    function restoreState(snapshot) {
+      Object.assign(activeState, snapshot);
+      applySnapshotToControls(snapshot);
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.view === snapshot.view));
+      renderActiveView();
+    }
+
+    function goBackOneStep() {
+      if (!viewHistory.length) return;
+      const snapshot = viewHistory.pop();
+      isRestoringHistory = true;
+      restoreState(snapshot);
+      isRestoringHistory = false;
+      updateBackButton();
+    }
 
     for (const edge of DATA.edges) {
       if (!edgesByPerson.has(edge.source)) edgesByPerson.set(edge.source, []);
@@ -106,7 +199,20 @@
       'Publiek / Maatschappelijk': '#b45309',
       'Unknown': '#8a8f98',
     };
+    const campusSourceColors = {
+      'Flagship': '#155eef',
+      'Sustainable Health': '#0f766e',
+    };
+    const campusClusterColors = {
+      'Workforce & system transformation': '#b45309',
+      'AI-driven early detection, smart diagnostics & decision support': '#7c3aed',
+      'Care anywhere / hybrid care': '#0369a1',
+      'Precision medicine at scale & advanced therapies': '#be123c',
+      'Prevention & positive health': '#4d7c0f',
+    };
     const colorForPartnerCategory = (category) => partnerCategoryColors[category] || hashColor(category);
+    const colorForCampusSource = (sourceType) => campusSourceColors[sourceType] || hashColor(sourceType);
+    const colorForCampusCluster = (cluster) => campusClusterColors[cluster] || hashColor(cluster);
     function hashColor(value) {
       const text = String(value || 'Unknown');
       let hash = 0;
@@ -253,6 +359,7 @@
     }
 
     function openPersonNetwork(personId) {
+      pushHistory();
       activeState.selectedPerson = personId;
       activeState.keyword = '';
       activeState.keywordLabel = '';
@@ -293,6 +400,48 @@
         font: { size: 12 },
         group: category,
         kind: 'partner',
+      };
+    }
+
+    function campusProjectNode(project, showLabel = true) {
+      const color = colorForCampusSource(project.source_type);
+      return {
+        id: project.id,
+        label: showLabel ? project.project_name : '',
+        title: `<b>${escapeHtml(project.project_name)}</b><br>${escapeHtml(project.source_type)}<br>${escapeHtml(project.primary_cluster)}<br>${fmt.format(project.n_people || 0)} personen`,
+        value: Math.max(1, project.n_people || 1),
+        size: 18 + Math.min(28, Math.sqrt(Math.max(1, project.n_people || 1)) * 3),
+        shape: 'box',
+        margin: 10,
+        color: {
+          background: color,
+          border: '#ffffff',
+          highlight: { background: color, border: '#111827' },
+          hover: { background: color, border: '#111827' }
+        },
+        font: { size: 12, color: '#ffffff', strokeWidth: 0 },
+        group: project.source_type,
+        kind: 'campus-project',
+      };
+    }
+
+    function campusClusterNode(cluster) {
+      const color = colorForCampusCluster(cluster.name);
+      return {
+        id: cluster.id,
+        label: cluster.name,
+        title: `<b>${escapeHtml(cluster.name)}</b><br>${fmt.format(cluster.n_projects)} project/programme item(s)`,
+        value: Math.max(1, cluster.n_projects || 1),
+        size: 24 + Math.min(24, Math.sqrt(Math.max(1, cluster.n_projects || 1)) * 5),
+        color: {
+          background: color,
+          border: '#ffffff',
+          highlight: { background: color, border: '#111827' },
+          hover: { background: color, border: '#111827' }
+        },
+        font: { size: 13 },
+        group: 'Thematic cluster',
+        kind: 'campus-cluster',
       };
     }
 
@@ -345,6 +494,16 @@
         }
       }
       return rows;
+    }
+
+    function passCampusProjectFilters(project) {
+      const sourceOk = !activeState.selectedCampusSourceType || project.source_type === activeState.selectedCampusSourceType;
+      const clusterOk = !activeState.selectedCampusCluster || project.primary_cluster === activeState.selectedCampusCluster;
+      return sourceOk && clusterOk;
+    }
+
+    function campusPartnersForProject(project) {
+      return ((campusData.partners_by_project || {})[project.project_id]?.links || []);
     }
 
     function flagshipLabel(flagship) {
@@ -911,6 +1070,177 @@
       `;
     }
 
+    function renderCampusTables(projects) {
+      const projectIds = new Set(projects.map(project => project.project_id));
+      const clusterRows = (campusData.cluster_overview || [])
+        .map(row => {
+          const filteredProjects = projects.filter(project => project.cluster_id === row.cluster_id);
+          if (!filteredProjects.length) return '';
+          const flagships = filteredProjects.filter(project => project.source_type === 'Flagship').map(project => project.project_name);
+          const sustainable = filteredProjects.filter(project => project.source_type === 'Sustainable Health').map(project => project.project_name);
+          return `
+            <tr data-campus-cluster="${escapeHtml(row.cluster_id)}">
+              <td>${escapeHtml(row.cluster)}</td>
+              <td>${escapeHtml(flagships.join('; ') || '-')}</td>
+              <td>${escapeHtml(sustainable.join('; ') || '-')}</td>
+              <td>${fmt.format(filteredProjects.length)}</td>
+            </tr>
+          `;
+        })
+        .join('');
+      document.getElementById('campusClusterOverview').innerHTML = `
+        <table class="convergence-table">
+          <thead>
+            <tr>
+              <th>Thematic cluster</th>
+              <th>Flagships</th>
+              <th>Sustainable Health</th>
+              <th>Items</th>
+            </tr>
+          </thead>
+          <tbody>${clusterRows || '<tr><td colspan="4">Geen projecten binnen deze filters</td></tr>'}</tbody>
+        </table>
+      `;
+
+      const projectRows = projects
+        .sort((a, b) => a.source_type.localeCompare(b.source_type) || a.primary_cluster.localeCompare(b.primary_cluster) || a.project_name.localeCompare(b.project_name))
+        .map(project => {
+          const partners = campusPartnersForProject(project);
+          return `
+            <tr data-campus-project="${escapeHtml(project.project_id)}">
+              <td>${escapeHtml(project.project_name)}</td>
+              <td>${escapeHtml(project.source_type)}</td>
+              <td>${escapeHtml(project.primary_cluster)}</td>
+              <td>${fmt.format(partners.length ? new Set(partners.map(link => link.partner_name)).size : 0)}</td>
+              <td>${escapeHtml(project.evidence_text)}</td>
+            </tr>
+          `;
+        })
+        .join('');
+      document.getElementById('campusProjectOverview').innerHTML = `
+        <table class="convergence-table">
+          <thead>
+            <tr>
+              <th>Project/programme</th>
+              <th>Source type</th>
+              <th>Primary cluster</th>
+              <th>Partners</th>
+              <th>Evidence</th>
+            </tr>
+          </thead>
+          <tbody>${projectRows || '<tr><td colspan="5">Geen projecten binnen deze filters</td></tr>'}</tbody>
+        </table>
+      `;
+    }
+
+    function showCampusProjectDetails(projectOrId) {
+      const project = typeof projectOrId === 'string' ? campusProjectsById.get(projectOrId) || campusProjectsByNodeId.get(projectOrId) : projectOrId;
+      if (!project) return;
+      const partners = campusPartnersForProject(project);
+      const partnerRows = partners
+        .slice(0, 12)
+        .map(link => `
+          <div class="list-item">
+            <div class="list-item-title">${escapeHtml(link.partner_name)}</div>
+            <div class="subtle">${escapeHtml(link.partner_type || 'other/unknown')} · ${escapeHtml(link.evidence_text || link.notes || '-')}</div>
+          </div>
+        `).join('');
+      const dashboardLink = project.dashboard_id && flagshipsById.has(project.dashboard_id)
+        ? `<div class="list-item" data-flagship="${escapeHtml(project.dashboard_id)}"><div class="list-item-title">Open in SNA view</div><div class="subtle">${escapeHtml(project.dashboard_id)}</div></div>`
+        : '-';
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>${escapeHtml(project.project_name)}</h3>
+        <div class="kv"><span>Project id</span><span>${escapeHtml(project.project_id)}</span></div>
+        <div class="kv"><span>Source type</span><span>${escapeHtml(project.source_type)}</span></div>
+        <div class="kv"><span>Primary cluster</span><span>${escapeHtml(project.primary_cluster)}</span></div>
+        <div class="kv"><span>People</span><span>${fmt.format(project.n_people || 0)}</span></div>
+        <div class="kv"><span>Partners</span><span>${fmt.format(new Set(partners.map(link => link.partner_name)).size)}</span></div>
+        <div class="kv"><span>Evidence</span><span>${escapeHtml(project.evidence_text || '-')}</span></div>
+        <div class="kv"><span>Notes</span><span>${escapeHtml(project.notes || '-')}</span></div>
+        <div class="kv"><span>SNA link</span><span>${dashboardLink}</span></div>
+        <div class="kv"><span>Partner links</span><span>${partnerRows || '-'}</span></div>
+      `;
+    }
+
+    function showCampusClusterDetails(clusterOrId) {
+      const cluster = typeof clusterOrId === 'string' ? campusClustersById.get(clusterOrId) : clusterOrId;
+      if (!cluster) return;
+      const projects = (campusData.projects || []).filter(project => project.cluster_id === cluster.id && passCampusProjectFilters(project));
+      const rows = projects.map(project => `
+        <div class="list-item" data-campus-project="${escapeHtml(project.project_id)}">
+          <div class="list-item-title">${escapeHtml(project.project_name)}</div>
+          <div class="subtle">${escapeHtml(project.source_type)} · ${fmt.format(project.n_people || 0)} personen</div>
+        </div>
+      `).join('');
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>${escapeHtml(cluster.name)}</h3>
+        <div class="kv"><span>Items</span><span>${fmt.format(projects.length)}</span></div>
+        <div class="kv"><span>Flagships</span><span>${fmt.format(projects.filter(project => project.source_type === 'Flagship').length)}</span></div>
+        <div class="kv"><span>Sustainable Health</span><span>${fmt.format(projects.filter(project => project.source_type === 'Sustainable Health').length)}</span></div>
+        <div class="kv"><span>Projecten</span><span>${rows || '-'}</span></div>
+      `;
+    }
+
+    function showCampusEdgeDetails(edgeOrId) {
+      const edge = typeof edgeOrId === 'string' ? campusEdgesById.get(edgeOrId) : edgeOrId;
+      if (!edge) return;
+      const project = campusProjectsByNodeId.get(edge.source);
+      const cluster = campusClustersById.get(edge.target);
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>Project-to-cluster</h3>
+        <div class="kv"><span>Project</span><span>${escapeHtml(project?.project_name || edge.source)}</span></div>
+        <div class="kv"><span>Cluster</span><span>${escapeHtml(cluster?.name || edge.target)}</span></div>
+        <div class="kv"><span>Edge type</span><span>${escapeHtml(edge.edge_type || 'project_to_cluster')}</span></div>
+        <div class="kv"><span>Source type</span><span>${escapeHtml(edge.source_type || project?.source_type || '-')}</span></div>
+        <div class="kv"><span>Evidence</span><span>${escapeHtml(edge.evidence_text || project?.evidence_text || '-')}</span></div>
+      `;
+    }
+
+    function renderCampusOverview() {
+      document.getElementById('campusPanel').hidden = false;
+      const projects = (campusData.projects || []).filter(passCampusProjectFilters);
+      renderCampusTables(projects);
+
+      const projectIds = new Set(projects.map(project => project.id));
+      const clusterIds = new Set(projects.map(project => project.cluster_id));
+      const projectNodes = projects.map(project => campusProjectNode(project, true));
+      const clusterNodes = activeState.showCampusClusters
+        ? (campusData.clusters || []).filter(cluster => clusterIds.has(cluster.id)).map(campusClusterNode)
+        : [];
+      const edges = activeState.showCampusClusters
+        ? (campusData.project_cluster_edges || [])
+          .filter(edge => projectIds.has(edge.source) && clusterIds.has(edge.target))
+          .map(edge => ({
+            id: edge.id,
+            from: edge.source,
+            to: edge.target,
+            width: 2,
+            color: { color: '#98a2b3', highlight: '#155eef', hover: '#155eef' },
+            dashes: false,
+            title: `${escapeHtml(edge.source_type)}<br>${escapeHtml(edge.evidence_text)}`,
+            kind: 'campus-project-cluster-link',
+            raw: edge,
+          }))
+        : [];
+      const filters = [activeState.selectedCampusSourceType, activeState.selectedCampusCluster].filter(Boolean);
+      const suffix = filters.length ? ` Filter: ${filters.join(' · ')}.` : '';
+      setNetwork(
+        [...projectNodes, ...clusterNodes],
+        edges,
+        'HealthTech Campus ecosystem',
+        `${projectNodes.length} project/programme nodes, ${clusterNodes.length} thematic cluster nodes, ${edges.length} project-to-cluster links.${suffix}`
+      );
+      markActiveFlagship('');
+      const sourceCounts = countValues(projects.map(project => project.source_type)).map(([source, count]) => `${escapeHtml(source)}: ${fmt.format(count)}`).join('<br>');
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>Campus ecosystem</h3>
+        <div class="kv"><span>Projecten</span><span>${fmt.format(projects.length)}</span></div>
+        <div class="kv"><span>Clusters</span><span>${fmt.format(clusterIds.size)}</span></div>
+        <div class="kv"><span>Source types</span><span>${sourceCounts || '-'}</span></div>
+        <div class="kv"><span>Partner links</span><span>${fmt.format((campusData.project_partner_links || []).length)}</span></div>
+      `;
+    }
+
     function renderConvergenceOverview() {
       document.getElementById('convergencePanel').hidden = false;
       renderConvergenceBars();
@@ -1082,15 +1412,26 @@
       activeState.selectedDepartment = document.getElementById('departmentFilter').value;
       activeState.selectedPartnerCategory = document.getElementById('partnerCategoryFilter').value;
       activeState.selectedPartnerCollaboration = document.getElementById('partnerCollaborationFilter').value;
+      activeState.selectedCampusSourceType = document.getElementById('campusSourceTypeFilter').value;
+      activeState.selectedCampusCluster = document.getElementById('campusClusterFilter').value;
+      activeState.showCampusClusters = document.getElementById('showCampusClustersToggle').checked;
       activeState.selectedFlagship = document.getElementById('flagshipSelect').value;
       activeState.hopDepth = Number(document.getElementById('hopDepth').value || 1);
       activeState.edgeMode = 'backbone';
       updateFlagshipControls();
       renderFlagshipList();
-      document.getElementById('convergencePanel').hidden = activeState.view !== 'convergence';
+      document.getElementById('convergencePanel').hidden = true;
+      document.getElementById('campusPanel').hidden = true;
+      if (activeState.view === 'convergence') {
+        document.getElementById('convergencePanel').hidden = false;
+      } else if (activeState.view === 'campus') {
+        document.getElementById('campusPanel').hidden = false;
+      }
 
       if (activeState.view === 'convergence') {
         renderConvergenceOverview();
+      } else if (activeState.view === 'campus') {
+        renderCampusOverview();
       } else if (activeState.view === 'partners') {
         renderPartnerEcosystem();
       } else if (activeState.view === 'person' && activeState.selectedPerson) {
@@ -1298,6 +1639,7 @@
     function renderQualityPanel() {
       const quality = DATA.quality;
       const partnerQuality = DATA.partner_quality || {};
+      const campusQuality = campusData.quality || {};
       document.getElementById('qualityPanel').innerHTML = `
         <div><b>${fmt.format(quality.people)}</b> personen</div>
         <div><b>${fmt.format(quality.edges)}</b> co-applicant relaties totaal</div>
@@ -1307,6 +1649,7 @@
         <div><b>${fmt.format(quality.raw_department_values || 0)}</b> ruwe afdelingen → <b>${fmt.format(quality.department_groups || 0)}</b> groepen</div>
         <div><b>${fmt.format(partnerQuality.source_rows || 0)}</b> partnerrecords → <b>${fmt.format(partnerQuality.unique_partners || 0)}</b> unieke partners</div>
         <div><b>${fmt.format((partnerQuality.matched_flagship_ids || []).length)}</b> partner-flagships gematcht; <b>${fmt.format((partnerQuality.unmatched_flagship_ids || []).length)}</b> ongematcht</div>
+        <div><b>${fmt.format(campusQuality.valid_projects || 0)}</b> campusprojecten → <b>${fmt.format((campusData.clusters || []).length)}</b> clusters</div>
       `;
     }
 
@@ -1317,6 +1660,7 @@
     }
 
     function setView(view) {
+      if (view !== activeState.view) pushHistory();
       activeState.view = view;
       document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.view === view));
       if (view === 'flagships' && activeState.selectedPerson) {
@@ -1364,8 +1708,11 @@
           option: (data, escape) => `<div><strong>${escape(data.text)}</strong><div class="subtle">${escape(data.institution)} · ${escape(data.department_group || data.department || 'Unknown')} · ${escape(data.expertise_keywords || data.email || '')}</div></div>`,
         },
         onType: value => {
-          activeState.keywordLabel = value.trim();
-          activeState.keyword = activeState.keywordLabel.toLowerCase();
+          const nextLabel = value.trim();
+          const nextKeyword = nextLabel.toLowerCase();
+          if (nextKeyword !== activeState.keyword || activeState.selectedPerson) pushHistory();
+          activeState.keywordLabel = nextLabel;
+          activeState.keyword = nextKeyword;
           if (activeState.selectedPerson) activeState.selectedPerson = '';
           if (activeState.keyword) {
             markActiveViewTab('person');
@@ -1380,11 +1727,13 @@
             searchRenderTimer = null;
           }
           if (value && personsById.has(value)) {
+            pushHistory();
             activeState.keyword = '';
             activeState.keywordLabel = '';
             activeState.selectedPerson = value;
             setView('person');
           } else if (!value) {
+            if (activeState.selectedPerson || activeState.keyword) pushHistory();
             activeState.selectedPerson = '';
             activeState.keyword = '';
             activeState.keywordLabel = '';
@@ -1405,7 +1754,6 @@
       document.getElementById('departmentFilter').innerHTML =
         '<option value="">Alle afdelingen</option>' +
         departments.map(dept => `<option value="${escapeHtml(dept)}">${escapeHtml(dept)}</option>`).join('');
-      document.getElementById('departmentFilter').addEventListener('change', renderActiveView);
 
       const partnerFilters = DATA.partner_filters || { categories: [], collaboration_types: [] };
       document.getElementById('partnerCategoryFilter').innerHTML =
@@ -1415,14 +1763,31 @@
         '<option value="">Alle samenwerkingstypen</option>' +
         (partnerFilters.collaboration_types || []).map(type => `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`).join('');
 
+      const campusFilters = campusData.filters || { source_types: [], clusters: [] };
+      document.getElementById('campusSourceTypeFilter').innerHTML =
+        '<option value="">Alle bronsoorten</option>' +
+        (campusFilters.source_types || []).map(source => `<option value="${escapeHtml(source)}">${escapeHtml(source)}</option>`).join('');
+      document.getElementById('campusClusterFilter').innerHTML =
+        '<option value="">Alle thematic clusters</option>' +
+        (campusFilters.clusters || []).map(cluster => `<option value="${escapeHtml(cluster)}">${escapeHtml(cluster)}</option>`).join('');
+
       document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => setView(tab.dataset.view)));
-      document.getElementById('applyFilters').addEventListener('click', renderActiveView);
+      document.getElementById('applyFilters').addEventListener('click', () => {
+        pushHistory();
+        renderActiveView();
+      });
       document.getElementById('fitNetwork').addEventListener('click', () => network.fit({ animation: true }));
+      document.getElementById('backOneStep').addEventListener('click', goBackOneStep);
       document.getElementById('resetView').addEventListener('click', () => {
+        viewHistory = [];
+        updateBackButton();
         document.getElementById('selectedOnlyToggle').checked = false;
         document.getElementById('flagshipSelect').value = '';
         document.getElementById('institutionFilter').value = '';
         document.getElementById('departmentFilter').value = '';
+        document.getElementById('campusSourceTypeFilter').value = '';
+        document.getElementById('campusClusterFilter').value = '';
+        document.getElementById('showCampusClustersToggle').checked = true;
         document.getElementById('partnerCategoryFilter').value = '';
         document.getElementById('partnerCollaborationFilter').value = '';
         document.getElementById('minWeight').value = '1';
@@ -1434,9 +1799,16 @@
         activeState.flagshipFocusPerson = '';
         activeState.selectedPartnerCategory = '';
         activeState.selectedPartnerCollaboration = '';
+        activeState.selectedCampusSourceType = '';
+        activeState.selectedCampusCluster = '';
+        activeState.showCampusClusters = true;
+        isRestoringHistory = true;
         setView('flagships');
+        isRestoringHistory = false;
+        updateBackButton();
       });
       document.getElementById('flagshipSelect').addEventListener('change', event => {
+        pushHistory();
         activeState.selectedFlagship = event.target.value;
         activeState.flagshipFocusPerson = '';
         if (activeState.view === 'partners') {
@@ -1451,8 +1823,9 @@
         setView('flagships');
       });
       document.getElementById('selectedOnlyToggle').addEventListener('change', () => {
+        pushHistory();
         activeState.selectedOnly = document.getElementById('selectedOnlyToggle').checked;
-        if (activeState.view === 'convergence' || activeState.view === 'partners') {
+        if (activeState.view === 'convergence' || activeState.view === 'partners' || activeState.view === 'campus') {
           renderActiveView();
           return;
         }
@@ -1461,17 +1834,47 @@
         updateFlagshipControls();
         setView('flagships');
       });
-      document.getElementById('institutionFilter').addEventListener('change', renderActiveView);
+      document.getElementById('institutionFilter').addEventListener('change', () => {
+        pushHistory();
+        renderActiveView();
+      });
+      document.getElementById('departmentFilter').addEventListener('change', () => {
+        pushHistory();
+        renderActiveView();
+      });
       document.getElementById('partnerCategoryFilter').addEventListener('change', () => {
+        pushHistory();
         markActiveViewTab('partners');
         renderActiveView();
       });
       document.getElementById('partnerCollaborationFilter').addEventListener('change', () => {
+        pushHistory();
         markActiveViewTab('partners');
         renderActiveView();
       });
-      document.getElementById('minWeight').addEventListener('change', renderActiveView);
-      document.getElementById('hopDepth').addEventListener('change', renderActiveView);
+      document.getElementById('campusSourceTypeFilter').addEventListener('change', () => {
+        pushHistory();
+        markActiveViewTab('campus');
+        renderActiveView();
+      });
+      document.getElementById('campusClusterFilter').addEventListener('change', () => {
+        pushHistory();
+        markActiveViewTab('campus');
+        renderActiveView();
+      });
+      document.getElementById('showCampusClustersToggle').addEventListener('change', () => {
+        pushHistory();
+        markActiveViewTab('campus');
+        renderActiveView();
+      });
+      document.getElementById('minWeight').addEventListener('change', () => {
+        pushHistory();
+        renderActiveView();
+      });
+      document.getElementById('hopDepth').addEventListener('change', () => {
+        pushHistory();
+        renderActiveView();
+      });
       document.getElementById('exportExpertiseEdits').addEventListener('click', exportManualExpertiseEdits);
 
       document.addEventListener('click', event => {
@@ -1493,24 +1896,42 @@
         const convergenceItem = event.target.closest('[data-convergence-flagship]');
         if (convergenceItem) {
           const flagshipId = convergenceItem.dataset.convergenceFlagship;
+          pushHistory();
           setView('convergence');
           showConvergenceFlagshipDetails(flagshipId);
           return;
         }
+        const campusProjectItem = event.target.closest('[data-campus-project]');
+        if (campusProjectItem) {
+          pushHistory();
+          markActiveViewTab('campus');
+          showCampusProjectDetails(campusProjectItem.dataset.campusProject);
+          return;
+        }
+        const campusClusterItem = event.target.closest('[data-campus-cluster]');
+        if (campusClusterItem) {
+          pushHistory();
+          markActiveViewTab('campus');
+          showCampusClusterDetails(campusClusterItem.dataset.campusCluster);
+          return;
+        }
         const partnerLinkItem = event.target.closest('[data-partner-link]');
         if (partnerLinkItem) {
+          pushHistory();
           markActiveViewTab('partners');
           showPartnerEdgeDetails(partnerLinkItem.dataset.partnerLink);
           return;
         }
         const partnerItem = event.target.closest('[data-partner]');
         if (partnerItem) {
+          pushHistory();
           markActiveViewTab('partners');
           showPartnerDetails(partnerItem.dataset.partner);
           return;
         }
         const flagshipItem = event.target.closest('[data-flagship]');
         if (flagshipItem) {
+          pushHistory();
           document.getElementById('flagshipSelect').value = flagshipItem.dataset.flagship;
           activeState.selectedFlagship = flagshipItem.dataset.flagship;
           activeState.flagshipFocusPerson = '';
@@ -1524,6 +1945,7 @@
         }
         const personItem = event.target.closest('[data-person]');
         if (personItem) {
+          pushHistory();
           activeState.selectedPerson = personItem.dataset.person;
           activeState.keyword = '';
           activeState.keywordLabel = '';
@@ -1538,6 +1960,8 @@
         const selectedEdge = activeState.currentEdges.find(edge => edge.id === params.edges[0]);
         if (selectedEdge?.kind === 'convergence-flagship-link') {
           showConvergenceEdgeDetails(selectedEdge.raw);
+        } else if (selectedEdge?.kind === 'campus-project-cluster-link') {
+          showCampusEdgeDetails(selectedEdge.raw);
         } else if (selectedEdge?.kind === 'partner-flagship-link') {
           showPartnerEdgeDetails(selectedEdge.raw);
         }
@@ -1547,7 +1971,12 @@
       const id = params.nodes[0];
       if (activeState.view === 'partners' && partnersById.has(id)) {
         showPartnerDetails(id);
+      } else if (activeState.view === 'campus' && campusProjectsByNodeId.has(id)) {
+        showCampusProjectDetails(id);
+      } else if (activeState.view === 'campus' && campusClustersById.has(id)) {
+        showCampusClusterDetails(id);
       } else if (activeState.view === 'partners' && flagshipsById.has(id)) {
+        pushHistory();
         document.getElementById('flagshipSelect').value = id;
         activeState.selectedFlagship = id;
         renderPartnerEcosystem();
@@ -1555,6 +1984,7 @@
       } else if (activeState.view === 'convergence' && convergenceProfilesById.has(id)) {
         showConvergenceFlagshipDetails(id);
       } else if (flagshipsById.has(id)) {
+        pushHistory();
         document.getElementById('flagshipSelect').value = id;
         activeState.selectedFlagship = id;
         activeState.flagshipFocusPerson = '';
@@ -1564,6 +1994,7 @@
           openPersonNetwork(id);
           hidePersonTooltip();
         } else if (activeState.view === 'flagships' && activeState.selectedFlagship) {
+          pushHistory();
           activeState.flagshipFocusPerson = id;
           renderFlagship(activeState.selectedFlagship);
           showPersonDetails(personsById.get(id));
