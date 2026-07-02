@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 import pandas as pd
 
@@ -71,8 +71,12 @@ def project_node_id(project_id):
     return f"campus-project:{project_id}"
 
 
-def partner_node_id(project_id, partner_name):
-    return f"campus-partner:{project_id}:{normalize_for_id(partner_name)}"
+def partner_key(partner_name):
+    return normalize_for_id(partner_name)
+
+
+def partner_node_id(partner_name):
+    return f"campus-partner:{partner_key(partner_name)}"
 
 
 def read_csv_mapping(path, columns):
@@ -170,6 +174,52 @@ def manual_partner_links(projects_by_id):
     return links
 
 
+def build_partner_cluster_view(projects, partner_links_by_project):
+    rows = []
+    for project in projects:
+        for link in partner_links_by_project.get(project["project_id"], []):
+            partner_name = clean_text(link.get("partner_name", ""))
+            if not partner_name:
+                continue
+            rows.append({
+                "project_id": project["project_id"],
+                "project_name": project["project_name"],
+                "source_type": project["source_type"],
+                "primary_cluster": project["primary_cluster"],
+                "cluster_id": project["cluster_id"],
+                "partner_name": partner_name,
+                "partner_key": partner_key(partner_name),
+                "partner_node_id": partner_node_id(partner_name),
+                "partner_type": clean_text(link.get("partner_type", "")) or "other/unknown",
+                "evidence_text": clean_text(link.get("evidence_text", "")),
+                "notes": clean_text(link.get("notes", "")),
+                "source": clean_text(link.get("source", "")),
+                "source_link_id": clean_text(link.get("source_link_id", "")),
+            })
+    return rows
+
+
+def partner_summary(rows, top_n=5):
+    unique_partner_names = {}
+    for row in rows:
+        if row["partner_key"] not in unique_partner_names:
+            unique_partner_names[row["partner_key"]] = row["partner_name"]
+    type_counts = Counter(row["partner_type"] for row in rows if clean_text(row["partner_type"]))
+    partner_counts = Counter(row["partner_key"] for row in rows if clean_text(row["partner_key"]))
+    return {
+        "n_partners": int(len(rows)),
+        "n_unique_partners": int(len(unique_partner_names)),
+        "partner_type_counts": [
+            {"partner_type": partner_type, "count": int(count)}
+            for partner_type, count in sorted(type_counts.items(), key=lambda item: (-item[1], item[0].lower()))
+        ],
+        "top_partners": [
+            unique_partner_names[key]
+            for key, _ in sorted(partner_counts.items(), key=lambda item: (-item[1], unique_partner_names[item[0]].lower()))[:top_n]
+        ],
+    }
+
+
 def build_campus_dashboard_data(applicants, flagship_data, partner_data):
     mapping = read_csv_mapping(CAMPUS_CLUSTER_MAPPING, CLUSTER_MAPPING_COLUMNS)
     dashboard_items = dashboard_lookup(flagship_data)
@@ -212,6 +262,11 @@ def build_campus_dashboard_data(applicants, flagship_data, partner_data):
         if clean_text(link.get("partner_name", "")):
             partner_links_by_project[link["project_id"]].append(link)
 
+    partner_cluster_view = build_partner_cluster_view(projects, partner_links_by_project)
+    partner_cluster_rows_by_cluster = defaultdict(list)
+    for row in partner_cluster_view:
+        partner_cluster_rows_by_cluster[row["cluster_id"]].append(row)
+
     for project in projects:
         unique_partners = sorted({link["partner_name"] for link in partner_links_by_project[project["project_id"]] if link["partner_name"]})
         project["n_partners"] = len(unique_partners)
@@ -220,12 +275,14 @@ def build_campus_dashboard_data(applicants, flagship_data, partner_data):
     clusters = []
     for name in CAMPUS_CLUSTERS:
         cluster_projects = [project for project in projects if project["primary_cluster"] == name]
+        summary = partner_summary(partner_cluster_rows_by_cluster[cluster_id(name)])
         clusters.append({
             "id": cluster_id(name),
             "name": name,
             "n_projects": len(cluster_projects),
             "n_flagships": sum(1 for project in cluster_projects if project["source_type"] == "Flagship"),
             "n_sustainable_health": sum(1 for project in cluster_projects if project["source_type"] == "Sustainable Health"),
+            **summary,
         })
 
     project_cluster_edges = [
@@ -243,6 +300,7 @@ def build_campus_dashboard_data(applicants, flagship_data, partner_data):
     cluster_overview = []
     for cluster in clusters:
         cluster_projects = [project for project in projects if project["cluster_id"] == cluster["id"]]
+        summary = partner_summary(partner_cluster_rows_by_cluster[cluster["id"]])
         cluster_overview.append({
             "cluster": cluster["name"],
             "cluster_id": cluster["id"],
@@ -253,6 +311,7 @@ def build_campus_dashboard_data(applicants, flagship_data, partner_data):
                 if project["source_type"] == "Sustainable Health"
             ],
             "n_items": len(cluster_projects),
+            **summary,
         })
 
     return {
@@ -261,6 +320,7 @@ def build_campus_dashboard_data(applicants, flagship_data, partner_data):
         "project_cluster_edges": project_cluster_edges,
         "cluster_overview": cluster_overview,
         "project_partner_links": partner_links,
+        "partner_cluster_view": partner_cluster_view,
         "partners_by_project": {
             project_id: {
                 "project_id": project_id,
@@ -277,6 +337,8 @@ def build_campus_dashboard_data(applicants, flagship_data, partner_data):
             "mapping_rows": int(len(mapping)),
             "valid_projects": int(len(projects)),
             "partner_links": int(len(partner_links)),
+            "partner_cluster_rows": int(len(partner_cluster_view)),
+            "unique_partner_cluster_partners": int(len({row["partner_key"] for row in partner_cluster_view if row["partner_key"]})),
             "manual_partner_links": int(sum(1 for link in partner_links if link["source"] == "campus_project_partner_mapping")),
             "existing_partner_links": int(sum(1 for link in partner_links if link["source"] == "existing_flagship_partner_data")),
         },

@@ -62,11 +62,16 @@
       if (!partnerLinksByFlagship.has(link.flagship_id)) partnerLinksByFlagship.set(link.flagship_id, []);
       partnerLinksByFlagship.get(link.flagship_id).push(link);
     }
-    const campusData = DATA.campus || { clusters: [], projects: [], project_cluster_edges: [], cluster_overview: [], project_partner_links: [], partners_by_project: {}, filters: { source_types: [], clusters: [] }, quality: {} };
+    const campusData = DATA.campus || { clusters: [], projects: [], project_cluster_edges: [], cluster_overview: [], project_partner_links: [], partner_cluster_view: [], partners_by_project: {}, filters: { source_types: [], clusters: [] }, quality: {} };
     const campusProjectsById = new Map((campusData.projects || []).map(project => [project.project_id, project]));
     const campusProjectsByNodeId = new Map((campusData.projects || []).map(project => [project.id, project]));
     const campusClustersById = new Map((campusData.clusters || []).map(cluster => [cluster.id, cluster]));
     const campusEdgesById = new Map((campusData.project_cluster_edges || []).map(edge => [edge.id, edge]));
+    const campusPartnerRowsByNodeId = new Map();
+    for (const row of campusData.partner_cluster_view || []) {
+      if (!campusPartnerRowsByNodeId.has(row.partner_node_id)) campusPartnerRowsByNodeId.set(row.partner_node_id, []);
+      campusPartnerRowsByNodeId.get(row.partner_node_id).push(row);
+    }
     const convergenceOverview = DATA.convergence_overview || { institution_groups: [], flagships: [], ranking: [], network_nodes: [], network_edges: [] };
     const convergenceProfilesById = new Map(convergenceOverview.flagships.map(profile => [profile.id, profile]));
     const edgesByPerson = new Map();
@@ -92,6 +97,7 @@
       selectedCampusSourceType: '',
       selectedCampusCluster: '',
       showCampusClusters: true,
+      showCampusPartners: false,
       minWeight: 1,
       hopDepth: 1,
       edgeMode: 'backbone',
@@ -115,6 +121,7 @@
         selectedCampusSourceType: activeState.selectedCampusSourceType || '',
         selectedCampusCluster: activeState.selectedCampusCluster || '',
         showCampusClusters: Boolean(activeState.showCampusClusters),
+        showCampusPartners: Boolean(activeState.showCampusPartners),
         minWeight: Number(activeState.minWeight || 1),
         hopDepth: Number(activeState.hopDepth || 1),
         edgeMode: activeState.edgeMode || 'backbone',
@@ -150,6 +157,7 @@
       document.getElementById('campusSourceTypeFilter').value = snapshot.selectedCampusSourceType || '';
       document.getElementById('campusClusterFilter').value = snapshot.selectedCampusCluster || '';
       document.getElementById('showCampusClustersToggle').checked = snapshot.showCampusClusters !== false;
+      document.getElementById('showCampusPartnersToggle').checked = Boolean(snapshot.showCampusPartners);
       document.getElementById('partnerCategoryFilter').value = snapshot.selectedPartnerCategory || '';
       document.getElementById('partnerCollaborationFilter').value = snapshot.selectedPartnerCollaboration || '';
       document.getElementById('minWeight').value = String(snapshot.minWeight || 1);
@@ -445,6 +453,28 @@
       };
     }
 
+    function campusPartnerNode(row, rows, showLabel = false) {
+      const color = colorForPartnerCategory(row.partner_type || 'other/unknown');
+      return {
+        id: row.partner_node_id,
+        label: showLabel ? row.partner_name : '',
+        title: `<b>${escapeHtml(row.partner_name)}</b><br>${escapeHtml(row.partner_type || 'other/unknown')}<br>${fmt.format(rows.length)} campus project link(s)`,
+        value: Math.max(1, rows.length),
+        size: 11 + Math.min(18, Math.sqrt(Math.max(1, rows.length)) * 4),
+        color: {
+          background: color,
+          border: '#ffffff',
+          highlight: { background: color, border: '#111827' },
+          hover: { background: color, border: '#111827' }
+        },
+        font: { size: 11 },
+        group: row.partner_type || 'other/unknown',
+        kind: 'campus-partner',
+        partner_type: row.partner_type || 'other/unknown',
+        source: row.source || '',
+      };
+    }
+
     function edgeLabel(weight) {
       return weight > 1 ? String(weight) : '';
     }
@@ -504,6 +534,41 @@
 
     function campusPartnersForProject(project) {
       return ((campusData.partners_by_project || {})[project.project_id]?.links || []);
+    }
+
+    function campusPartnerRowsForProjects(projects) {
+      const projectIds = new Set(projects.map(project => project.project_id));
+      return (campusData.partner_cluster_view || []).filter(row => projectIds.has(row.project_id));
+    }
+
+    function campusPartnerTypeCounts(rows) {
+      return countValues(rows.map(row => row.partner_type || 'other/unknown'));
+    }
+
+    function campusUniquePartnerRows(rows) {
+      const seen = new Set();
+      const unique = [];
+      for (const row of rows) {
+        const key = row.partner_key || row.partner_node_id || row.partner_name;
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        unique.push(row);
+      }
+      return unique;
+    }
+
+    function campusTopPartnerRows(rows, limit = 8) {
+      const byPartner = new Map();
+      for (const row of rows) {
+        const key = row.partner_key || row.partner_node_id || row.partner_name;
+        if (!key) continue;
+        if (!byPartner.has(key)) byPartner.set(key, { row, count: 0 });
+        byPartner.get(key).count += 1;
+      }
+      return [...byPartner.values()]
+        .sort((a, b) => b.count - a.count || a.row.partner_name.localeCompare(b.row.partner_name))
+        .slice(0, limit)
+        .map(item => item.row);
     }
 
     function flagshipLabel(flagship) {
@@ -1076,6 +1141,7 @@
         .map(row => {
           const filteredProjects = projects.filter(project => project.cluster_id === row.cluster_id);
           if (!filteredProjects.length) return '';
+          const clusterPartnerRows = campusPartnerRowsForProjects(filteredProjects);
           const flagships = filteredProjects.filter(project => project.source_type === 'Flagship').map(project => project.project_name);
           const sustainable = filteredProjects.filter(project => project.source_type === 'Sustainable Health').map(project => project.project_name);
           return `
@@ -1084,6 +1150,7 @@
               <td>${escapeHtml(flagships.join('; ') || '-')}</td>
               <td>${escapeHtml(sustainable.join('; ') || '-')}</td>
               <td>${fmt.format(filteredProjects.length)}</td>
+              <td>${fmt.format(campusUniquePartnerRows(clusterPartnerRows).length)}</td>
             </tr>
           `;
         })
@@ -1096,9 +1163,10 @@
               <th>Flagships</th>
               <th>Sustainable Health</th>
               <th>Items</th>
+              <th>Partners</th>
             </tr>
           </thead>
-          <tbody>${clusterRows || '<tr><td colspan="4">Geen projecten binnen deze filters</td></tr>'}</tbody>
+          <tbody>${clusterRows || '<tr><td colspan="5">Geen projecten binnen deze filters</td></tr>'}</tbody>
         </table>
       `;
 
@@ -1131,6 +1199,36 @@
           <tbody>${projectRows || '<tr><td colspan="5">Geen projecten binnen deze filters</td></tr>'}</tbody>
         </table>
       `;
+
+      const partnerRows = (campusData.partner_cluster_view || [])
+        .filter(row => projectIds.has(row.project_id))
+        .sort((a, b) => a.partner_name.localeCompare(b.partner_name) || a.project_name.localeCompare(b.project_name))
+        .map(row => `
+          <tr data-campus-project="${escapeHtml(row.project_id)}">
+            <td>${escapeHtml(row.partner_name)}</td>
+            <td>${escapeHtml(row.partner_type || 'other/unknown')}</td>
+            <td>${escapeHtml(row.project_name)}</td>
+            <td>${escapeHtml(row.source_type)}</td>
+            <td>${escapeHtml(row.primary_cluster)}</td>
+            <td>${escapeHtml(row.source || '-')}</td>
+          </tr>
+        `)
+        .join('');
+      document.getElementById('campusPartnerOverview').innerHTML = `
+        <table class="convergence-table">
+          <thead>
+            <tr>
+              <th>Partner</th>
+              <th>Partner type</th>
+              <th>Project/programme</th>
+              <th>Source type</th>
+              <th>Thematic cluster</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>${partnerRows || '<tr><td colspan="6">Geen partnerlinks binnen deze filters</td></tr>'}</tbody>
+        </table>
+      `;
     }
 
     function showCampusProjectDetails(projectOrId) {
@@ -1142,7 +1240,7 @@
         .map(link => `
           <div class="list-item">
             <div class="list-item-title">${escapeHtml(link.partner_name)}</div>
-            <div class="subtle">${escapeHtml(link.partner_type || 'other/unknown')} · ${escapeHtml(link.evidence_text || link.notes || '-')}</div>
+            <div class="subtle">${escapeHtml(link.partner_type || 'other/unknown')} · ${escapeHtml(link.source || '-')} · ${escapeHtml(link.evidence_text || link.notes || '-')}</div>
           </div>
         `).join('');
       const dashboardLink = project.dashboard_id && flagshipsById.has(project.dashboard_id)
@@ -1166,10 +1264,22 @@
       const cluster = typeof clusterOrId === 'string' ? campusClustersById.get(clusterOrId) : clusterOrId;
       if (!cluster) return;
       const projects = (campusData.projects || []).filter(project => project.cluster_id === cluster.id && passCampusProjectFilters(project));
+      const partnerRows = campusPartnerRowsForProjects(projects);
+      const uniquePartners = campusUniquePartnerRows(partnerRows);
+      const partnerTypeRows = campusPartnerTypeCounts(partnerRows).map(([type, count]) => `
+        <span class="chip"><span class="swatch" style="background:${colorForPartnerCategory(type)}"></span>${escapeHtml(type)}: ${fmt.format(count)}</span>
+      `).join('');
+      const topPartnerRows = campusTopPartnerRows(partnerRows, 8)
+        .map(row => `
+          <div class="list-item" data-campus-partner="${escapeHtml(row.partner_node_id)}">
+            <div class="list-item-title">${escapeHtml(row.partner_name)}</div>
+            <div class="subtle">${escapeHtml(row.partner_type || 'other/unknown')}</div>
+          </div>
+        `).join('');
       const rows = projects.map(project => `
         <div class="list-item" data-campus-project="${escapeHtml(project.project_id)}">
           <div class="list-item-title">${escapeHtml(project.project_name)}</div>
-          <div class="subtle">${escapeHtml(project.source_type)} · ${fmt.format(project.n_people || 0)} personen</div>
+          <div class="subtle">${escapeHtml(project.source_type)} · ${fmt.format(project.n_partners || 0)} partners · ${fmt.format(project.n_people || 0)} personen</div>
         </div>
       `).join('');
       document.getElementById('selectionDetails').innerHTML = `
@@ -1177,7 +1287,31 @@
         <div class="kv"><span>Items</span><span>${fmt.format(projects.length)}</span></div>
         <div class="kv"><span>Flagships</span><span>${fmt.format(projects.filter(project => project.source_type === 'Flagship').length)}</span></div>
         <div class="kv"><span>Sustainable Health</span><span>${fmt.format(projects.filter(project => project.source_type === 'Sustainable Health').length)}</span></div>
+        <div class="kv"><span>Unique partners</span><span>${fmt.format(uniquePartners.length)}</span></div>
+        <div class="kv"><span>Partner types</span><span><div class="chips">${partnerTypeRows || '-'}</div></span></div>
+        <div class="kv"><span>Top partners</span><span>${topPartnerRows || '-'}</span></div>
         <div class="kv"><span>Projecten</span><span>${rows || '-'}</span></div>
+      `;
+    }
+
+    function showCampusPartnerDetails(partnerNodeId) {
+      const rows = campusPartnerRowsByNodeId.get(partnerNodeId) || [];
+      if (!rows.length) return;
+      const first = rows[0];
+      const projectRows = rows
+        .sort((a, b) => a.primary_cluster.localeCompare(b.primary_cluster) || a.project_name.localeCompare(b.project_name))
+        .map(row => `
+          <div class="list-item" data-campus-project="${escapeHtml(row.project_id)}">
+            <div class="list-item-title">${escapeHtml(row.project_name)}</div>
+            <div class="subtle">${escapeHtml(row.source_type)} · ${escapeHtml(row.primary_cluster)} · ${escapeHtml(row.source || '-')}</div>
+          </div>
+        `).join('');
+      const typeRows = campusPartnerTypeCounts(rows).map(([type, count]) => `${escapeHtml(type)}: ${fmt.format(count)}`).join('<br>');
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>${escapeHtml(first.partner_name)}</h3>
+        <div class="kv"><span>Partner type</span><span>${typeRows || escapeHtml(first.partner_type || 'other/unknown')}</span></div>
+        <div class="kv"><span>Project links</span><span>${fmt.format(rows.length)}</span></div>
+        <div class="kv"><span>Projects</span><span>${projectRows || '-'}</span></div>
       `;
     }
 
@@ -1196,6 +1330,21 @@
       `;
     }
 
+    function showCampusPartnerEdgeDetails(row) {
+      if (!row) return;
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>Project-to-partner</h3>
+        <div class="kv"><span>Project</span><span>${escapeHtml(row.project_name || row.project_id)}</span></div>
+        <div class="kv"><span>Partner</span><span>${escapeHtml(row.partner_name || '-')}</span></div>
+        <div class="kv"><span>Partner type</span><span>${escapeHtml(row.partner_type || 'other/unknown')}</span></div>
+        <div class="kv"><span>Cluster</span><span>${escapeHtml(row.primary_cluster || '-')}</span></div>
+        <div class="kv"><span>Edge type</span><span>project_to_partner</span></div>
+        <div class="kv"><span>Source type</span><span>${escapeHtml(row.source_type || '-')}</span></div>
+        <div class="kv"><span>Source</span><span>${escapeHtml(row.source || '-')}</span></div>
+        <div class="kv"><span>Evidence</span><span>${escapeHtml(row.evidence_text || row.notes || '-')}</span></div>
+      `;
+    }
+
     function renderCampusOverview() {
       document.getElementById('campusPanel').hidden = false;
       const projects = (campusData.projects || []).filter(passCampusProjectFilters);
@@ -1207,7 +1356,7 @@
       const clusterNodes = activeState.showCampusClusters
         ? (campusData.clusters || []).filter(cluster => clusterIds.has(cluster.id)).map(campusClusterNode)
         : [];
-      const edges = activeState.showCampusClusters
+      const projectClusterEdges = activeState.showCampusClusters
         ? (campusData.project_cluster_edges || [])
           .filter(edge => projectIds.has(edge.source) && clusterIds.has(edge.target))
           .map(edge => ({
@@ -1222,22 +1371,53 @@
             raw: edge,
           }))
         : [];
+      const visibleProjectIds = new Set(projects.map(project => project.project_id));
+      const visibleProjectById = new Map(projects.map(project => [project.project_id, project]));
+      const visiblePartnerRows = activeState.showCampusPartners
+        ? (campusData.partner_cluster_view || []).filter(row => visibleProjectIds.has(row.project_id))
+        : [];
+      const partnerRowsByNodeId = new Map();
+      for (const row of visiblePartnerRows) {
+        if (!partnerRowsByNodeId.has(row.partner_node_id)) partnerRowsByNodeId.set(row.partner_node_id, []);
+        partnerRowsByNodeId.get(row.partner_node_id).push(row);
+      }
+      const showPartnerLabels = Boolean(activeState.selectedCampusCluster);
+      const partnerNodes = [...partnerRowsByNodeId.values()].map(rows => campusPartnerNode(rows[0], rows, showPartnerLabels));
+      const partnerEdges = visiblePartnerRows.map((row, idx) => {
+        const project = visibleProjectById.get(row.project_id);
+        return {
+          id: `campus-project-partner:${row.project_id}:${row.partner_node_id}:${row.source_link_id || idx}`,
+          from: project?.id || `campus-project:${row.project_id}`,
+          to: row.partner_node_id,
+          width: 1.4,
+          color: { color: '#c7d7fe', highlight: '#155eef', hover: '#155eef' },
+          dashes: true,
+          title: `${escapeHtml(row.project_name)}<br>${escapeHtml(row.partner_type || 'other/unknown')}<br>${escapeHtml(row.evidence_text || row.notes || '-')}`,
+          kind: 'campus-project-partner-link',
+          edge_type: 'project_to_partner',
+          source_type: row.source_type,
+          raw: row,
+        };
+      });
+      const edges = [...projectClusterEdges, ...partnerEdges];
       const filters = [activeState.selectedCampusSourceType, activeState.selectedCampusCluster].filter(Boolean);
       const suffix = filters.length ? ` Filter: ${filters.join(' · ')}.` : '';
       setNetwork(
-        [...projectNodes, ...clusterNodes],
+        [...projectNodes, ...clusterNodes, ...partnerNodes],
         edges,
         'HealthTech Campus ecosystem',
-        `${projectNodes.length} project/programme nodes, ${clusterNodes.length} thematic cluster nodes, ${edges.length} project-to-cluster links.${suffix}`
+        `${projectNodes.length} project/programme nodes, ${clusterNodes.length} thematic cluster nodes, ${partnerNodes.length} partner nodes, ${projectClusterEdges.length} project-to-cluster links, ${partnerEdges.length} project-to-partner links.${suffix}`
       );
       markActiveFlagship('');
       const sourceCounts = countValues(projects.map(project => project.source_type)).map(([source, count]) => `${escapeHtml(source)}: ${fmt.format(count)}`).join('<br>');
+      const visibleUniquePartners = campusUniquePartnerRows(visiblePartnerRows);
       document.getElementById('selectionDetails').innerHTML = `
         <h3>Campus ecosystem</h3>
         <div class="kv"><span>Projecten</span><span>${fmt.format(projects.length)}</span></div>
         <div class="kv"><span>Clusters</span><span>${fmt.format(clusterIds.size)}</span></div>
         <div class="kv"><span>Source types</span><span>${sourceCounts || '-'}</span></div>
-        <div class="kv"><span>Partner links</span><span>${fmt.format((campusData.project_partner_links || []).length)}</span></div>
+        <div class="kv"><span>Visible partners</span><span>${fmt.format(visibleUniquePartners.length)}</span></div>
+        <div class="kv"><span>Visible partner links</span><span>${fmt.format(visiblePartnerRows.length)}</span></div>
       `;
     }
 
@@ -1415,6 +1595,7 @@
       activeState.selectedCampusSourceType = document.getElementById('campusSourceTypeFilter').value;
       activeState.selectedCampusCluster = document.getElementById('campusClusterFilter').value;
       activeState.showCampusClusters = document.getElementById('showCampusClustersToggle').checked;
+      activeState.showCampusPartners = document.getElementById('showCampusPartnersToggle').checked;
       activeState.selectedFlagship = document.getElementById('flagshipSelect').value;
       activeState.hopDepth = Number(document.getElementById('hopDepth').value || 1);
       activeState.edgeMode = 'backbone';
@@ -1650,6 +1831,7 @@
         <div><b>${fmt.format(partnerQuality.source_rows || 0)}</b> partnerrecords → <b>${fmt.format(partnerQuality.unique_partners || 0)}</b> unieke partners</div>
         <div><b>${fmt.format((partnerQuality.matched_flagship_ids || []).length)}</b> partner-flagships gematcht; <b>${fmt.format((partnerQuality.unmatched_flagship_ids || []).length)}</b> ongematcht</div>
         <div><b>${fmt.format(campusQuality.valid_projects || 0)}</b> campusprojecten → <b>${fmt.format((campusData.clusters || []).length)}</b> clusters</div>
+        <div><b>${fmt.format(campusQuality.unique_partner_cluster_partners || 0)}</b> unieke campuspartners via <b>${fmt.format(campusQuality.partner_cluster_rows || 0)}</b> project-partner-cluster rijen</div>
       `;
     }
 
@@ -1788,6 +1970,7 @@
         document.getElementById('campusSourceTypeFilter').value = '';
         document.getElementById('campusClusterFilter').value = '';
         document.getElementById('showCampusClustersToggle').checked = true;
+        document.getElementById('showCampusPartnersToggle').checked = false;
         document.getElementById('partnerCategoryFilter').value = '';
         document.getElementById('partnerCollaborationFilter').value = '';
         document.getElementById('minWeight').value = '1';
@@ -1802,6 +1985,7 @@
         activeState.selectedCampusSourceType = '';
         activeState.selectedCampusCluster = '';
         activeState.showCampusClusters = true;
+        activeState.showCampusPartners = false;
         isRestoringHistory = true;
         setView('flagships');
         isRestoringHistory = false;
@@ -1867,6 +2051,11 @@
         markActiveViewTab('campus');
         renderActiveView();
       });
+      document.getElementById('showCampusPartnersToggle').addEventListener('change', () => {
+        pushHistory();
+        markActiveViewTab('campus');
+        renderActiveView();
+      });
       document.getElementById('minWeight').addEventListener('change', () => {
         pushHistory();
         renderActiveView();
@@ -1913,6 +2102,13 @@
           pushHistory();
           markActiveViewTab('campus');
           showCampusClusterDetails(campusClusterItem.dataset.campusCluster);
+          return;
+        }
+        const campusPartnerItem = event.target.closest('[data-campus-partner]');
+        if (campusPartnerItem) {
+          pushHistory();
+          markActiveViewTab('campus');
+          showCampusPartnerDetails(campusPartnerItem.dataset.campusPartner);
           return;
         }
         const partnerLinkItem = event.target.closest('[data-partner-link]');
@@ -1962,6 +2158,8 @@
           showConvergenceEdgeDetails(selectedEdge.raw);
         } else if (selectedEdge?.kind === 'campus-project-cluster-link') {
           showCampusEdgeDetails(selectedEdge.raw);
+        } else if (selectedEdge?.kind === 'campus-project-partner-link') {
+          showCampusPartnerEdgeDetails(selectedEdge.raw);
         } else if (selectedEdge?.kind === 'partner-flagship-link') {
           showPartnerEdgeDetails(selectedEdge.raw);
         }
@@ -1975,6 +2173,8 @@
         showCampusProjectDetails(id);
       } else if (activeState.view === 'campus' && campusClustersById.has(id)) {
         showCampusClusterDetails(id);
+      } else if (activeState.view === 'campus' && campusPartnerRowsByNodeId.has(id)) {
+        showCampusPartnerDetails(id);
       } else if (activeState.view === 'partners' && flagshipsById.has(id)) {
         pushHistory();
         document.getElementById('flagshipSelect').value = id;

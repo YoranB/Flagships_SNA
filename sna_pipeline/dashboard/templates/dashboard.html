@@ -62,6 +62,10 @@ __DASHBOARD_CSS__
           <input id="showCampusClustersToggle" type="checkbox" checked>
           Toon campusclusters
         </label>
+        <label class="toggle-row" for="showCampusPartnersToggle">
+          <input id="showCampusPartnersToggle" type="checkbox">
+          Toon partners in Campus view
+        </label>
         <div class="field">
           <label for="partnerCategoryFilter">Partner categorie</label>
           <select id="partnerCategoryFilter"></select>
@@ -147,6 +151,13 @@ __DASHBOARD_CSS__
             <div class="subtle">CSV mapping als bron</div>
           </div>
           <div id="campusProjectOverview"></div>
+        </section>
+        <section class="convergence-card">
+          <div class="convergence-heading">
+            <h3>Campus partner overview</h3>
+            <div class="subtle">Partners gekoppeld aan thematic clusters via projecten/programmas</div>
+          </div>
+          <div id="campusPartnerOverview"></div>
         </section>
       </div>
       <div id="network"></div>
