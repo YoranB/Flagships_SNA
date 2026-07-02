@@ -9,15 +9,17 @@ from .config import (
     OUT_SUMMARY,
     OUT_TOP_CONNECTORS,
 )
-from .data_loading import load_data
-from .graph_builder import build_person_graph
-from .html_renderer import create_interactive_network
-from .metrics import calculate_flagship_metrics, calculate_institution_collaboration, calculate_person_metrics
-from .outputs import save_excel_outputs, write_summary
+from .dashboard.render import create_interactive_network
+from .data.load import load_data
+from .network.graph_builder import build_person_graph
+from .network.metrics import calculate_flagship_metrics, calculate_institution_collaboration, calculate_person_metrics
+from .partners import load_partners
+from .reporting.outputs import save_excel_outputs, write_summary
 
 
 def main():
     applicants, person_edges, org_edges = load_data()
+    partners = load_partners()
 
     G = build_person_graph(applicants, person_edges)
 
@@ -37,7 +39,7 @@ def main():
 
     save_excel_outputs(person_metrics, flagship_metrics, institution_matrix, top_connectors)
 
-    create_interactive_network(G, applicants, person_metrics, flagship_metrics)
+    create_interactive_network(G, applicants, person_metrics, flagship_metrics, partners)
     write_summary(G, person_metrics, flagship_metrics, institution_matrix)
 
     print("Done")

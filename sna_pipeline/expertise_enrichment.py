@@ -9,8 +9,8 @@ from urllib.request import Request, urlopen
 import pandas as pd
 
 from .config import ENRICHED_FOLDER, OUT_PERSON_EXPERTISE
-from .data_loading import load_data
-from .expertise import ONLINE_COLUMNS, normalize_keywords
+from .data.load import load_data
+from .enrichment.expertise import ONLINE_COLUMNS, normalize_keywords
 from .text_utils import clean_text, simplify_institution, split_semicolon_values
 
 

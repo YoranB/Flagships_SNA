@@ -55,6 +55,13 @@
     applyManualExpertiseEdits();
     const personsById = new Map(DATA.persons.map(p => [p.id, p]));
     const flagshipsById = new Map([...DATA.flagships, ...DATA.selected_flagship_groups].map(f => [f.id, f]));
+    const partnersById = new Map((DATA.partners || []).map(partner => [partner.id, partner]));
+    const partnerLinksById = new Map((DATA.partner_flagship_links || []).map(link => [link.id, link]));
+    const partnerLinksByFlagship = new Map();
+    for (const link of DATA.partner_flagship_links || []) {
+      if (!partnerLinksByFlagship.has(link.flagship_id)) partnerLinksByFlagship.set(link.flagship_id, []);
+      partnerLinksByFlagship.get(link.flagship_id).push(link);
+    }
     const convergenceOverview = DATA.convergence_overview || { institution_groups: [], flagships: [], ranking: [], network_nodes: [], network_edges: [] };
     const convergenceProfilesById = new Map(convergenceOverview.flagships.map(profile => [profile.id, profile]));
     const edgesByPerson = new Map();
@@ -73,6 +80,8 @@
       selectedDepartment: '',
       keyword: '',
       keywordLabel: '',
+      selectedPartnerCategory: '',
+      selectedPartnerCollaboration: '',
       minWeight: 1,
       hopDepth: 1,
       edgeMode: 'backbone',
@@ -92,6 +101,12 @@
       '#c2410c', '#4338ca', '#047857', '#a21caf', '#ca8a04', '#0e7490'
     ];
     const colorForInstitution = (institution) => DATA.institution_colors[institution] || '#64748b';
+    const partnerCategoryColors = {
+      'Privaat': '#0f766e',
+      'Publiek / Maatschappelijk': '#b45309',
+      'Unknown': '#8a8f98',
+    };
+    const colorForPartnerCategory = (category) => partnerCategoryColors[category] || hashColor(category);
     function hashColor(value) {
       const text = String(value || 'Unknown');
       let hash = 0;
@@ -259,6 +274,28 @@
       };
     }
 
+    function partnerNode(partner, links, showLabel = false) {
+      const categories = partner.categories && partner.categories.length ? partner.categories : ['Unknown'];
+      const category = categories[0];
+      const color = colorForPartnerCategory(category);
+      return {
+        id: partner.id,
+        label: showLabel ? partner.name : '',
+        title: `<b>${escapeHtml(partner.name)}</b><br>${escapeHtml(categories.join('; '))}<br>${fmt.format(links.length)} flagship link(s)`,
+        value: Math.max(1, links.length),
+        size: 12 + Math.min(24, Math.sqrt(Math.max(1, links.length)) * 4),
+        color: {
+          background: color,
+          border: '#ffffff',
+          highlight: { background: color, border: '#111827' },
+          hover: { background: color, border: '#111827' }
+        },
+        font: { size: 12 },
+        group: category,
+        kind: 'partner',
+      };
+    }
+
     function edgeLabel(weight) {
       return weight > 1 ? String(weight) : '';
     }
@@ -277,6 +314,37 @@
 
     function flagshipMemberIds(flagship) {
       return flagship.member_ids && flagship.member_ids.length ? flagship.member_ids : [flagship.id];
+    }
+
+    function countValues(values) {
+      const counts = new Map();
+      for (const value of values) {
+        if (!value) continue;
+        counts.set(value, (counts.get(value) || 0) + 1);
+      }
+      return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    }
+
+    function passesPartnerFilters(link) {
+      const categoryOk = !activeState.selectedPartnerCategory || link.partner_category === activeState.selectedPartnerCategory;
+      const collaborationOk = !activeState.selectedPartnerCollaboration || (link.collaboration_types || []).includes(activeState.selectedPartnerCollaboration);
+      return categoryOk && collaborationOk;
+    }
+
+    function partnerLinksForFlagship(flagship) {
+      return flagshipMemberIds(flagship)
+        .flatMap(flagshipId => partnerLinksByFlagship.get(flagshipId) || [])
+        .filter(passesPartnerFilters);
+    }
+
+    function partnerLinksForDisplayFlagships(flagships) {
+      const rows = [];
+      for (const flagship of flagships) {
+        for (const link of partnerLinksForFlagship(flagship)) {
+          rows.push({ displayFlagship: flagship, link });
+        }
+      }
+      return rows;
     }
 
     function flagshipLabel(flagship) {
@@ -885,11 +953,135 @@
       `;
     }
 
+    function partnerFlagshipNode(flagship, linkCount) {
+      return {
+        id: flagship.id,
+        label: flagship.title.length > 34 ? flagship.title.slice(0, 31) + '...' : flagship.title,
+        title: `<b>${escapeHtml(flagship.title)}</b><br>${fmt.format(linkCount)} partner link(s)`,
+        value: Math.max(1, linkCount),
+        size: 16 + Math.min(30, Math.sqrt(Math.max(1, linkCount)) * 4),
+        color: {
+          background: '#155eef',
+          border: '#ffffff',
+          highlight: { background: '#174ea6', border: '#ffffff' },
+          hover: { background: '#174ea6', border: '#ffffff' }
+        },
+        font: { size: 12 },
+        kind: 'partner-flagship',
+      };
+    }
+
+    function renderPartnerEcosystem() {
+      const allFlagships = visibleFlagships();
+      const displayFlagships = activeState.selectedFlagship
+        ? allFlagships.filter(flagship => flagship.id === activeState.selectedFlagship)
+        : allFlagships;
+      const rows = partnerLinksForDisplayFlagships(displayFlagships);
+      const linksByDisplayFlagship = new Map();
+      const linksByPartner = new Map();
+
+      for (const row of rows) {
+        const flagshipId = row.displayFlagship.id;
+        if (!linksByDisplayFlagship.has(flagshipId)) linksByDisplayFlagship.set(flagshipId, []);
+        linksByDisplayFlagship.get(flagshipId).push(row.link);
+        if (!linksByPartner.has(row.link.partner_id)) linksByPartner.set(row.link.partner_id, []);
+        linksByPartner.get(row.link.partner_id).push(row.link);
+      }
+
+      const flagshipNodes = displayFlagships
+        .filter(flagship => activeState.selectedFlagship || linksByDisplayFlagship.has(flagship.id))
+        .map(flagship => partnerFlagshipNode(flagship, linksByDisplayFlagship.get(flagship.id)?.length || 0));
+      const partnerNodes = [...linksByPartner.entries()]
+        .map(([partnerId, links]) => partnersById.has(partnerId) ? partnerNode(partnersById.get(partnerId), links, links.length > 1) : null)
+        .filter(Boolean);
+      const edges = rows.map(row => ({
+        id: `partner-edge:${row.displayFlagship.id}:${row.link.id}`,
+        from: row.displayFlagship.id,
+        to: row.link.partner_id,
+        width: 1.2,
+        color: { color: '#98a2b3', highlight: '#155eef', hover: '#155eef' },
+        title: `${escapeHtml(row.displayFlagship.title)} ↔ ${escapeHtml(row.link.partner_name)}<br>${escapeHtml(row.link.partner_category)}<br>${escapeHtml((row.link.collaboration_types || []).join('; '))}`,
+        kind: 'partner-flagship-link',
+        raw: row.link,
+        displayFlagshipId: row.displayFlagship.id,
+      }));
+
+      const filters = [
+        activeState.selectedPartnerCategory,
+        activeState.selectedPartnerCollaboration,
+        activeState.selectedFlagship ? (flagshipsById.get(activeState.selectedFlagship)?.title || activeState.selectedFlagship) : '',
+      ].filter(Boolean);
+      const suffix = filters.length ? ` Filter: ${filters.join(' · ')}.` : '';
+      setNetwork(
+        [...flagshipNodes, ...partnerNodes],
+        edges,
+        'Partner Ecosystem',
+        `${flagshipNodes.length} flagship nodes, ${partnerNodes.length} partner nodes, ${edges.length} partner-flagship links.${suffix}`
+      );
+      markActiveFlagship(activeState.selectedFlagship || '');
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>Partner Ecosystem</h3>
+        <div class="kv"><span>Partners</span><span>${fmt.format(partnerNodes.length)}</span></div>
+        <div class="kv"><span>Flagships</span><span>${fmt.format(flagshipNodes.length)}</span></div>
+        <div class="kv"><span>Links</span><span>${fmt.format(edges.length)}</span></div>
+        <div class="kv"><span>Categorie</span><span>${escapeHtml(activeState.selectedPartnerCategory || 'Alle categorieen')}</span></div>
+        <div class="kv"><span>Samenwerking</span><span>${escapeHtml(activeState.selectedPartnerCollaboration || 'Alle typen')}</span></div>
+      `;
+    }
+
+    function renderPartnerLinkList(links) {
+      return links.map(link => `
+        <div class="list-item" data-partner-link="${escapeHtml(link.id)}">
+          <div class="list-item-title">${escapeHtml(link.flagship_title || link.flagship_id)}</div>
+          <div class="subtle">${escapeHtml(link.partner_category)} · ${escapeHtml((link.collaboration_types || []).join('; ') || link.collaboration_type_raw || '-')}</div>
+        </div>
+      `).join('');
+    }
+
+    function showPartnerDetails(partnerId) {
+      const partner = partnersById.get(partnerId);
+      if (!partner) return;
+      const links = (partner.link_ids || []).map(id => partnerLinksById.get(id)).filter(Boolean).filter(passesPartnerFilters);
+      const categoryChips = (partner.categories || []).map(category => `
+        <span class="chip"><span class="swatch" style="background:${colorForPartnerCategory(category)}"></span>${escapeHtml(category)}</span>
+      `).join('');
+      const typeChips = countValues(links.flatMap(link => link.collaboration_types || [])).map(([type, count]) => `
+        <span class="chip">${escapeHtml(type)}: ${fmt.format(count)}</span>
+      `).join('');
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>${escapeHtml(partner.name)}</h3>
+        <div class="kv"><span>Flagships</span><span>${fmt.format(new Set(links.map(link => link.flagship_id)).size)}</span></div>
+        <div class="kv"><span>Links</span><span>${fmt.format(links.length)}</span></div>
+        <div class="chips">${categoryChips || '<span class="chip">Unknown</span>'}</div>
+        <div class="chips">${typeChips || '<span class="chip">Geen type</span>'}</div>
+        <div class="kv"><span>Records</span><span>${renderPartnerLinkList(links) || '-'}</span></div>
+      `;
+    }
+
+    function showPartnerEdgeDetails(linkOrId) {
+      const link = typeof linkOrId === 'string' ? partnerLinksById.get(linkOrId) : linkOrId;
+      if (!link) return;
+      const years = [link.start_year || '', link.end_year || ''].filter(Boolean).join(' - ') || '-';
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>${escapeHtml(link.partner_name)}</h3>
+        <div class="kv"><span>Flagship</span><span>${escapeHtml(link.flagship_title || link.flagship_id)}</span></div>
+        <div class="kv"><span>Categorie</span><span>${escapeHtml(link.partner_category)}</span></div>
+        ${link.partner_category_raw && link.partner_category_raw !== link.partner_category ? `<div class="kv"><span>Categorie ruw</span><span>${escapeHtml(link.partner_category_raw)}</span></div>` : ''}
+        <div class="kv"><span>Samenwerking</span><span>${escapeHtml((link.collaboration_types || []).join('; ') || '-')}</span></div>
+        <div class="kv"><span>Type ruw</span><span>${escapeHtml(link.collaboration_type_raw || '-')}</span></div>
+        <div class="kv"><span>Periode</span><span>${escapeHtml(link.reporting_period || '-')}</span></div>
+        <div class="kv"><span>Jaren</span><span>${escapeHtml(years)}</span></div>
+        <div class="kv"><span>Rol</span><span>${escapeHtml(link.role_relevance || '-')}</span></div>
+      `;
+    }
+
     function renderActiveView() {
       activeState.selectedOnly = document.getElementById('selectedOnlyToggle').checked;
       activeState.minWeight = Number(document.getElementById('minWeight').value || 1);
       activeState.selectedInstitution = document.getElementById('institutionFilter').value;
       activeState.selectedDepartment = document.getElementById('departmentFilter').value;
+      activeState.selectedPartnerCategory = document.getElementById('partnerCategoryFilter').value;
+      activeState.selectedPartnerCollaboration = document.getElementById('partnerCollaborationFilter').value;
       activeState.selectedFlagship = document.getElementById('flagshipSelect').value;
       activeState.hopDepth = Number(document.getElementById('hopDepth').value || 1);
       activeState.edgeMode = 'backbone';
@@ -899,6 +1091,8 @@
 
       if (activeState.view === 'convergence') {
         renderConvergenceOverview();
+      } else if (activeState.view === 'partners') {
+        renderPartnerEcosystem();
       } else if (activeState.view === 'person' && activeState.selectedPerson) {
         renderPersonNeighborhood(activeState.selectedPerson);
       } else if (activeState.view === 'person' && activeState.keyword) {
@@ -1034,6 +1228,40 @@
       `;
     }
 
+    function renderFlagshipPartnerSummary(flagship) {
+      const links = partnerLinksForFlagship(flagship);
+      if (!links.length) {
+        return `
+          <div class="kv"><span>Partners</span><span>Geen partnerrecords</span></div>
+        `;
+      }
+      const uniquePartners = new Map();
+      for (const link of links) {
+        if (!uniquePartners.has(link.partner_id)) uniquePartners.set(link.partner_id, link);
+      }
+      const categoryChips = countValues(links.map(link => link.partner_category)).map(([category, count]) => `
+        <span class="chip"><span class="swatch" style="background:${colorForPartnerCategory(category)}"></span>${escapeHtml(category)}: ${fmt.format(count)}</span>
+      `).join('');
+      const typeChips = countValues(links.flatMap(link => link.collaboration_types || [])).map(([type, count]) => `
+        <span class="chip">${escapeHtml(type)}: ${fmt.format(count)}</span>
+      `).join('');
+      const partnerRows = [...uniquePartners.values()]
+        .sort((a, b) => a.partner_name.localeCompare(b.partner_name))
+        .slice(0, 8)
+        .map(link => `
+          <div class="list-item" data-partner="${escapeHtml(link.partner_id)}">
+            <div class="list-item-title">${escapeHtml(link.partner_name)}</div>
+            <div class="subtle">${escapeHtml(link.partner_category)} · ${escapeHtml((link.collaboration_types || []).join('; ') || '-')}</div>
+          </div>
+        `).join('');
+      return `
+        <div class="kv"><span>Partners</span><span>${fmt.format(uniquePartners.size)} uniek · ${fmt.format(links.length)} records</span></div>
+        <div class="chips">${categoryChips}</div>
+        <div class="chips">${typeChips}</div>
+        <div class="kv"><span>Partnerlijst</span><span>${partnerRows || '-'}</span></div>
+      `;
+    }
+
     function showFlagshipDetails(flagship, shownEdges = 0, totalEdges = 0) {
       const connectors = flagship.top_connectors.map(person => `
         <div class="list-item" data-person="${escapeHtml(person.id)}">
@@ -1050,6 +1278,7 @@
         <div class="kv"><span>Instellingen</span><span>${flagship.n_institutions}</span></div>
         <div class="kv"><span>Edges</span><span>${shownEdges}/${totalEdges} getoond</span></div>
         <div class="kv"><span>Edge mode</span><span>${escapeHtml(activeState.edgeMode)}</span></div>
+        ${renderFlagshipPartnerSummary(flagship)}
         <div class="kv"><span>Top</span><span>${connectors || '-'}</span></div>
       `;
     }
@@ -1068,6 +1297,7 @@
 
     function renderQualityPanel() {
       const quality = DATA.quality;
+      const partnerQuality = DATA.partner_quality || {};
       document.getElementById('qualityPanel').innerHTML = `
         <div><b>${fmt.format(quality.people)}</b> personen</div>
         <div><b>${fmt.format(quality.edges)}</b> co-applicant relaties totaal</div>
@@ -1075,6 +1305,8 @@
         <div><b>${fmt.format(quality.placeholder_person_ids)}</b> placeholder/fallback person ids</div>
         <div><b>${fmt.format(quality.raw_institution_values)}</b> ruwe instellingwaarden → <b>${fmt.format(quality.simplified_institution_values)}</b> genormaliseerd</div>
         <div><b>${fmt.format(quality.raw_department_values || 0)}</b> ruwe afdelingen → <b>${fmt.format(quality.department_groups || 0)}</b> groepen</div>
+        <div><b>${fmt.format(partnerQuality.source_rows || 0)}</b> partnerrecords → <b>${fmt.format(partnerQuality.unique_partners || 0)}</b> unieke partners</div>
+        <div><b>${fmt.format((partnerQuality.matched_flagship_ids || []).length)}</b> partner-flagships gematcht; <b>${fmt.format((partnerQuality.unmatched_flagship_ids || []).length)}</b> ongematcht</div>
       `;
     }
 
@@ -1175,6 +1407,14 @@
         departments.map(dept => `<option value="${escapeHtml(dept)}">${escapeHtml(dept)}</option>`).join('');
       document.getElementById('departmentFilter').addEventListener('change', renderActiveView);
 
+      const partnerFilters = DATA.partner_filters || { categories: [], collaboration_types: [] };
+      document.getElementById('partnerCategoryFilter').innerHTML =
+        '<option value="">Alle partnercategorieen</option>' +
+        (partnerFilters.categories || []).map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join('');
+      document.getElementById('partnerCollaborationFilter').innerHTML =
+        '<option value="">Alle samenwerkingstypen</option>' +
+        (partnerFilters.collaboration_types || []).map(type => `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`).join('');
+
       document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => setView(tab.dataset.view)));
       document.getElementById('applyFilters').addEventListener('click', renderActiveView);
       document.getElementById('fitNetwork').addEventListener('click', () => network.fit({ animation: true }));
@@ -1183,6 +1423,8 @@
         document.getElementById('flagshipSelect').value = '';
         document.getElementById('institutionFilter').value = '';
         document.getElementById('departmentFilter').value = '';
+        document.getElementById('partnerCategoryFilter').value = '';
+        document.getElementById('partnerCollaborationFilter').value = '';
         document.getElementById('minWeight').value = '1';
         document.getElementById('hopDepth').value = '1';
         if (globalSearchControl) globalSearchControl.clear(true);
@@ -1190,11 +1432,17 @@
         activeState.keyword = '';
         activeState.keywordLabel = '';
         activeState.flagshipFocusPerson = '';
+        activeState.selectedPartnerCategory = '';
+        activeState.selectedPartnerCollaboration = '';
         setView('flagships');
       });
       document.getElementById('flagshipSelect').addEventListener('change', event => {
         activeState.selectedFlagship = event.target.value;
         activeState.flagshipFocusPerson = '';
+        if (activeState.view === 'partners') {
+          renderActiveView();
+          return;
+        }
         if (activeState.keyword) {
           markActiveViewTab('person');
           renderActiveView();
@@ -1204,7 +1452,7 @@
       });
       document.getElementById('selectedOnlyToggle').addEventListener('change', () => {
         activeState.selectedOnly = document.getElementById('selectedOnlyToggle').checked;
-        if (activeState.view === 'convergence') {
+        if (activeState.view === 'convergence' || activeState.view === 'partners') {
           renderActiveView();
           return;
         }
@@ -1214,6 +1462,14 @@
         setView('flagships');
       });
       document.getElementById('institutionFilter').addEventListener('change', renderActiveView);
+      document.getElementById('partnerCategoryFilter').addEventListener('change', () => {
+        markActiveViewTab('partners');
+        renderActiveView();
+      });
+      document.getElementById('partnerCollaborationFilter').addEventListener('change', () => {
+        markActiveViewTab('partners');
+        renderActiveView();
+      });
       document.getElementById('minWeight').addEventListener('change', renderActiveView);
       document.getElementById('hopDepth').addEventListener('change', renderActiveView);
       document.getElementById('exportExpertiseEdits').addEventListener('click', exportManualExpertiseEdits);
@@ -1239,6 +1495,18 @@
           const flagshipId = convergenceItem.dataset.convergenceFlagship;
           setView('convergence');
           showConvergenceFlagshipDetails(flagshipId);
+          return;
+        }
+        const partnerLinkItem = event.target.closest('[data-partner-link]');
+        if (partnerLinkItem) {
+          markActiveViewTab('partners');
+          showPartnerEdgeDetails(partnerLinkItem.dataset.partnerLink);
+          return;
+        }
+        const partnerItem = event.target.closest('[data-partner]');
+        if (partnerItem) {
+          markActiveViewTab('partners');
+          showPartnerDetails(partnerItem.dataset.partner);
           return;
         }
         const flagshipItem = event.target.closest('[data-flagship]');
@@ -1270,12 +1538,21 @@
         const selectedEdge = activeState.currentEdges.find(edge => edge.id === params.edges[0]);
         if (selectedEdge?.kind === 'convergence-flagship-link') {
           showConvergenceEdgeDetails(selectedEdge.raw);
+        } else if (selectedEdge?.kind === 'partner-flagship-link') {
+          showPartnerEdgeDetails(selectedEdge.raw);
         }
         return;
       }
       if (!params.nodes.length) return;
       const id = params.nodes[0];
-      if (activeState.view === 'convergence' && convergenceProfilesById.has(id)) {
+      if (activeState.view === 'partners' && partnersById.has(id)) {
+        showPartnerDetails(id);
+      } else if (activeState.view === 'partners' && flagshipsById.has(id)) {
+        document.getElementById('flagshipSelect').value = id;
+        activeState.selectedFlagship = id;
+        renderPartnerEcosystem();
+        showFlagshipDetails(flagshipsById.get(id));
+      } else if (activeState.view === 'convergence' && convergenceProfilesById.has(id)) {
         showConvergenceFlagshipDetails(id);
       } else if (flagshipsById.has(id)) {
         document.getElementById('flagshipSelect').value = id;

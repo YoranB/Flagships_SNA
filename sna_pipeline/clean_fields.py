@@ -1,4 +1,4 @@
-from .field_cleaning import main
+from .data.field_cleaning import main
 
 
 if __name__ == "__main__":
