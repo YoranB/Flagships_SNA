@@ -32,6 +32,13 @@ def calculate_person_metrics(G, applicants):
         .reset_index()
     )
 
+    call_counts = (
+        applicants.groupby("person_id")["call_id"]
+        .nunique()
+        .rename("n_calls")
+        .reset_index()
+    )
+
     role_summary = (
         applicants.groupby("person_id")["role"]
         .apply(lambda x: "; ".join(sorted(set(v for v in x if v))))
@@ -43,6 +50,13 @@ def calculate_person_metrics(G, applicants):
         applicants.groupby("person_id")["flagship_title"]
         .apply(lambda x: "; ".join(sorted(set(v for v in x if v))))
         .rename("flagship_titles_all")
+        .reset_index()
+    )
+
+    call_summary = (
+        applicants.groupby("person_id")["call_name"]
+        .apply(lambda x: "; ".join(sorted(set(v for v in x if v))))
+        .rename("call_names_all")
         .reset_index()
     )
 
@@ -60,6 +74,8 @@ def calculate_person_metrics(G, applicants):
             "department_raw": attrs.get("department_raw", ""),
             "department_clean": attrs.get("department_clean", attrs.get("department", "")),
             "department_group": attrs.get("department_group", "Unknown"),
+            "call_ids": attrs.get("call_ids", ""),
+            "call_names": attrs.get("call_names", ""),
             "is_placeholder_id": attrs.get("is_placeholder_id", False),
             "degree": degree.get(node, 0),
             "weighted_degree": weighted_degree.get(node, 0),
@@ -73,10 +89,13 @@ def calculate_person_metrics(G, applicants):
     metrics = pd.DataFrame(rows)
 
     metrics = metrics.merge(flagship_counts, on="person_id", how="left")
+    metrics = metrics.merge(call_counts, on="person_id", how="left")
     metrics = metrics.merge(role_summary, on="person_id", how="left")
     metrics = metrics.merge(flagship_summary, on="person_id", how="left")
+    metrics = metrics.merge(call_summary, on="person_id", how="left")
 
     metrics["n_flagships"] = metrics["n_flagships"].fillna(0).astype(int)
+    metrics["n_calls"] = metrics["n_calls"].fillna(0).astype(int)
 
     metrics = metrics.sort_values(
         by=["betweenness_centrality", "weighted_degree", "degree"],
@@ -100,6 +119,9 @@ def calculate_flagship_metrics(applicants):
 
         rows.append({
             "flagship_id": flagship_id,
+            "proposal_id": group["proposal_id"].iloc[0],
+            "call_id": group["call_id"].iloc[0],
+            "call_name": group["call_name"].iloc[0],
             "flagship_title": group["flagship_title"].iloc[0],
             "source_file": group["source_file"].iloc[0],
             "n_applicants": people,

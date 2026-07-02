@@ -9,13 +9,23 @@ def build_person_records_and_edges(G, applicants, person_metrics):
     expertise_map = load_expertise_map()
 
     person_flagships = defaultdict(list)
+    person_calls = defaultdict(dict)
     for _, row in applicants.iterrows():
         item = {
             "id": row["flagship_id"],
             "title": row["flagship_title"],
             "role": row["role"],
+            "proposal_id": row.get("proposal_id", row["flagship_id"]),
+            "call_id": row.get("call_id", ""),
+            "call_name": row.get("call_name", ""),
         }
         person_flagships[row["person_id"]].append(item)
+        call_id = row.get("call_id", "")
+        if call_id:
+            person_calls[row["person_id"]][call_id] = {
+                "id": call_id,
+                "name": row.get("call_name", ""),
+            }
 
     persons = []
     for node, attrs in G.nodes(data=True):
@@ -27,6 +37,7 @@ def build_person_records_and_edges(G, applicants, person_metrics):
         department_group = attrs.get("department_group") or "Unknown"
         expertise = expertise_map.get(node, empty_expertise())
         flagships = sorted(person_flagships.get(node, []), key=lambda x: x["id"])
+        calls = sorted(person_calls.get(node, {}).values(), key=lambda x: x["id"])
         search_parts = [
             attrs.get("name", node),
             attrs.get("email", ""),
@@ -42,6 +53,7 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             expertise.get("expertise_summary", ""),
             " ".join(item["title"] for item in flagships),
             " ".join(item["role"] for item in flagships),
+            " ".join(item["name"] for item in calls),
         ]
         persons.append({
             "id": node,
@@ -59,6 +71,8 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             "betweenness": safe_float(metrics.get("betweenness_centrality", 0)),
             "community": int(metrics.get("community", 0) or 0),
             "n_flagships": int(metrics.get("n_flagships", 0) or 0),
+            "n_calls": int(metrics.get("n_calls", len(calls)) or 0),
+            "calls": calls,
             "flagships": flagships,
             "expertise_keywords": expertise.get("expertise_keywords", ""),
             "expertise_summary": expertise.get("expertise_summary", ""),
@@ -80,6 +94,8 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             "weight": safe_float(attrs.get("weight", 1), 1),
             "flagships": attrs.get("flagships", []),
             "flagship_titles": attrs.get("flagship_titles", []),
+            "call_ids": attrs.get("call_ids", []),
+            "call_names": attrs.get("call_names", []),
         })
 
     return persons, edges

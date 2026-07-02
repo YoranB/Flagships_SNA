@@ -34,6 +34,8 @@ def build_person_graph(applicants, person_edges):
             department_tokens=("department_tokens", join_unique),
             role=("role", join_unique),
             email=("email", join_unique),
+            call_ids=("call_id", join_unique),
+            call_names=("call_name", join_unique),
             is_placeholder_id=("is_placeholder_id", "max"),
         )
         .reset_index()
@@ -53,6 +55,8 @@ def build_person_graph(applicants, person_edges):
             department_tokens=row["department_tokens"],
             role=row["role"],
             email=row["email"],
+            call_ids=row["call_ids"],
+            call_names=row["call_names"],
             is_placeholder_id=bool(row["is_placeholder_id"]),
         )
 
@@ -64,18 +68,22 @@ def build_person_graph(applicants, person_edges):
             continue
 
         if source not in G:
-            G.add_node(source, name=row.get("source_name", source), institution="Unknown", institution_raw="", institution_clean="Unknown", department="", department_raw="", department_clean="", department_group="Unknown", department_tokens="", role="", email=row.get("source", ""))
+            G.add_node(source, name=row.get("source_name", source), institution="Unknown", institution_raw="", institution_clean="Unknown", department="", department_raw="", department_clean="", department_group="Unknown", department_tokens="", role="", email=row.get("source", ""), call_ids="", call_names="")
         if target not in G:
-            G.add_node(target, name=row.get("target_name", target), institution="Unknown", institution_raw="", institution_clean="Unknown", department="", department_raw="", department_clean="", department_group="Unknown", department_tokens="", role="", email=row.get("target", ""))
+            G.add_node(target, name=row.get("target_name", target), institution="Unknown", institution_raw="", institution_clean="Unknown", department="", department_raw="", department_clean="", department_group="Unknown", department_tokens="", role="", email=row.get("target", ""), call_ids="", call_names="")
 
         weight = float(row["weight"])
         flagships = split_semicolon_values(row.get("flagships", ""))
         flagship_titles = split_semicolon_values(row.get("flagship_titles", ""))
+        call_ids = split_semicolon_values(row.get("call_ids", ""))
+        call_names = split_semicolon_values(row.get("call_names", ""))
 
         if G.has_edge(source, target):
             G[source][target]["weight"] += weight
             G[source][target]["flagships"] = sorted(set(G[source][target]["flagships"] + flagships))
             G[source][target]["flagship_titles"] = sorted(set(G[source][target]["flagship_titles"] + flagship_titles))
+            G[source][target]["call_ids"] = sorted(set(G[source][target]["call_ids"] + call_ids))
+            G[source][target]["call_names"] = sorted(set(G[source][target]["call_names"] + call_names))
         else:
             G.add_edge(
                 source,
@@ -83,6 +91,8 @@ def build_person_graph(applicants, person_edges):
                 weight=weight,
                 flagships=flagships,
                 flagship_titles=flagship_titles,
+                call_ids=call_ids,
+                call_names=call_names,
                 relation_type=row.get("relation_type", "co_applicant"),
             )
 
