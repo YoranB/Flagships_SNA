@@ -11,11 +11,14 @@ def build_person_records_and_edges(G, applicants, person_metrics):
     person_flagships = defaultdict(list)
     person_calls = defaultdict(dict)
     for _, row in applicants.iterrows():
+        proposal_key = row.get("proposal_key", row.get("flagship_id", ""))
         item = {
-            "id": row["flagship_id"],
+            "id": proposal_key,
             "title": row["flagship_title"],
             "role": row["role"],
+            "proposal_key": proposal_key,
             "proposal_id": row.get("proposal_id", row["flagship_id"]),
+            "flagship_id": row["flagship_id"],
             "call_id": row.get("call_id", ""),
             "call_name": row.get("call_name", ""),
         }
@@ -73,6 +76,7 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             "n_flagships": int(metrics.get("n_flagships", 0) or 0),
             "n_calls": int(metrics.get("n_calls", len(calls)) or 0),
             "calls": calls,
+            "proposal_keys": attrs.get("proposal_keys", ""),
             "flagships": flagships,
             "expertise_keywords": expertise.get("expertise_keywords", ""),
             "expertise_summary": expertise.get("expertise_summary", ""),
@@ -88,11 +92,14 @@ def build_person_records_and_edges(G, applicants, person_metrics):
 
     edges = []
     for source, target, attrs in G.edges(data=True):
+        proposal_keys = attrs.get("proposal_keys", [])
         edges.append({
             "source": source,
             "target": target,
             "weight": safe_float(attrs.get("weight", 1), 1),
-            "flagships": attrs.get("flagships", []),
+            "proposal_keys": proposal_keys,
+            "flagships": attrs.get("flagships", proposal_keys),
+            "legacy_flagship_ids": attrs.get("legacy_flagship_ids", []),
             "flagship_titles": attrs.get("flagship_titles", []),
             "call_ids": attrs.get("call_ids", []),
             "call_names": attrs.get("call_names", []),
