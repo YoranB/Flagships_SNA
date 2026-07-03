@@ -17,6 +17,7 @@ __DASHBOARD_CSS__
 <body>
   <div class="app">
     <aside class="sidebar">
+      <button id="sidebarRailToggle" class="sidebar-rail-toggle" type="button" aria-label="Toon linker paneel">Filters</button>
       <section class="panel-section">
         <h1>Flagships SNA Explorer</h1>
         <div class="subtle">Standalone netwerkverkenner met gefilterde views</div>
@@ -50,18 +51,6 @@ __DASHBOARD_CSS__
           <label for="departmentFilter">Afdeling</label>
           <select id="departmentFilter"></select>
         </div>
-        <div class="field">
-          <label for="campusSourceTypeFilter">Campus bronsoort</label>
-          <select id="campusSourceTypeFilter"></select>
-        </div>
-        <div class="field">
-          <label for="campusClusterFilter">Thematic cluster</label>
-          <select id="campusClusterFilter"></select>
-        </div>
-        <label class="toggle-row" for="showCampusPartnersToggle">
-          <input id="showCampusPartnersToggle" type="checkbox">
-          Toon partners in Campus view
-        </label>
         <div class="field">
           <label for="partnerCategoryFilter">Partner categorie</label>
           <select id="partnerCategoryFilter"></select>
@@ -108,6 +97,7 @@ __DASHBOARD_CSS__
 
     <main class="network-wrap">
       <div class="toolbar">
+        <button id="sidebarToggle" class="btn sidebar-toggle" type="button" aria-expanded="true">Verberg filters</button>
         <div>
           <h3 id="viewTitle">Flagship-overzicht</h3>
           <div id="viewSubtitle" class="subtle">Klik op een flagship om deelnemers en relaties te verkennen.</div>

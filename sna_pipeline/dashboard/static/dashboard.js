@@ -94,9 +94,7 @@
       keywordLabel: '',
       selectedPartnerCategory: '',
       selectedPartnerCollaboration: '',
-      selectedCampusSourceType: '',
-      selectedCampusCluster: '',
-      showCampusPartners: false,
+      sidebarCollapsed: false,
       minWeight: 1,
       hopDepth: 1,
       edgeMode: 'backbone',
@@ -114,13 +112,11 @@
         selectedInstitution: activeState.selectedInstitution || '',
         selectedDepartment: activeState.selectedDepartment || '',
         keyword: activeState.keyword || '',
-        keywordLabel: activeState.keywordLabel || '',
-        selectedPartnerCategory: activeState.selectedPartnerCategory || '',
-        selectedPartnerCollaboration: activeState.selectedPartnerCollaboration || '',
-        selectedCampusSourceType: activeState.selectedCampusSourceType || '',
-        selectedCampusCluster: activeState.selectedCampusCluster || '',
-        showCampusPartners: Boolean(activeState.showCampusPartners),
-        minWeight: Number(activeState.minWeight || 1),
+      keywordLabel: activeState.keywordLabel || '',
+      selectedPartnerCategory: activeState.selectedPartnerCategory || '',
+      selectedPartnerCollaboration: activeState.selectedPartnerCollaboration || '',
+      sidebarCollapsed: Boolean(activeState.sidebarCollapsed),
+      minWeight: Number(activeState.minWeight || 1),
         hopDepth: Number(activeState.hopDepth || 1),
         edgeMode: activeState.edgeMode || 'backbone',
       };
@@ -135,6 +131,17 @@
       if (!button) return;
       button.disabled = viewHistory.length === 0;
       button.title = viewHistory.length ? 'Ga een stap terug' : 'Geen vorige stap';
+    }
+
+    function setSidebarCollapsed(collapsed) {
+      activeState.sidebarCollapsed = Boolean(collapsed);
+      const app = document.querySelector('.app');
+      if (app) app.classList.toggle('sidebar-collapsed', activeState.sidebarCollapsed);
+      const toggle = document.getElementById('sidebarToggle');
+      if (toggle) {
+        toggle.textContent = activeState.sidebarCollapsed ? 'Toon filters' : 'Verberg filters';
+        toggle.setAttribute('aria-expanded', String(!activeState.sidebarCollapsed));
+      }
     }
 
     function pushHistory() {
@@ -152,13 +159,11 @@
       document.getElementById('flagshipSelect').value = snapshot.selectedFlagship || '';
       document.getElementById('institutionFilter').value = snapshot.selectedInstitution || '';
       document.getElementById('departmentFilter').value = snapshot.selectedDepartment || '';
-      document.getElementById('campusSourceTypeFilter').value = snapshot.selectedCampusSourceType || '';
-      document.getElementById('campusClusterFilter').value = snapshot.selectedCampusCluster || '';
-      document.getElementById('showCampusPartnersToggle').checked = Boolean(snapshot.showCampusPartners);
       document.getElementById('partnerCategoryFilter').value = snapshot.selectedPartnerCategory || '';
       document.getElementById('partnerCollaborationFilter').value = snapshot.selectedPartnerCollaboration || '';
       document.getElementById('minWeight').value = String(snapshot.minWeight || 1);
       document.getElementById('hopDepth').value = String(snapshot.hopDepth || 1);
+      setSidebarCollapsed(Boolean(snapshot.sidebarCollapsed));
       if (globalSearchControl) {
         if (snapshot.selectedPerson) {
           globalSearchControl.setValue(snapshot.selectedPerson, true);
@@ -199,6 +204,7 @@
       '#c2410c', '#4338ca', '#047857', '#a21caf', '#ca8a04', '#0e7490'
     ];
     const colorForInstitution = (institution) => DATA.institution_colors[institution] || '#64748b';
+    const MULTI_LINK_PARTNER_FILTER = '__multi_link_partners__';
     const partnerCategoryColors = {
       'Privaat': '#0f766e',
       'Publiek / Maatschappelijk': '#b45309',
@@ -522,29 +528,38 @@
           hover: { background: color, border: '#111827' }
         },
         font: { size: 13 },
-        group: 'Thematic cluster',
+        group: 'Cluster',
         kind: 'campus-cluster',
       };
     }
 
     function campusPartnerNode(row, rows, showLabel = false) {
       const color = colorForPartnerCategory(row.partner_type || 'other/unknown');
+      const linkCount = Math.max(1, rows.length);
+      const isMultiLink = isMultiLinkCampusPartner(rows);
+      const size = isMultiLink
+        ? 21 + Math.min(20, Math.sqrt(linkCount) * 5)
+        : 11 + Math.min(18, Math.sqrt(linkCount) * 4);
+      const border = isMultiLink ? '#111827' : '#ffffff';
       return {
         id: row.partner_node_id,
         label: showLabel ? row.partner_name : '',
-        value: Math.max(1, rows.length),
-        size: 11 + Math.min(18, Math.sqrt(Math.max(1, rows.length)) * 4),
+        value: linkCount,
+        size,
+        borderWidth: isMultiLink ? 3 : 1,
         color: {
           background: color,
-          border: '#ffffff',
-          highlight: { background: color, border: '#111827' },
-          hover: { background: color, border: '#111827' }
+          border,
+          highlight: { background: color, border },
+          hover: { background: color, border }
         },
-        font: { size: 11 },
+        font: { size: isMultiLink ? 13 : 11, color: '#111827', strokeWidth: isMultiLink ? 4 : 3, strokeColor: '#ffffff' },
         group: row.partner_type || 'other/unknown',
         kind: 'campus-partner',
         partner_type: row.partner_type || 'other/unknown',
         source: row.source || '',
+        link_count: linkCount,
+        is_multi_link: isMultiLink,
       };
     }
 
@@ -578,9 +593,16 @@
     }
 
     function passesPartnerFilters(link) {
-      const categoryOk = !activeState.selectedPartnerCategory || link.partner_category === activeState.selectedPartnerCategory;
+      const categoryOk = !activeState.selectedPartnerCategory ||
+        activeState.selectedPartnerCategory === MULTI_LINK_PARTNER_FILTER ||
+        link.partner_category === activeState.selectedPartnerCategory;
       const collaborationOk = !activeState.selectedPartnerCollaboration || (link.collaboration_types || []).includes(activeState.selectedPartnerCollaboration);
       return categoryOk && collaborationOk;
+    }
+
+    function partnerCategoryFilterLabel() {
+      if (activeState.selectedPartnerCategory === MULTI_LINK_PARTNER_FILTER) return 'Partners met meerdere links';
+      return activeState.selectedPartnerCategory || 'Alle categorieen';
     }
 
     function partnerLinksForFlagship(flagship) {
@@ -600,9 +622,32 @@
     }
 
     function passCampusProjectFilters(project) {
-      const sourceOk = !activeState.selectedCampusSourceType || project.source_type === activeState.selectedCampusSourceType;
-      const clusterOk = !activeState.selectedCampusCluster || project.primary_cluster === activeState.selectedCampusCluster;
-      return sourceOk && clusterOk;
+      return true;
+    }
+
+    function passesCampusPartnerFilters(row) {
+      const categoryOk = !activeState.selectedPartnerCategory ||
+        activeState.selectedPartnerCategory === MULTI_LINK_PARTNER_FILTER ||
+        row.partner_type === activeState.selectedPartnerCategory;
+      const collaborationOk = !activeState.selectedPartnerCollaboration ||
+        (row.collaboration_types || []).includes(activeState.selectedPartnerCollaboration);
+      return categoryOk && collaborationOk;
+    }
+
+    function filterCampusPartnerRows(rows) {
+      let filtered = rows.filter(passesCampusPartnerFilters);
+      if (activeState.selectedPartnerCategory === MULTI_LINK_PARTNER_FILTER) {
+        const linkCounts = new Map();
+        for (const row of filtered) {
+          linkCounts.set(row.partner_node_id, (linkCounts.get(row.partner_node_id) || 0) + 1);
+        }
+        filtered = filtered.filter(row => linkCounts.get(row.partner_node_id) > 1);
+      }
+      return filtered;
+    }
+
+    function isMultiLinkCampusPartner(rows) {
+      return (rows || []).length > 1;
     }
 
     function campusPartnersForProject(project) {
@@ -611,7 +656,7 @@
 
     function campusPartnerRowsForProjects(projects) {
       const projectIds = new Set(projects.map(project => project.project_id));
-      return (campusData.partner_cluster_view || []).filter(row => projectIds.has(row.project_id));
+      return filterCampusPartnerRows((campusData.partner_cluster_view || []).filter(row => projectIds.has(row.project_id)));
     }
 
     function campusPartnerTypeCounts(rows) {
@@ -1429,27 +1474,35 @@
           title: `${escapeHtml(edge.source_type)}<br>${escapeHtml(edge.evidence_text)}`,
           kind: 'campus-project-cluster-link',
           raw: edge,
-        }));
+      }));
       const visibleProjectIds = new Set(projects.map(project => project.project_id));
       const visibleProjectById = new Map(projects.map(project => [project.project_id, project]));
-      const visiblePartnerRows = activeState.showCampusPartners
-        ? (campusData.partner_cluster_view || []).filter(row => visibleProjectIds.has(row.project_id))
-        : [];
+      const visiblePartnerRows = filterCampusPartnerRows(
+        (campusData.partner_cluster_view || []).filter(row => visibleProjectIds.has(row.project_id))
+      );
       const partnerRowsByNodeId = new Map();
       for (const row of visiblePartnerRows) {
         if (!partnerRowsByNodeId.has(row.partner_node_id)) partnerRowsByNodeId.set(row.partner_node_id, []);
         partnerRowsByNodeId.get(row.partner_node_id).push(row);
       }
-      const showPartnerLabels = Boolean(activeState.selectedCampusCluster);
-      const partnerNodes = [...partnerRowsByNodeId.values()].map(rows => campusPartnerNode(rows[0], rows, showPartnerLabels));
+      const partnerNodes = [...partnerRowsByNodeId.values()].map(rows => {
+        const showPartnerLabel = isMultiLinkCampusPartner(rows) || activeState.selectedPartnerCategory === MULTI_LINK_PARTNER_FILTER;
+        return campusPartnerNode(rows[0], rows, showPartnerLabel);
+      });
       const partnerEdges = visiblePartnerRows.map((row, idx) => {
         const project = visibleProjectById.get(row.project_id);
+        const targetRows = partnerRowsByNodeId.get(row.partner_node_id) || [];
+        const isMultiLinkTarget = isMultiLinkCampusPartner(targetRows);
         return {
           id: `campus-project-partner:${row.project_id}:${row.partner_node_id}:${row.source_link_id || idx}`,
           from: project?.id || `campus-project:${row.project_id}`,
           to: row.partner_node_id,
-          width: 0.7,
-          color: { color: '#d9e2f1', highlight: '#155eef', hover: '#155eef' },
+          width: isMultiLinkTarget ? 1.5 : 0.7,
+          color: {
+            color: isMultiLinkTarget ? '#8aa4c8' : '#d9e2f1',
+            highlight: '#155eef',
+            hover: '#155eef',
+          },
           dashes: true,
           title: `${escapeHtml(row.project_name)}<br>${escapeHtml(row.partner_type || 'other/unknown')}<br>${escapeHtml(campusCollaborationText(row))}<br>${escapeHtml(row.evidence_text || row.notes || '-')}`,
           kind: 'campus-project-partner-link',
@@ -1460,13 +1513,17 @@
       });
       const edges = [...projectClusterEdges, ...partnerEdges];
       applyCampusLayout(projectNodes, clusterNodes, partnerNodes, projects, partnerRowsByNodeId);
-      const filters = [activeState.selectedCampusSourceType, activeState.selectedCampusCluster].filter(Boolean);
+      const filters = [
+        activeState.selectedPartnerCategory && activeState.selectedPartnerCategory !== MULTI_LINK_PARTNER_FILTER ? activeState.selectedPartnerCategory : '',
+        activeState.selectedPartnerCategory === MULTI_LINK_PARTNER_FILTER ? 'Partners met meerdere links' : '',
+        activeState.selectedPartnerCollaboration,
+      ].filter(Boolean);
       const suffix = filters.length ? ` Filter: ${filters.join(' · ')}.` : '';
       setNetwork(
         [...projectNodes, ...clusterNodes, ...partnerNodes],
         edges,
         'HealthTech Campus ecosystem',
-        `${projectNodes.length} project/programme nodes, ${clusterNodes.length} thematic cluster nodes, ${partnerNodes.length} partner nodes, ${projectClusterEdges.length} project-to-cluster links, ${partnerEdges.length} project-to-partner links.${suffix}`
+        `${projectNodes.length} project/programme nodes, ${clusterNodes.length} cluster nodes, ${partnerNodes.length} partner nodes, ${projectClusterEdges.length} project-to-cluster links, ${partnerEdges.length} project-to-partner links.${suffix}`
       );
       markActiveFlagship('');
       const sourceCounts = countValues(projects.map(project => project.source_type)).map(([source, count]) => `${escapeHtml(source)}: ${fmt.format(count)}`).join('<br>');
@@ -1546,7 +1603,14 @@
       const displayFlagships = activeState.selectedFlagship
         ? allFlagships.filter(flagship => flagship.id === activeState.selectedFlagship)
         : allFlagships;
-      const rows = partnerLinksForDisplayFlagships(displayFlagships);
+      let rows = partnerLinksForDisplayFlagships(displayFlagships);
+      if (activeState.selectedPartnerCategory === MULTI_LINK_PARTNER_FILTER) {
+        const partnerLinkCounts = new Map();
+        for (const row of rows) {
+          partnerLinkCounts.set(row.link.partner_id, (partnerLinkCounts.get(row.link.partner_id) || 0) + 1);
+        }
+        rows = rows.filter(row => partnerLinkCounts.get(row.link.partner_id) > 1);
+      }
       const linksByDisplayFlagship = new Map();
       const linksByPartner = new Map();
 
@@ -1577,7 +1641,7 @@
       }));
 
       const filters = [
-        activeState.selectedPartnerCategory,
+        activeState.selectedPartnerCategory ? partnerCategoryFilterLabel() : '',
         activeState.selectedPartnerCollaboration,
         activeState.selectedFlagship ? (flagshipsById.get(activeState.selectedFlagship)?.title || activeState.selectedFlagship) : '',
       ].filter(Boolean);
@@ -1594,7 +1658,7 @@
         <div class="kv"><span>Partners</span><span>${fmt.format(partnerNodes.length)}</span></div>
         <div class="kv"><span>Flagships</span><span>${fmt.format(flagshipNodes.length)}</span></div>
         <div class="kv"><span>Links</span><span>${fmt.format(edges.length)}</span></div>
-        <div class="kv"><span>Categorie</span><span>${escapeHtml(activeState.selectedPartnerCategory || 'Alle categorieen')}</span></div>
+        <div class="kv"><span>Categorie</span><span>${escapeHtml(partnerCategoryFilterLabel())}</span></div>
         <div class="kv"><span>Samenwerking</span><span>${escapeHtml(activeState.selectedPartnerCollaboration || 'Alle typen')}</span></div>
       `;
     }
@@ -1652,9 +1716,6 @@
       activeState.selectedDepartment = document.getElementById('departmentFilter').value;
       activeState.selectedPartnerCategory = document.getElementById('partnerCategoryFilter').value;
       activeState.selectedPartnerCollaboration = document.getElementById('partnerCollaborationFilter').value;
-      activeState.selectedCampusSourceType = document.getElementById('campusSourceTypeFilter').value;
-      activeState.selectedCampusCluster = document.getElementById('campusClusterFilter').value;
-      activeState.showCampusPartners = document.getElementById('showCampusPartnersToggle').checked;
       activeState.selectedFlagship = document.getElementById('flagshipSelect').value;
       activeState.hopDepth = Number(document.getElementById('hopDepth').value || 1);
       activeState.edgeMode = 'backbone';
@@ -1996,20 +2057,20 @@
       const partnerFilters = DATA.partner_filters || { categories: [], collaboration_types: [] };
       document.getElementById('partnerCategoryFilter').innerHTML =
         '<option value="">Alle partnercategorieen</option>' +
+        `<option value="${MULTI_LINK_PARTNER_FILTER}">Partners met meerdere links</option>` +
         (partnerFilters.categories || []).map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`).join('');
       document.getElementById('partnerCollaborationFilter').innerHTML =
         '<option value="">Alle samenwerkingstypen</option>' +
         (partnerFilters.collaboration_types || []).map(type => `<option value="${escapeHtml(type)}">${escapeHtml(type)}</option>`).join('');
 
-      const campusFilters = campusData.filters || { source_types: [], clusters: [] };
-      document.getElementById('campusSourceTypeFilter').innerHTML =
-        '<option value="">Alle bronsoorten</option>' +
-        (campusFilters.source_types || []).map(source => `<option value="${escapeHtml(source)}">${escapeHtml(source)}</option>`).join('');
-      document.getElementById('campusClusterFilter').innerHTML =
-        '<option value="">Alle thematic clusters</option>' +
-        (campusFilters.clusters || []).map(cluster => `<option value="${escapeHtml(cluster)}">${escapeHtml(cluster)}</option>`).join('');
-
       document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => setView(tab.dataset.view)));
+      const toggleSidebar = () => {
+        pushHistory();
+        setSidebarCollapsed(!activeState.sidebarCollapsed);
+        window.setTimeout(() => network.fit({ animation: { duration: 220, easingFunction: 'easeInOutQuad' } }), 80);
+      };
+      document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
+      document.getElementById('sidebarRailToggle').addEventListener('click', toggleSidebar);
       document.getElementById('applyFilters').addEventListener('click', () => {
         pushHistory();
         renderActiveView();
@@ -2023,9 +2084,6 @@
         document.getElementById('flagshipSelect').value = '';
         document.getElementById('institutionFilter').value = '';
         document.getElementById('departmentFilter').value = '';
-        document.getElementById('campusSourceTypeFilter').value = '';
-        document.getElementById('campusClusterFilter').value = '';
-        document.getElementById('showCampusPartnersToggle').checked = false;
         document.getElementById('partnerCategoryFilter').value = '';
         document.getElementById('partnerCollaborationFilter').value = '';
         document.getElementById('minWeight').value = '1';
@@ -2037,9 +2095,7 @@
         activeState.flagshipFocusPerson = '';
         activeState.selectedPartnerCategory = '';
         activeState.selectedPartnerCollaboration = '';
-        activeState.selectedCampusSourceType = '';
-        activeState.selectedCampusCluster = '';
-        activeState.showCampusPartners = false;
+        setSidebarCollapsed(false);
         isRestoringHistory = true;
         setView('flagships');
         isRestoringHistory = false;
@@ -2082,27 +2138,12 @@
       });
       document.getElementById('partnerCategoryFilter').addEventListener('change', () => {
         pushHistory();
-        markActiveViewTab('partners');
+        if (activeState.view !== 'campus') markActiveViewTab('partners');
         renderActiveView();
       });
       document.getElementById('partnerCollaborationFilter').addEventListener('change', () => {
         pushHistory();
-        markActiveViewTab('partners');
-        renderActiveView();
-      });
-      document.getElementById('campusSourceTypeFilter').addEventListener('change', () => {
-        pushHistory();
-        markActiveViewTab('campus');
-        renderActiveView();
-      });
-      document.getElementById('campusClusterFilter').addEventListener('change', () => {
-        pushHistory();
-        markActiveViewTab('campus');
-        renderActiveView();
-      });
-      document.getElementById('showCampusPartnersToggle').addEventListener('change', () => {
-        pushHistory();
-        markActiveViewTab('campus');
+        if (activeState.view !== 'campus') markActiveViewTab('partners');
         renderActiveView();
       });
       document.getElementById('minWeight').addEventListener('change', () => {
