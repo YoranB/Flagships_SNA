@@ -29,6 +29,7 @@ from sna_pipeline.data.manual_programs import (
 )
 from sna_pipeline.network.graph_builder import build_person_graph
 from sna_pipeline.network.metrics import calculate_person_metrics
+from sna_pipeline.partners import normalize_partner_flagship_id
 
 
 class MultiCallFoundationTest(unittest.TestCase):
@@ -234,6 +235,20 @@ class MultiCallFoundationTest(unittest.TestCase):
             ],
         )
 
+    def test_sustainable_health_partner_ids_are_normalized(self):
+        cases = [
+            ("2023014", "", "sustainable-health-programs::shp-smart-or2030"),
+            ("", "SMART OR2030", "sustainable-health-programs::shp-smart-or2030"),
+            ("2023015", "", "sustainable-health-programs::shp-technological-innovations-for-nurses"),
+            ("", "NURTURE", "sustainable-health-programs::shp-technological-innovations-for-nurses"),
+            ("2023016", "", "sustainable-health-programs::shp-zero-emission-endoscopy"),
+            ("", "ZEE", "sustainable-health-programs::shp-zero-emission-endoscopy"),
+        ]
+
+        for project_code, title, expected in cases:
+            with self.subTest(project_code=project_code, title=title):
+                self.assertEqual(normalize_partner_flagship_id(project_code, title), expected)
+
     def test_campus_cluster_mapping_has_unique_projects(self):
         mapping = read_csv_mapping(CAMPUS_CLUSTER_MAPPING, CLUSTER_MAPPING_COLUMNS)
 
@@ -282,6 +297,57 @@ class MultiCallFoundationTest(unittest.TestCase):
         self.assertEqual(projects["flagship_smart_or_2030"]["n_people"], 1)
         self.assertEqual(projects["sh_smart_or_2030"]["n_people"], 1)
         self.assertEqual(len(campus["project_cluster_edges"]), 13)
+
+    def test_campus_partner_rows_keep_collaboration_types(self):
+        proposal_key = "sustainable-health-programs::shp-technological-innovations-for-nurses"
+        applicants = pd.DataFrame({
+            "person_id": ["sustainable-person"],
+            "flagship_id": ["shp-technological-innovations-for-nurses"],
+            "proposal_id": ["shp-technological-innovations-for-nurses"],
+            "proposal_key": [proposal_key],
+        })
+        flagship_data = {
+            "flagships": [
+                {
+                    "id": proposal_key,
+                    "member_ids": [proposal_key, "shp-technological-innovations-for-nurses"],
+                    "n_institutions": 1,
+                    "institutions": ["Erasmus MC"],
+                },
+            ],
+            "selected_flagship_groups": [],
+        }
+        campus = build_campus_dashboard_data(
+            applicants,
+            flagship_data,
+            {
+                "partner_flagship_links": [
+                    {
+                        "id": "partner-link:nurture:create4care",
+                        "flagship_id": proposal_key,
+                        "partner_name": "Create4Care",
+                        "partner_category": "Publiek / Maatschappelijk",
+                        "collaboration_types": ["Co-creatie", "Implementatie"],
+                        "collaboration_type_raw": "Co-creatie; implementatie",
+                        "role_relevance": "Innovatieplatform voor verpleegkundige zorgtechnologie.",
+                    },
+                ],
+            },
+        )
+
+        rows = [
+            row
+            for row in campus["partner_cluster_view"]
+            if row["project_id"] == "sh_technological_innovations_for_nurses"
+        ]
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["partner_name"], "Create4Care")
+        self.assertEqual(rows[0]["collaboration_types"], ["Co-creatie", "Implementatie"])
+        self.assertEqual(
+            campus["partners_by_project"]["sh_technological_innovations_for_nurses"]["links"][0]["collaboration_type_raw"],
+            "Co-creatie; implementatie",
+        )
 
 
 if __name__ == "__main__":

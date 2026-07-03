@@ -1,6 +1,6 @@
 import pandas as pd
 
-from .config import INPUT_PARTNERS_XLSX, OUT_PARTNERS_CLEANED
+from .config import INPUT_PARTNER_XLSX_FILES, INPUT_PARTNERS_XLSX, OUT_PARTNERS_CLEANED
 from .text_utils import compact_spaces, normalize_for_id
 
 
@@ -34,6 +34,21 @@ COLLABORATION_ORDER = [
     "Advisory",
 ]
 
+SUSTAINABLE_HEALTH_PARTNER_PROJECTS = {
+    "2023014": "sustainable-health-programs::shp-smart-or2030",
+    "2023015": "sustainable-health-programs::shp-technological-innovations-for-nurses",
+    "2023016": "sustainable-health-programs::shp-zero-emission-endoscopy",
+}
+
+SUSTAINABLE_HEALTH_PARTNER_TITLES = {
+    "smart-or2030": "sustainable-health-programs::shp-smart-or2030",
+    "nurture": "sustainable-health-programs::shp-technological-innovations-for-nurses",
+    "technological-innovations-for-nurses": "sustainable-health-programs::shp-technological-innovations-for-nurses",
+    "zee": "sustainable-health-programs::shp-zero-emission-endoscopy",
+    "zero-emission-endoscopy": "sustainable-health-programs::shp-zero-emission-endoscopy",
+    "transition-towards-zero-emission-endoscopy": "sustainable-health-programs::shp-zero-emission-endoscopy",
+}
+
 
 def find_column(columns, exact=None, startswith=None):
     if exact:
@@ -66,14 +81,26 @@ def clean_project_code(value):
     return text
 
 
+def normalize_partner_flagship_id(project_code, flagship_title):
+    code = clean_project_code(project_code)
+    if code in SUSTAINABLE_HEALTH_PARTNER_PROJECTS:
+        return SUSTAINABLE_HEALTH_PARTNER_PROJECTS[code]
+
+    title_key = normalize_for_id(flagship_title)
+    if title_key in SUSTAINABLE_HEALTH_PARTNER_TITLES:
+        return SUSTAINABLE_HEALTH_PARTNER_TITLES[title_key]
+
+    return code
+
+
 def normalize_category(value):
     text = compact_spaces(value)
     if not text:
         return "Unknown"
     low = text.lower()
-    if low == "privaat":
+    if low.startswith("privaat"):
         return "Privaat"
-    if low in {"publiek / maatschappelijk", "publiek/maatschappelijk"}:
+    if low.startswith("publiek") or low.startswith("maatschappelijk") or "maatschappelijk" in low:
         return "Publiek / Maatschappelijk"
     return text
 
@@ -116,6 +143,7 @@ def clean_partner_records(raw):
         raw[column] = raw[column].apply(compact_spaces)
 
     columns = list(raw.columns)
+    category_column = find_column(columns, startswith="Categorie partner")
     collaboration_column = find_column(columns, startswith="Type samenwerking")
     role_column = find_column(columns, startswith="Rol en relevantie")
     period_column = find_column(columns, startswith="Rapportage periode")
@@ -123,17 +151,18 @@ def clean_partner_records(raw):
     records = []
     for idx, row in raw.iterrows():
         partner_name = compact_spaces(row["Naam partner"])
-        flagship_id = clean_project_code(row["Meta_Project_Code"])
+        flagship_title_raw = compact_spaces(row["Flagship"])
+        flagship_id = normalize_partner_flagship_id(row["Meta_Project_Code"], flagship_title_raw)
         collaboration_raw = compact_spaces(row[collaboration_column])
         collaboration_types = canonical_collaboration_types(collaboration_raw)
         records.append({
             "source_row": int(idx) + 2,
             "flagship_id": flagship_id,
-            "flagship_title_raw": compact_spaces(row["Flagship"]),
+            "flagship_title_raw": flagship_title_raw,
             "partner_id": f"partner:{normalize_for_id(partner_name)}",
             "partner_name": partner_name,
-            "partner_category": normalize_category(row["Categorie partner"]),
-            "partner_category_raw": compact_spaces(row["Categorie partner"]),
+            "partner_category": normalize_category(row[category_column]),
+            "partner_category_raw": compact_spaces(row[category_column]),
             "collaboration_types": "; ".join(collaboration_types),
             "collaboration_type_raw": collaboration_raw,
             "start_year": clean_year(row["Startjaar"]),
@@ -150,10 +179,21 @@ def clean_partner_records(raw):
     return cleaned
 
 
+def configured_partner_workbooks():
+    paths = list(INPUT_PARTNER_XLSX_FILES)
+    if INPUT_PARTNERS_XLSX not in paths:
+        paths.insert(0, INPUT_PARTNERS_XLSX)
+    return paths
+
+
 def load_partners():
-    if INPUT_PARTNERS_XLSX.exists():
-        raw = pd.read_excel(INPUT_PARTNERS_XLSX, sheet_name="Partners", dtype=str)
-        cleaned = clean_partner_records(raw)
+    input_paths = [path for path in configured_partner_workbooks() if path.exists()]
+    if input_paths:
+        cleaned_frames = []
+        for path in input_paths:
+            raw = pd.read_excel(path, sheet_name="Partners", dtype=str)
+            cleaned_frames.append(clean_partner_records(raw))
+        cleaned = pd.concat(cleaned_frames, ignore_index=True) if cleaned_frames else empty_partners_frame()
         OUT_PARTNERS_CLEANED.parent.mkdir(exist_ok=True)
         cleaned.to_csv(OUT_PARTNERS_CLEANED, index=False, encoding="utf-8-sig")
         return cleaned

@@ -32,7 +32,14 @@ def build_partner_dashboard_data(partners, applicants, flagship_metrics):
         partners[column] = partners[column].apply(clean_text)
 
     applicant_flagship_ids = set(applicants["flagship_id"].dropna().map(clean_text))
+    if "proposal_id" in applicants:
+        applicant_flagship_ids.update(applicants["proposal_id"].dropna().map(clean_text))
+    if "proposal_key" in applicants:
+        applicant_flagship_ids.update(applicants["proposal_key"].dropna().map(clean_text))
+
     flagship_title_map = flagship_metrics.set_index("flagship_id")["flagship_title"].to_dict()
+    if "proposal_key" in flagship_metrics:
+        flagship_title_map.update(flagship_metrics.set_index("proposal_key")["flagship_title"].to_dict())
 
     links = []
     categories = set()

@@ -3,7 +3,7 @@ from collections import Counter, defaultdict
 import pandas as pd
 
 from ..config import CAMPUS_CLUSTER_MAPPING, CAMPUS_PARTNER_MAPPING, SELECTED_FLAGSHIP_GROUPS
-from ..text_utils import clean_text, normalize_for_id
+from ..text_utils import clean_text, normalize_for_id, split_semicolon_values
 
 
 CAMPUS_CLUSTERS = [
@@ -79,6 +79,12 @@ def partner_node_id(partner_name):
     return f"campus-partner:{partner_key(partner_name)}"
 
 
+def clean_collaboration_types(value):
+    if isinstance(value, (list, tuple, set)):
+        return [clean_text(item) for item in value if clean_text(item)]
+    return split_semicolon_values(value)
+
+
 def read_csv_mapping(path, columns):
     if not path.exists():
         return pd.DataFrame(columns=columns)
@@ -145,6 +151,8 @@ def existing_partner_links_for_project(project, partner_data):
                 "source_type": project["source_type"],
                 "partner_name": link.get("partner_name", ""),
                 "partner_type": link.get("partner_category", "other/unknown"),
+                "collaboration_types": clean_collaboration_types(link.get("collaboration_types", [])),
+                "collaboration_type_raw": link.get("collaboration_type_raw", ""),
                 "evidence_text": link.get("role_relevance", ""),
                 "notes": "Imported from existing flagship partner data",
                 "source": "existing_flagship_partner_data",
@@ -166,6 +174,8 @@ def manual_partner_links(projects_by_id):
             "source_type": row["source_type"] or (project or {}).get("source_type", ""),
             "partner_name": row["partner_name"],
             "partner_type": partner_type,
+            "collaboration_types": [],
+            "collaboration_type_raw": "",
             "evidence_text": row["evidence_text"],
             "notes": row["notes"],
             "source": "campus_project_partner_mapping",
@@ -191,6 +201,8 @@ def build_partner_cluster_view(projects, partner_links_by_project):
                 "partner_key": partner_key(partner_name),
                 "partner_node_id": partner_node_id(partner_name),
                 "partner_type": clean_text(link.get("partner_type", "")) or "other/unknown",
+                "collaboration_types": clean_collaboration_types(link.get("collaboration_types", [])),
+                "collaboration_type_raw": clean_text(link.get("collaboration_type_raw", "")),
                 "evidence_text": clean_text(link.get("evidence_text", "")),
                 "notes": clean_text(link.get("notes", "")),
                 "source": clean_text(link.get("source", "")),

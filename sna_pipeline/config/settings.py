@@ -19,6 +19,8 @@ INPUT_APPLICANTS = CLEANED_APPLICANTS if CLEANED_APPLICANTS.exists() else READY_
 INPUT_PERSON_EDGES = Path("output_ready/person_person_edges_sna_ready.csv")
 INPUT_ORG_EDGES = Path("output_ready/person_organisation_edges_sna_ready.csv")
 INPUT_PARTNERS_XLSX = Path("Data/Partners.xlsx")
+INPUT_PARTNERS_SHP_XLSX = Path("Data/Partners_shp.xlsx")
+INPUT_PARTNER_XLSX_FILES = [INPUT_PARTNERS_XLSX, INPUT_PARTNERS_SHP_XLSX]
 OUT_PARTNERS_CLEANED = CLEANED_FOLDER / "partners_cleaned.csv"
 
 OUTPUT_FOLDER = Path("output_sna")

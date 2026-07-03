@@ -304,6 +304,12 @@
       });
     }
 
+    function restoreCurrentNode(nodeId) {
+      const node = activeState.currentNodes.find(item => item.id === nodeId);
+      if (!node) return;
+      network.body.data.nodes.update(node);
+    }
+
     function departmentDisplay(person) {
       const clean = person.department_clean || person.department || '-';
       const raw = person.department_raw || '';
@@ -332,13 +338,13 @@
       `;
     }
 
-    function showPersonTooltip(person, pointer) {
+    function showNetworkTooltip(html, pointer) {
       const tooltip = document.getElementById('personTooltip');
       const networkRect = document.getElementById('network').getBoundingClientRect();
       const x = networkRect.left + (pointer?.x ?? 0) + 16;
       const y = networkRect.top + (pointer?.y ?? 0) + 16;
 
-      tooltip.innerHTML = renderPersonTooltipContent(person);
+      tooltip.innerHTML = html;
       tooltip.classList.add('visible');
       tooltip.setAttribute('aria-hidden', 'false');
 
@@ -357,10 +363,83 @@
       tooltip.style.top = `${top}px`;
     }
 
-    function hidePersonTooltip() {
+    function showPersonTooltip(person, pointer) {
+      showNetworkTooltip(renderPersonTooltipContent(person), pointer);
+    }
+
+    function hideNetworkTooltip() {
       const tooltip = document.getElementById('personTooltip');
       tooltip.classList.remove('visible');
       tooltip.setAttribute('aria-hidden', 'true');
+    }
+
+    function hidePersonTooltip() {
+      hideNetworkTooltip();
+    }
+
+    function renderCampusTooltipContent(nodeId) {
+      if (campusProjectsByNodeId.has(nodeId)) {
+        const project = campusProjectsByNodeId.get(nodeId);
+        const partners = campusPartnersForProject(project);
+        const collaborationTypes = countValues(partners.flatMap(link => link.collaboration_types || []))
+          .slice(0, 4)
+          .map(([type]) => type)
+          .join('; ') || '-';
+        return `
+          <div class="tooltip-title">
+            <span class="swatch" style="background:${colorForCampusSource(project.source_type)}"></span>
+            <span>${escapeHtml(project.project_name)}</span>
+          </div>
+          <div class="tooltip-grid">
+            <span>Type</span><span>${escapeHtml(project.source_type)}</span>
+            <span>Cluster</span><span>${escapeHtml(project.primary_cluster)}</span>
+            <span>Personen</span><span>${fmt.format(project.n_people || 0)}</span>
+            <span>Partners</span><span>${fmt.format(new Set(partners.map(link => link.partner_name)).size)}</span>
+            <span>Samenwerking</span><span>${escapeHtml(collaborationTypes)}</span>
+          </div>
+          <div class="tooltip-hint">Klik om projectdetails te openen.</div>
+        `;
+      }
+
+      if (campusClustersById.has(nodeId)) {
+        const cluster = campusClustersById.get(nodeId);
+        return `
+          <div class="tooltip-title">
+            <span class="swatch" style="background:${colorForCampusCluster(cluster.name)}"></span>
+            <span>${escapeHtml(cluster.name)}</span>
+          </div>
+          <div class="tooltip-grid">
+            <span>Items</span><span>${fmt.format(cluster.n_projects || 0)}</span>
+            <span>Flagships</span><span>${fmt.format(cluster.n_flagships || 0)}</span>
+            <span>Sustainable Health</span><span>${fmt.format(cluster.n_sustainable_health || 0)}</span>
+            <span>Partners</span><span>${fmt.format(cluster.n_unique_partners || 0)}</span>
+          </div>
+          <div class="tooltip-hint">Klik om clusterdetails te openen.</div>
+        `;
+      }
+
+      const rows = campusPartnerRowsByNodeId.get(nodeId) || [];
+      if (rows.length) {
+        const first = rows[0];
+        const collaborationTypes = countValues(rows.flatMap(row => row.collaboration_types || []))
+          .slice(0, 4)
+          .map(([type]) => type)
+          .join('; ') || '-';
+        return `
+          <div class="tooltip-title">
+            <span class="swatch" style="background:${colorForPartnerCategory(first.partner_type || 'other/unknown')}"></span>
+            <span>${escapeHtml(first.partner_name)}</span>
+          </div>
+          <div class="tooltip-grid">
+            <span>Partner type</span><span>${escapeHtml(first.partner_type || 'other/unknown')}</span>
+            <span>Projectlinks</span><span>${fmt.format(rows.length)}</span>
+            <span>Samenwerking</span><span>${escapeHtml(collaborationTypes)}</span>
+          </div>
+          <div class="tooltip-hint">Klik om partnerdetails te openen.</div>
+        `;
+      }
+
+      return '';
     }
 
     function openPersonNetwork(personId) {
@@ -413,7 +492,6 @@
       return {
         id: project.id,
         label: showLabel ? project.project_name : '',
-        title: `<b>${escapeHtml(project.project_name)}</b><br>${escapeHtml(project.source_type)}<br>${escapeHtml(project.primary_cluster)}<br>${fmt.format(project.n_people || 0)} personen`,
         value: Math.max(1, project.n_people || 1),
         size: 18 + Math.min(28, Math.sqrt(Math.max(1, project.n_people || 1)) * 3),
         shape: 'box',
@@ -435,7 +513,6 @@
       return {
         id: cluster.id,
         label: cluster.name,
-        title: `<b>${escapeHtml(cluster.name)}</b><br>${fmt.format(cluster.n_projects)} project/programme item(s)`,
         value: Math.max(1, cluster.n_projects || 1),
         size: 24 + Math.min(24, Math.sqrt(Math.max(1, cluster.n_projects || 1)) * 5),
         color: {
@@ -455,7 +532,6 @@
       return {
         id: row.partner_node_id,
         label: showLabel ? row.partner_name : '',
-        title: `<b>${escapeHtml(row.partner_name)}</b><br>${escapeHtml(row.partner_type || 'other/unknown')}<br>${fmt.format(rows.length)} campus project link(s)`,
         value: Math.max(1, rows.length),
         size: 11 + Math.min(18, Math.sqrt(Math.max(1, rows.length)) * 4),
         color: {
@@ -540,6 +616,15 @@
 
     function campusPartnerTypeCounts(rows) {
       return countValues(rows.map(row => row.partner_type || 'other/unknown'));
+    }
+
+    function campusCollaborationText(item) {
+      const types = (item.collaboration_types || []).filter(Boolean);
+      return types.length ? types.join('; ') : (item.collaboration_type_raw || '-');
+    }
+
+    function campusCollaborationTypeCounts(rows) {
+      return countValues(rows.flatMap(row => row.collaboration_types || []));
     }
 
     function campusUniquePartnerRows(rows) {
@@ -1212,7 +1297,7 @@
         .map(link => `
           <div class="list-item">
             <div class="list-item-title">${escapeHtml(link.partner_name)}</div>
-            <div class="subtle">${escapeHtml(link.partner_type || 'other/unknown')} · ${escapeHtml(link.source || '-')} · ${escapeHtml(link.evidence_text || link.notes || '-')}</div>
+            <div class="subtle">${escapeHtml(link.partner_type || 'other/unknown')} · ${escapeHtml(campusCollaborationText(link))} · ${escapeHtml(link.source || '-')} · ${escapeHtml(link.evidence_text || link.notes || '-')}</div>
           </div>
         `).join('');
       const dashboardLink = project.dashboard_id && flagshipsById.has(project.dashboard_id)
@@ -1241,11 +1326,14 @@
       const partnerTypeRows = campusPartnerTypeCounts(partnerRows).map(([type, count]) => `
         <span class="chip"><span class="swatch" style="background:${colorForPartnerCategory(type)}"></span>${escapeHtml(type)}: ${fmt.format(count)}</span>
       `).join('');
+      const collaborationRows = campusCollaborationTypeCounts(partnerRows).map(([type, count]) => `
+        <span class="chip">${escapeHtml(type)}: ${fmt.format(count)}</span>
+      `).join('');
       const topPartnerRows = campusTopPartnerRows(partnerRows, 8)
         .map(row => `
           <div class="list-item" data-campus-partner="${escapeHtml(row.partner_node_id)}">
             <div class="list-item-title">${escapeHtml(row.partner_name)}</div>
-            <div class="subtle">${escapeHtml(row.partner_type || 'other/unknown')}</div>
+            <div class="subtle">${escapeHtml(row.partner_type || 'other/unknown')} · ${escapeHtml(campusCollaborationText(row))}</div>
           </div>
         `).join('');
       const rows = projects.map(project => `
@@ -1261,6 +1349,7 @@
         <div class="kv"><span>Sustainable Health</span><span>${fmt.format(projects.filter(project => project.source_type === 'Sustainable Health').length)}</span></div>
         <div class="kv"><span>Unique partners</span><span>${fmt.format(uniquePartners.length)}</span></div>
         <div class="kv"><span>Partner types</span><span><div class="chips">${partnerTypeRows || '-'}</div></span></div>
+        <div class="kv"><span>Samenwerking</span><span><div class="chips">${collaborationRows || '-'}</div></span></div>
         <div class="kv"><span>Top partners</span><span>${topPartnerRows || '-'}</span></div>
         <div class="kv"><span>Projecten</span><span>${rows || '-'}</span></div>
       `;
@@ -1275,13 +1364,15 @@
         .map(row => `
           <div class="list-item" data-campus-project="${escapeHtml(row.project_id)}">
             <div class="list-item-title">${escapeHtml(row.project_name)}</div>
-            <div class="subtle">${escapeHtml(row.source_type)} · ${escapeHtml(row.primary_cluster)} · ${escapeHtml(row.source || '-')}</div>
+            <div class="subtle">${escapeHtml(row.source_type)} · ${escapeHtml(row.primary_cluster)} · ${escapeHtml(campusCollaborationText(row))} · ${escapeHtml(row.source || '-')}</div>
           </div>
         `).join('');
       const typeRows = campusPartnerTypeCounts(rows).map(([type, count]) => `${escapeHtml(type)}: ${fmt.format(count)}`).join('<br>');
+      const collaborationRows = campusCollaborationTypeCounts(rows).map(([type, count]) => `${escapeHtml(type)}: ${fmt.format(count)}`).join('<br>');
       document.getElementById('selectionDetails').innerHTML = `
         <h3>${escapeHtml(first.partner_name)}</h3>
         <div class="kv"><span>Partner type</span><span>${typeRows || escapeHtml(first.partner_type || 'other/unknown')}</span></div>
+        <div class="kv"><span>Samenwerking</span><span>${collaborationRows || '-'}</span></div>
         <div class="kv"><span>Project links</span><span>${fmt.format(rows.length)}</span></div>
         <div class="kv"><span>Projects</span><span>${projectRows || '-'}</span></div>
       `;
@@ -1309,6 +1400,8 @@
         <div class="kv"><span>Project</span><span>${escapeHtml(row.project_name || row.project_id)}</span></div>
         <div class="kv"><span>Partner</span><span>${escapeHtml(row.partner_name || '-')}</span></div>
         <div class="kv"><span>Partner type</span><span>${escapeHtml(row.partner_type || 'other/unknown')}</span></div>
+        <div class="kv"><span>Samenwerking</span><span>${escapeHtml(campusCollaborationText(row))}</span></div>
+        ${row.collaboration_type_raw && row.collaboration_type_raw !== campusCollaborationText(row) ? `<div class="kv"><span>Type raw</span><span>${escapeHtml(row.collaboration_type_raw)}</span></div>` : ''}
         <div class="kv"><span>Cluster</span><span>${escapeHtml(row.primary_cluster || '-')}</span></div>
         <div class="kv"><span>Edge type</span><span>project_to_partner</span></div>
         <div class="kv"><span>Source type</span><span>${escapeHtml(row.source_type || '-')}</span></div>
@@ -1358,7 +1451,7 @@
           width: 0.7,
           color: { color: '#d9e2f1', highlight: '#155eef', hover: '#155eef' },
           dashes: true,
-          title: `${escapeHtml(row.project_name)}<br>${escapeHtml(row.partner_type || 'other/unknown')}<br>${escapeHtml(row.evidence_text || row.notes || '-')}`,
+          title: `${escapeHtml(row.project_name)}<br>${escapeHtml(row.partner_type || 'other/unknown')}<br>${escapeHtml(campusCollaborationText(row))}<br>${escapeHtml(row.evidence_text || row.notes || '-')}`,
           kind: 'campus-project-partner-link',
           edge_type: 'project_to_partner',
           source_type: row.source_type,
@@ -2162,30 +2255,47 @@
 
     network.on('hoverNode', params => {
       const nodeId = params.node;
-      if (!personsById.has(nodeId)) return;
-      const person = personsById.get(nodeId);
       const node = activeState.currentNodes.find(item => item.id === nodeId);
-      if (node) {
-        network.body.data.nodes.update({
-          id: nodeId,
-          label: person.name,
-          color: node.color,
-          group: node.group,
-          size: node.size,
-          value: node.value,
-          kind: node.kind,
-        });
-      } else {
-        network.body.data.nodes.update({ id: nodeId, label: person.name });
+      if (personsById.has(nodeId)) {
+        const person = personsById.get(nodeId);
+        if (node) {
+          network.body.data.nodes.update({
+            id: nodeId,
+            label: person.name,
+            color: node.color,
+            group: node.group,
+            size: node.size,
+            value: node.value,
+            kind: node.kind,
+          });
+        } else {
+          network.body.data.nodes.update({ id: nodeId, label: person.name });
+        }
+        showPersonTooltip(person, params.pointer?.DOM);
+        return;
       }
-      showPersonTooltip(person, params.pointer?.DOM);
+
+      if (activeState.view === 'campus' && node && ['campus-project', 'campus-cluster', 'campus-partner'].includes(node.kind)) {
+        if (node.kind === 'campus-partner') {
+          const rows = campusPartnerRowsByNodeId.get(nodeId) || [];
+          if (rows.length) network.body.data.nodes.update({ id: nodeId, label: rows[0].partner_name });
+        }
+        const tooltipHtml = renderCampusTooltipContent(nodeId);
+        if (tooltipHtml) showNetworkTooltip(tooltipHtml, params.pointer?.DOM);
+      }
     });
 
     network.on('blurNode', params => {
       const nodeId = params.node;
-      if (!personsById.has(nodeId)) return;
-      restorePersonNode(nodeId);
-      hidePersonTooltip();
+      if (personsById.has(nodeId)) {
+        restorePersonNode(nodeId);
+        hideNetworkTooltip();
+        return;
+      }
+      if (activeState.view === 'campus') {
+        restoreCurrentNode(nodeId);
+        hideNetworkTooltip();
+      }
     });
 
     renderFlagshipList();
