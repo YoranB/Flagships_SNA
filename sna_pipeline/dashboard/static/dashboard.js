@@ -96,7 +96,6 @@
       selectedPartnerCollaboration: '',
       selectedCampusSourceType: '',
       selectedCampusCluster: '',
-      showCampusClusters: true,
       showCampusPartners: false,
       minWeight: 1,
       hopDepth: 1,
@@ -120,7 +119,6 @@
         selectedPartnerCollaboration: activeState.selectedPartnerCollaboration || '',
         selectedCampusSourceType: activeState.selectedCampusSourceType || '',
         selectedCampusCluster: activeState.selectedCampusCluster || '',
-        showCampusClusters: Boolean(activeState.showCampusClusters),
         showCampusPartners: Boolean(activeState.showCampusPartners),
         minWeight: Number(activeState.minWeight || 1),
         hopDepth: Number(activeState.hopDepth || 1),
@@ -156,7 +154,6 @@
       document.getElementById('departmentFilter').value = snapshot.selectedDepartment || '';
       document.getElementById('campusSourceTypeFilter').value = snapshot.selectedCampusSourceType || '';
       document.getElementById('campusClusterFilter').value = snapshot.selectedCampusCluster || '';
-      document.getElementById('showCampusClustersToggle').checked = snapshot.showCampusClusters !== false;
       document.getElementById('showCampusPartnersToggle').checked = Boolean(snapshot.showCampusPartners);
       document.getElementById('partnerCategoryFilter').value = snapshot.selectedPartnerCategory || '';
       document.getElementById('partnerCollaborationFilter').value = snapshot.selectedPartnerCollaboration || '';
@@ -569,6 +566,77 @@
         .sort((a, b) => b.count - a.count || a.row.partner_name.localeCompare(b.row.partner_name))
         .slice(0, limit)
         .map(item => item.row);
+    }
+
+    function campusCirclePosition(center, index, total, radius, startAngle = -Math.PI / 2) {
+      if (total <= 1 || radius === 0) return { x: center.x, y: center.y };
+      const angle = startAngle + (Math.PI * 2 * index / total);
+      return {
+        x: center.x + Math.cos(angle) * radius,
+        y: center.y + Math.sin(angle) * radius,
+      };
+    }
+
+    function campusRingPosition(center, index, total, baseRadius, ringSize = 24) {
+      if (total <= 1) return { x: center.x + baseRadius, y: center.y };
+      const ringIndex = Math.floor(index / ringSize);
+      const ringStart = ringIndex * ringSize;
+      const ringTotal = Math.min(ringSize, total - ringStart);
+      return campusCirclePosition(center, index - ringStart, ringTotal, baseRadius + ringIndex * 110, -Math.PI / 2 + ringIndex * 0.28);
+    }
+
+    function applyCampusLayout(projectNodes, clusterNodes, partnerNodes, projects, partnerRowsByNodeId) {
+      const clusterOrder = (campusData.clusters || [])
+        .map(cluster => cluster.id)
+        .filter(id => clusterNodes.some(node => node.id === id));
+      const clusterRadius = clusterOrder.length <= 1 ? 0 : 650;
+      const clusterPositions = new Map();
+      clusterOrder.forEach((clusterId, index) => {
+        clusterPositions.set(clusterId, campusCirclePosition({ x: 0, y: 0 }, index, clusterOrder.length, clusterRadius));
+      });
+
+      const projectNodesById = new Map(projectNodes.map(node => [node.id, node]));
+      const projectsByCluster = new Map();
+      for (const project of projects) {
+        if (!projectsByCluster.has(project.cluster_id)) projectsByCluster.set(project.cluster_id, []);
+        projectsByCluster.get(project.cluster_id).push(project);
+      }
+      for (const [clusterId, clusterProjects] of projectsByCluster.entries()) {
+        const center = clusterPositions.get(clusterId) || { x: 0, y: 0 };
+        clusterProjects
+          .sort((a, b) => a.project_name.localeCompare(b.project_name))
+          .forEach((project, index) => {
+            const node = projectNodesById.get(project.id);
+            if (!node) return;
+            const position = campusRingPosition(center, index, clusterProjects.length, 125, 10);
+            Object.assign(node, { x: position.x, y: position.y, fixed: { x: true, y: true }, physics: false });
+          });
+      }
+
+      const partnerNodesById = new Map(partnerNodes.map(node => [node.id, node]));
+      const partnersByCluster = new Map();
+      for (const [partnerNodeId, rows] of partnerRowsByNodeId.entries()) {
+        const clusterId = rows[0]?.cluster_id;
+        if (!clusterId) continue;
+        if (!partnersByCluster.has(clusterId)) partnersByCluster.set(clusterId, []);
+        partnersByCluster.get(clusterId).push({ partnerNodeId, rows });
+      }
+      for (const [clusterId, partners] of partnersByCluster.entries()) {
+        const center = clusterPositions.get(clusterId) || { x: 0, y: 0 };
+        partners
+          .sort((a, b) => a.rows[0].partner_name.localeCompare(b.rows[0].partner_name))
+          .forEach((item, index) => {
+            const node = partnerNodesById.get(item.partnerNodeId);
+            if (!node) return;
+            const position = campusRingPosition(center, index, partners.length, 285, 28);
+            Object.assign(node, { x: position.x, y: position.y, fixed: { x: true, y: true }, physics: false });
+          });
+      }
+
+      for (const node of clusterNodes) {
+        const position = clusterPositions.get(node.id) || { x: 0, y: 0 };
+        Object.assign(node, { x: position.x, y: position.y, fixed: { x: true, y: true }, physics: false });
+      }
     }
 
     function flagshipLabel(flagship) {
@@ -1135,102 +1203,6 @@
       `;
     }
 
-    function renderCampusTables(projects) {
-      const projectIds = new Set(projects.map(project => project.project_id));
-      const clusterRows = (campusData.cluster_overview || [])
-        .map(row => {
-          const filteredProjects = projects.filter(project => project.cluster_id === row.cluster_id);
-          if (!filteredProjects.length) return '';
-          const clusterPartnerRows = campusPartnerRowsForProjects(filteredProjects);
-          const flagships = filteredProjects.filter(project => project.source_type === 'Flagship').map(project => project.project_name);
-          const sustainable = filteredProjects.filter(project => project.source_type === 'Sustainable Health').map(project => project.project_name);
-          return `
-            <tr data-campus-cluster="${escapeHtml(row.cluster_id)}">
-              <td>${escapeHtml(row.cluster)}</td>
-              <td>${escapeHtml(flagships.join('; ') || '-')}</td>
-              <td>${escapeHtml(sustainable.join('; ') || '-')}</td>
-              <td>${fmt.format(filteredProjects.length)}</td>
-              <td>${fmt.format(campusUniquePartnerRows(clusterPartnerRows).length)}</td>
-            </tr>
-          `;
-        })
-        .join('');
-      document.getElementById('campusClusterOverview').innerHTML = `
-        <table class="convergence-table">
-          <thead>
-            <tr>
-              <th>Thematic cluster</th>
-              <th>Flagships</th>
-              <th>Sustainable Health</th>
-              <th>Items</th>
-              <th>Partners</th>
-            </tr>
-          </thead>
-          <tbody>${clusterRows || '<tr><td colspan="5">Geen projecten binnen deze filters</td></tr>'}</tbody>
-        </table>
-      `;
-
-      const projectRows = projects
-        .sort((a, b) => a.source_type.localeCompare(b.source_type) || a.primary_cluster.localeCompare(b.primary_cluster) || a.project_name.localeCompare(b.project_name))
-        .map(project => {
-          const partners = campusPartnersForProject(project);
-          return `
-            <tr data-campus-project="${escapeHtml(project.project_id)}">
-              <td>${escapeHtml(project.project_name)}</td>
-              <td>${escapeHtml(project.source_type)}</td>
-              <td>${escapeHtml(project.primary_cluster)}</td>
-              <td>${fmt.format(partners.length ? new Set(partners.map(link => link.partner_name)).size : 0)}</td>
-              <td>${escapeHtml(project.evidence_text)}</td>
-            </tr>
-          `;
-        })
-        .join('');
-      document.getElementById('campusProjectOverview').innerHTML = `
-        <table class="convergence-table">
-          <thead>
-            <tr>
-              <th>Project/programme</th>
-              <th>Source type</th>
-              <th>Primary cluster</th>
-              <th>Partners</th>
-              <th>Evidence</th>
-            </tr>
-          </thead>
-          <tbody>${projectRows || '<tr><td colspan="5">Geen projecten binnen deze filters</td></tr>'}</tbody>
-        </table>
-      `;
-
-      const partnerRows = (campusData.partner_cluster_view || [])
-        .filter(row => projectIds.has(row.project_id))
-        .sort((a, b) => a.partner_name.localeCompare(b.partner_name) || a.project_name.localeCompare(b.project_name))
-        .map(row => `
-          <tr data-campus-project="${escapeHtml(row.project_id)}">
-            <td>${escapeHtml(row.partner_name)}</td>
-            <td>${escapeHtml(row.partner_type || 'other/unknown')}</td>
-            <td>${escapeHtml(row.project_name)}</td>
-            <td>${escapeHtml(row.source_type)}</td>
-            <td>${escapeHtml(row.primary_cluster)}</td>
-            <td>${escapeHtml(row.source || '-')}</td>
-          </tr>
-        `)
-        .join('');
-      document.getElementById('campusPartnerOverview').innerHTML = `
-        <table class="convergence-table">
-          <thead>
-            <tr>
-              <th>Partner</th>
-              <th>Partner type</th>
-              <th>Project/programme</th>
-              <th>Source type</th>
-              <th>Thematic cluster</th>
-              <th>Source</th>
-            </tr>
-          </thead>
-          <tbody>${partnerRows || '<tr><td colspan="6">Geen partnerlinks binnen deze filters</td></tr>'}</tbody>
-        </table>
-      `;
-    }
-
     function showCampusProjectDetails(projectOrId) {
       const project = typeof projectOrId === 'string' ? campusProjectsById.get(projectOrId) || campusProjectsByNodeId.get(projectOrId) : projectOrId;
       if (!project) return;
@@ -1346,31 +1318,25 @@
     }
 
     function renderCampusOverview() {
-      document.getElementById('campusPanel').hidden = false;
       const projects = (campusData.projects || []).filter(passCampusProjectFilters);
-      renderCampusTables(projects);
 
       const projectIds = new Set(projects.map(project => project.id));
       const clusterIds = new Set(projects.map(project => project.cluster_id));
       const projectNodes = projects.map(project => campusProjectNode(project, true));
-      const clusterNodes = activeState.showCampusClusters
-        ? (campusData.clusters || []).filter(cluster => clusterIds.has(cluster.id)).map(campusClusterNode)
-        : [];
-      const projectClusterEdges = activeState.showCampusClusters
-        ? (campusData.project_cluster_edges || [])
-          .filter(edge => projectIds.has(edge.source) && clusterIds.has(edge.target))
-          .map(edge => ({
-            id: edge.id,
-            from: edge.source,
-            to: edge.target,
-            width: 2,
-            color: { color: '#98a2b3', highlight: '#155eef', hover: '#155eef' },
-            dashes: false,
-            title: `${escapeHtml(edge.source_type)}<br>${escapeHtml(edge.evidence_text)}`,
-            kind: 'campus-project-cluster-link',
-            raw: edge,
-          }))
-        : [];
+      const clusterNodes = (campusData.clusters || []).filter(cluster => clusterIds.has(cluster.id)).map(campusClusterNode);
+      const projectClusterEdges = (campusData.project_cluster_edges || [])
+        .filter(edge => projectIds.has(edge.source) && clusterIds.has(edge.target))
+        .map(edge => ({
+          id: edge.id,
+          from: edge.source,
+          to: edge.target,
+          width: 2.2,
+          color: { color: '#667085', highlight: '#155eef', hover: '#155eef' },
+          dashes: false,
+          title: `${escapeHtml(edge.source_type)}<br>${escapeHtml(edge.evidence_text)}`,
+          kind: 'campus-project-cluster-link',
+          raw: edge,
+        }));
       const visibleProjectIds = new Set(projects.map(project => project.project_id));
       const visibleProjectById = new Map(projects.map(project => [project.project_id, project]));
       const visiblePartnerRows = activeState.showCampusPartners
@@ -1389,8 +1355,8 @@
           id: `campus-project-partner:${row.project_id}:${row.partner_node_id}:${row.source_link_id || idx}`,
           from: project?.id || `campus-project:${row.project_id}`,
           to: row.partner_node_id,
-          width: 1.4,
-          color: { color: '#c7d7fe', highlight: '#155eef', hover: '#155eef' },
+          width: 0.7,
+          color: { color: '#d9e2f1', highlight: '#155eef', hover: '#155eef' },
           dashes: true,
           title: `${escapeHtml(row.project_name)}<br>${escapeHtml(row.partner_type || 'other/unknown')}<br>${escapeHtml(row.evidence_text || row.notes || '-')}`,
           kind: 'campus-project-partner-link',
@@ -1400,6 +1366,7 @@
         };
       });
       const edges = [...projectClusterEdges, ...partnerEdges];
+      applyCampusLayout(projectNodes, clusterNodes, partnerNodes, projects, partnerRowsByNodeId);
       const filters = [activeState.selectedCampusSourceType, activeState.selectedCampusCluster].filter(Boolean);
       const suffix = filters.length ? ` Filter: ${filters.join(' · ')}.` : '';
       setNetwork(
@@ -1594,7 +1561,6 @@
       activeState.selectedPartnerCollaboration = document.getElementById('partnerCollaborationFilter').value;
       activeState.selectedCampusSourceType = document.getElementById('campusSourceTypeFilter').value;
       activeState.selectedCampusCluster = document.getElementById('campusClusterFilter').value;
-      activeState.showCampusClusters = document.getElementById('showCampusClustersToggle').checked;
       activeState.showCampusPartners = document.getElementById('showCampusPartnersToggle').checked;
       activeState.selectedFlagship = document.getElementById('flagshipSelect').value;
       activeState.hopDepth = Number(document.getElementById('hopDepth').value || 1);
@@ -1602,11 +1568,8 @@
       updateFlagshipControls();
       renderFlagshipList();
       document.getElementById('convergencePanel').hidden = true;
-      document.getElementById('campusPanel').hidden = true;
       if (activeState.view === 'convergence') {
         document.getElementById('convergencePanel').hidden = false;
-      } else if (activeState.view === 'campus') {
-        document.getElementById('campusPanel').hidden = false;
       }
 
       if (activeState.view === 'convergence') {
@@ -1969,7 +1932,6 @@
         document.getElementById('departmentFilter').value = '';
         document.getElementById('campusSourceTypeFilter').value = '';
         document.getElementById('campusClusterFilter').value = '';
-        document.getElementById('showCampusClustersToggle').checked = true;
         document.getElementById('showCampusPartnersToggle').checked = false;
         document.getElementById('partnerCategoryFilter').value = '';
         document.getElementById('partnerCollaborationFilter').value = '';
@@ -1984,7 +1946,6 @@
         activeState.selectedPartnerCollaboration = '';
         activeState.selectedCampusSourceType = '';
         activeState.selectedCampusCluster = '';
-        activeState.showCampusClusters = true;
         activeState.showCampusPartners = false;
         isRestoringHistory = true;
         setView('flagships');
@@ -2042,11 +2003,6 @@
         renderActiveView();
       });
       document.getElementById('campusClusterFilter').addEventListener('change', () => {
-        pushHistory();
-        markActiveViewTab('campus');
-        renderActiveView();
-      });
-      document.getElementById('showCampusClustersToggle').addEventListener('change', () => {
         pushHistory();
         markActiveViewTab('campus');
         renderActiveView();
