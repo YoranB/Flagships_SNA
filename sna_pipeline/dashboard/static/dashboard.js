@@ -643,6 +643,7 @@
       const color = colorForPartnerCategory(row.partner_type || 'other/unknown');
       const linkCount = Math.max(1, rows.length);
       const isMultiLink = isMultiLinkCampusPartner(rows);
+      const hasPersistentLabel = Boolean(showLabel);
       const size = isMultiLink
         ? 21 + Math.min(20, Math.sqrt(linkCount) * 5)
         : 11 + Math.min(18, Math.sqrt(linkCount) * 4);
@@ -659,7 +660,7 @@
           highlight: { background: color, border },
           hover: { background: color, border }
         },
-        font: { size: isMultiLink ? 13 : 11, color: '#111827', strokeWidth: isMultiLink ? 4 : 3, strokeColor: '#ffffff' },
+        font: { size: hasPersistentLabel ? 16 : 11, color: '#111827', strokeWidth: hasPersistentLabel ? 5 : 3, strokeColor: '#ffffff' },
         group: row.partner_type || 'other/unknown',
         kind: 'campus-partner',
         partner_type: row.partner_type || 'other/unknown',
@@ -754,6 +755,12 @@
 
     function isMultiLinkCampusPartner(rows) {
       return (rows || []).length > 1;
+    }
+
+    function shouldShowCampusPartnerLabel(rows) {
+      return isMultiLinkCampusPartner(rows) ||
+        activeState.selectedPartnerCategory === MULTI_LINK_PARTNER_FILTER ||
+        (rows || []).some(row => row.partner_type === 'Privaat');
     }
 
     function campusPartnersForProject(project) {
@@ -1592,8 +1599,7 @@
         partnerRowsByNodeId.get(row.partner_node_id).push(row);
       }
       const partnerNodes = [...partnerRowsByNodeId.values()].map(rows => {
-        const showPartnerLabel = isMultiLinkCampusPartner(rows) || activeState.selectedPartnerCategory === MULTI_LINK_PARTNER_FILTER;
-        return campusPartnerNode(rows[0], rows, showPartnerLabel);
+        return campusPartnerNode(rows[0], rows, shouldShowCampusPartnerLabel(rows));
       });
       const partnerEdges = visiblePartnerRows.map((row, idx) => {
         const project = visibleProjectById.get(row.project_id);
