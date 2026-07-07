@@ -448,6 +448,112 @@
       return '';
     }
 
+    function renderSharedFlagshipEdgeTooltip(edge, titleText, hasClickDetails = false) {
+      const raw = edge.raw || edge;
+      const source = convergenceProfilesById.get(raw.source) || flagshipsById.get(raw.source) || flagshipsById.get(edge.from);
+      const target = convergenceProfilesById.get(raw.target) || flagshipsById.get(raw.target) || flagshipsById.get(edge.to);
+      const weight = raw.weight ?? edge.value ?? edge.label ?? '-';
+      const sharedPeople = Array.isArray(raw.shared_people) ? raw.shared_people.length : null;
+      return `
+        <div class="tooltip-title">
+          <span class="swatch" style="background:#155eef"></span>
+          <span>${escapeHtml(titleText)}</span>
+        </div>
+        <div class="tooltip-grid">
+          <span>Van</span><span>${escapeHtml(source?.title || raw.source || edge.from || '-')}</span>
+          <span>Naar</span><span>${escapeHtml(target?.title || raw.target || edge.to || '-')}</span>
+          <span>Gedeeld</span><span>${fmt.format(Number(weight) || 0)} persoon/personen</span>
+          ${sharedPeople === null ? '' : `<span>Personen</span><span>${fmt.format(sharedPeople)}</span>`}
+        </div>
+        ${hasClickDetails ? '<div class="tooltip-hint">Klik om details te openen.</div>' : ''}
+      `;
+    }
+
+    function renderPersonEdgeTooltip(edge) {
+      const raw = edge.raw || edge;
+      const source = personsById.get(raw.source || edge.from);
+      const target = personsById.get(raw.target || edge.to);
+      const flagshipTitles = raw.flagship_titles && raw.flagship_titles.length
+        ? raw.flagship_titles.join('; ')
+        : (raw.flagships || []).map(id => flagshipsById.get(id)?.title || id).join('; ');
+      return `
+        <div class="tooltip-title">
+          <span class="swatch" style="background:#98a2b3"></span>
+          <span>Co-applicant relatie</span>
+        </div>
+        <div class="tooltip-grid">
+          <span>Persoon</span><span>${escapeHtml(source?.name || raw.source || edge.from || '-')}</span>
+          <span>Persoon</span><span>${escapeHtml(target?.name || raw.target || edge.to || '-')}</span>
+          <span>Weight</span><span>${fmt.format(Number(raw.weight || edge.value || 1))}</span>
+          <span>Flagships</span><span>${escapeHtml(flagshipTitles || '-')}</span>
+        </div>
+      `;
+    }
+
+    function renderCampusEdgeTooltip(edge) {
+      const raw = edge.raw || edge;
+      if (edge.kind === 'campus-project-cluster-link') {
+        const project = campusProjectsByNodeId.get(raw.source || edge.from);
+        const cluster = campusClustersById.get(raw.target || edge.to);
+        return `
+          <div class="tooltip-title">
+            <span class="swatch" style="background:#667085"></span>
+            <span>Project-to-cluster</span>
+          </div>
+          <div class="tooltip-grid">
+            <span>Project</span><span>${escapeHtml(project?.project_name || raw.source || edge.from || '-')}</span>
+            <span>Cluster</span><span>${escapeHtml(cluster?.name || raw.target || edge.to || '-')}</span>
+            <span>Source type</span><span>${escapeHtml(raw.source_type || project?.source_type || '-')}</span>
+            <span>Evidence</span><span>${escapeHtml(raw.evidence_text || project?.evidence_text || '-')}</span>
+          </div>
+          <div class="tooltip-hint">Klik om details te openen.</div>
+        `;
+      }
+
+      return `
+        <div class="tooltip-title">
+          <span class="swatch" style="background:${colorForPartnerCategory(raw.partner_type || 'other/unknown')}"></span>
+          <span>Project-to-partner</span>
+        </div>
+        <div class="tooltip-grid">
+          <span>Project</span><span>${escapeHtml(raw.project_name || raw.project_id || '-')}</span>
+          <span>Partner</span><span>${escapeHtml(raw.partner_name || '-')}</span>
+          <span>Partner type</span><span>${escapeHtml(raw.partner_type || 'other/unknown')}</span>
+          <span>Samenwerking</span><span>${escapeHtml(campusCollaborationText(raw))}</span>
+          <span>Evidence</span><span>${escapeHtml(raw.evidence_text || raw.notes || '-')}</span>
+        </div>
+        <div class="tooltip-hint">Klik om details te openen.</div>
+      `;
+    }
+
+    function renderPartnerEdgeTooltip(edge) {
+      const link = edge.raw || partnerLinksById.get(edge.raw?.id) || edge;
+      const displayFlagship = flagshipsById.get(edge.displayFlagshipId) || flagshipsById.get(link.flagship_id);
+      return `
+        <div class="tooltip-title">
+          <span class="swatch" style="background:${colorForPartnerCategory(link.partner_category || 'Unknown')}"></span>
+          <span>Partner-link</span>
+        </div>
+        <div class="tooltip-grid">
+          <span>Flagship</span><span>${escapeHtml(displayFlagship?.title || link.flagship_title || link.flagship_id || '-')}</span>
+          <span>Partner</span><span>${escapeHtml(link.partner_name || '-')}</span>
+          <span>Categorie</span><span>${escapeHtml(link.partner_category || 'Unknown')}</span>
+          <span>Samenwerking</span><span>${escapeHtml((link.collaboration_types || []).join('; ') || '-')}</span>
+        </div>
+        <div class="tooltip-hint">Klik om details te openen.</div>
+      `;
+    }
+
+    function renderEdgeTooltipContent(edge) {
+      if (!edge) return '';
+      if (edge.kind === 'person-edge') return renderPersonEdgeTooltip(edge);
+      if (edge.kind === 'flagship-link') return renderSharedFlagshipEdgeTooltip(edge, 'Gedeelde personen');
+      if (edge.kind === 'convergence-flagship-link') return renderSharedFlagshipEdgeTooltip(edge, 'Convergence link', true);
+      if (edge.kind === 'campus-project-cluster-link' || edge.kind === 'campus-project-partner-link') return renderCampusEdgeTooltip(edge);
+      if (edge.kind === 'partner-flagship-link') return renderPartnerEdgeTooltip(edge);
+      return '';
+    }
+
     function openPersonNetwork(personId) {
       pushHistory();
       activeState.selectedPerson = personId;
@@ -814,6 +920,7 @@
     }
 
     function setNetwork(nodes, edges, title, subtitle) {
+      hideNetworkTooltip();
       activeState.currentNodes = nodes;
       activeState.currentEdges = edges;
       document.getElementById('viewNodes').textContent = fmt.format(nodes.length);
@@ -971,8 +1078,8 @@
           value: link.weight,
           width: 1 + Math.sqrt(link.weight),
           label: edgeLabel(link.weight),
-          title: `${link.weight} gedeelde persoon/personen`,
           kind: 'flagship-link',
+          raw: link,
         }));
       const label = activeState.selectedOnly ? 'Gekozen flagships' : 'Flagship-overzicht';
       setNetwork(nodes, edges, label, 'Klik op een flagship om deelnemers en co-applicant relaties te zien.');
@@ -1013,8 +1120,8 @@
           from: edge.source,
           to: edge.target,
           width: personEdgeWidth(edge),
-          title: `${escapeHtml(flagship.title)}<br>Weight: ${edge.weight}<br>${escapeHtml(edge.flagship_titles.join('; '))}`,
           kind: 'person-edge',
+          raw: edge,
         }));
 
       const modeLabel = activeState.edgeMode === 'all' ? 'alle edges' : activeState.edgeMode === 'selection' ? 'selectie-edges' : 'backbone';
@@ -1062,8 +1169,8 @@
           to: edge.target,
           width: personEdgeWidth(edge),
           label: edge.weight > 2 ? String(edge.weight) : '',
-          title: `Weight: ${edge.weight}<br>${escapeHtml(edge.flagship_titles.join('; '))}`,
           kind: 'person-edge',
+          raw: edge,
         }));
 
       const nodes = people.map(item => personNode(item, item.id === personId || item.betweenness >= 0.02));
@@ -1084,8 +1191,8 @@
           from: edge.source,
           to: edge.target,
           width: personEdgeWidth(edge),
-          title: `Weight: ${edge.weight}<br>${escapeHtml(edge.flagship_titles.join('; '))}`,
           kind: 'person-edge',
+          raw: edge,
         }));
       const nodes = people.map(person => personNode(person, true));
       setNetwork(nodes, edges, 'Top connectoren', `${people.length} personen gesorteerd op betweenness, flagships en weighted degree.`);
@@ -1106,8 +1213,8 @@
           to: edge.target,
           width: personEdgeWidth(edge),
           label: edge.weight > 2 ? String(edge.weight) : '',
-          title: `Weight: ${edge.weight}<br>${escapeHtml(edge.flagship_titles.join('; '))}`,
           kind: 'person-edge',
+          raw: edge,
         }));
       const nodes = people.map(person => personNode(person, true));
       const scopeParts = [
@@ -1155,8 +1262,8 @@
           to: edge.target,
           width: personEdgeWidth(edge),
           label: edge.weight > 2 ? String(edge.weight) : '',
-          title: `Weight: ${edge.weight}<br>${escapeHtml(edge.flagship_titles.join('; '))}`,
           kind: 'person-edge',
+          raw: edge,
         }));
       const topIds = new Set([...people]
         .sort((a, b) => b.betweenness - a.betweenness || b.weighted_degree - a.weighted_degree || b.degree - a.degree)
@@ -1186,8 +1293,8 @@
           to: edge.target,
           width: personEdgeWidth(edge),
           label: edge.weight > 2 ? String(edge.weight) : '',
-          title: `Weight: ${edge.weight}<br>${escapeHtml(edge.flagship_titles.join('; '))}`,
           kind: 'person-edge',
+          raw: edge,
         }));
       const topIds = new Set([...people]
         .sort((a, b) => b.betweenness - a.betweenness || b.weighted_degree - a.weighted_degree || b.degree - a.degree)
@@ -1471,7 +1578,6 @@
           width: 2.2,
           color: { color: '#667085', highlight: '#155eef', hover: '#155eef' },
           dashes: false,
-          title: `${escapeHtml(edge.source_type)}<br>${escapeHtml(edge.evidence_text)}`,
           kind: 'campus-project-cluster-link',
           raw: edge,
       }));
@@ -1504,7 +1610,6 @@
             hover: '#155eef',
           },
           dashes: true,
-          title: `${escapeHtml(row.project_name)}<br>${escapeHtml(row.partner_type || 'other/unknown')}<br>${escapeHtml(campusCollaborationText(row))}<br>${escapeHtml(row.evidence_text || row.notes || '-')}`,
           kind: 'campus-project-partner-link',
           edge_type: 'project_to_partner',
           source_type: row.source_type,
@@ -1554,7 +1659,6 @@
           value: link.weight,
           width: 1 + Math.sqrt(link.weight),
           label: edgeLabel(link.weight),
-          title: `${link.weight} gedeelde persoon/personen`,
           kind: 'convergence-flagship-link',
           raw: link,
         }));
@@ -1634,7 +1738,6 @@
         to: row.link.partner_id,
         width: 1.2,
         color: { color: '#98a2b3', highlight: '#155eef', hover: '#155eef' },
-        title: `${escapeHtml(row.displayFlagship.title)} ↔ ${escapeHtml(row.link.partner_name)}<br>${escapeHtml(row.link.partner_category)}<br>${escapeHtml((row.link.collaboration_types || []).join('; '))}`,
         kind: 'partner-flagship-link',
         raw: row.link,
         displayFlagshipId: row.displayFlagship.id,
@@ -2337,6 +2440,16 @@
         restoreCurrentNode(nodeId);
         hideNetworkTooltip();
       }
+    });
+
+    network.on('hoverEdge', params => {
+      const edge = activeState.currentEdges.find(item => item.id === params.edge);
+      const tooltipHtml = renderEdgeTooltipContent(edge);
+      if (tooltipHtml) showNetworkTooltip(tooltipHtml, params.pointer?.DOM);
+    });
+
+    network.on('blurEdge', () => {
+      hideNetworkTooltip();
     });
 
     renderFlagshipList();
