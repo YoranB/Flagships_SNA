@@ -35,26 +35,26 @@ def simplify_institution(value):
     low = value.lower()
     low_clean = re.sub(r"[^a-z0-9]+", " ", low).strip()
     low_compact = re.sub(r"[^a-z0-9]+", "", low)
+    padded = f" {low_clean} "
 
-    if any(token in low for token in ["erasmus mc", "erasmusmc", "emc"]) or low_compact in {"erasmusmc", "eramsusmc"}:
-        has_emc = True
-    else:
-        has_emc = False
+    def contains_phrase(phrase):
+        return f" {phrase} " in padded
+
+    has_emc = any(contains_phrase(phrase) for phrase in ["erasmus mc", "erasmusmc", "eramsus mc", "emc"])
 
     has_tud = any(
-        token in low
-        for token in [
+        contains_phrase(phrase)
+        for phrase in [
             "tu delft",
             "tudelft",
-            "tu-delft",
             "delft university of technology",
             "tud",
         ]
     )
 
     has_eur = any(
-        token in low
-        for token in [
+        contains_phrase(phrase)
+        for phrase in [
             "erasmus university rotterdam",
             "erasmus university",
             "erasmus universiteit",

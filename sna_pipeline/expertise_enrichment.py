@@ -49,14 +49,18 @@ def fetch_json(url, timeout):
         return json.loads(response.read().decode("utf-8", errors="replace"))
 
 
-def evidence_for_candidate(person, candidate_text):
+def evidence_for_candidate(person, candidate_text, candidate_affiliations=None):
     evidence = []
     text = clean_text(candidate_text).lower()
     institution = clean_text(person["institution"])
     department = clean_text(person["department"])
     email = clean_text(person["email"]).lower()
+    affiliations = [clean_text(value) for value in (candidate_affiliations or []) if clean_text(value)]
 
-    if institution and simplify_institution(candidate_text) == simplify_institution(institution):
+    if institution and any(
+        simplify_institution(affiliation) == simplify_institution(institution)
+        for affiliation in affiliations
+    ):
         evidence.append("institution")
     if email and "@" in email:
         domain = email.split("@", 1)[1]
@@ -64,9 +68,6 @@ def evidence_for_candidate(person, candidate_text):
             evidence.append("email_domain")
     if department and keyword_tokens(department) & keyword_tokens(candidate_text):
         evidence.append("department")
-    if any(token in text for token in ["erasmus", "delft", "tudelft", "erasmusmc", "university medical center"]):
-        evidence.append("profile_page_organisation")
-
     return sorted(set(evidence))
 
 
@@ -113,7 +114,7 @@ def openalex_candidates(person, timeout):
                 keywords.append(clean_text(concept.get("display_name", "")))
 
         candidate_text = " ".join([candidate_name, *institutions, *keywords])
-        evidence = evidence_for_candidate(person, candidate_text)
+        evidence = evidence_for_candidate(person, candidate_text, institutions)
         confidence = confidence_from_evidence(evidence, bool(keywords))
         if confidence == "needs_review":
             continue
@@ -152,7 +153,7 @@ def semantic_scholar_candidates(person, timeout):
             fields_of_study.extend(clean_text(value) for value in paper.get("fieldsOfStudy", []) or [])
         keywords = sorted(set(value for value in fields_of_study if value))[:8]
         candidate_text = " ".join([candidate_name, *affiliations, *titles, *keywords])
-        evidence = evidence_for_candidate(person, candidate_text)
+        evidence = evidence_for_candidate(person, candidate_text, affiliations)
         confidence = confidence_from_evidence(evidence, bool(keywords or titles))
         if confidence == "needs_review":
             continue
@@ -196,7 +197,7 @@ def orcid_candidates(person, timeout):
             keywords.extend(split_semicolon_values(value))
 
         candidate_text = " ".join([candidate_name, *affiliations, *keywords])
-        evidence = evidence_for_candidate(person, candidate_text)
+        evidence = evidence_for_candidate(person, candidate_text, affiliations)
         confidence = confidence_from_evidence(evidence, bool(keywords or affiliations))
         if confidence == "needs_review":
             continue
@@ -273,15 +274,19 @@ def enrich_person(person, timeout):
 def run(limit=None, timeout=8, sleep_seconds=0.2):
     applicants, _, _ = load_data()
     people = build_people(applicants)
-    if limit:
-        people = people[:limit]
+    limited_run = limit is not None
+    if limited_run:
+        people = people[:max(0, limit)]
 
     ENRICHED_FOLDER.mkdir(exist_ok=True)
     today = date.today().isoformat()
+    existing = pd.DataFrame(columns=ONLINE_COLUMNS)
+    if OUT_PERSON_EXPERTISE.exists():
+        existing = pd.read_csv(OUT_PERSON_EXPERTISE, dtype=str).fillna("")
+        existing = existing.reindex(columns=ONLINE_COLUMNS, fill_value="")
     manual_override_ids = load_manual_override_ids()
     preserved = {}
-    if OUT_PERSON_EXPERTISE.exists() and manual_override_ids:
-        existing = pd.read_csv(OUT_PERSON_EXPERTISE, dtype=str).fillna("")
+    if manual_override_ids:
         preserved = {
             row["person_id"]: row.to_dict()
             for _, row in existing.iterrows()
@@ -316,6 +321,14 @@ def run(limit=None, timeout=8, sleep_seconds=0.2):
 
         if sleep_seconds and index < len(people):
             time.sleep(sleep_seconds)
+
+    if limited_run and not existing.empty:
+        processed_ids = {person["person_id"] for person in people}
+        rows.extend(
+            {column: clean_text(row.get(column, "")) for column in ONLINE_COLUMNS}
+            for _, row in existing.iterrows()
+            if clean_text(row.get("person_id", "")) not in processed_ids
+        )
 
     output = pd.DataFrame(rows, columns=ONLINE_COLUMNS)
     output.to_csv(OUT_PERSON_EXPERTISE, index=False, encoding="utf-8-sig")

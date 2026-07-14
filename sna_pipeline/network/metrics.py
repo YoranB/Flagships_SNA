@@ -11,7 +11,11 @@ def calculate_person_metrics(G, applicants):
     weighted_degree = dict(G.degree(weight="weight"))
 
     degree_centrality = nx.degree_centrality(G)
-    betweenness = nx.betweenness_centrality(G, weight="weight", normalized=True)
+    distance_graph = G.copy()
+    for _, _, attrs in distance_graph.edges(data=True):
+        strength = float(attrs.get("weight", 1) or 1)
+        attrs["distance"] = 1.0 / strength if strength > 0 else 1.0
+    betweenness = nx.betweenness_centrality(distance_graph, weight="distance", normalized=True)
     closeness = nx.closeness_centrality(G)
 
     try:

@@ -23,29 +23,29 @@ Hester Lingsma | Erasmus MC | degree=116 | flagships=4
 
 Top 10 by betweenness centrality
 --------------------------------------------------
-Kees Ahaus | Erasmus University Rotterdam | betweenness=0.0848 | flagships=7
-Joost Gribnau | Erasmus MC | betweenness=0.0805 | flagships=6
-Pieter Jan Stappers | TU Delft | betweenness=0.0563 | flagships=3
-Marleen de Mul | Erasmus University Rotterdam | betweenness=0.0444 | flagships=5
-Maartje Schermer | Erasmus MC | betweenness=0.0392 | flagships=4
-Ken Redekop | Erasmus University Rotterdam | betweenness=0.0358 | flagships=6
-Pauline Jansen | Erasmus MC | betweenness=0.0317 | flagships=2
-Carin Uyl – de Groot | Erasmus University Rotterdam | betweenness=0.0277 | flagships=5
-Pieter van Baal | Erasmus University Rotterdam | betweenness=0.0272 | flagships=3
-André Uitterlinden | Erasmus MC | betweenness=0.0270 | flagships=3
+Kees Ahaus | Erasmus University Rotterdam | betweenness=0.1679 | flagships=7
+Marcel Reinders | TU Delft | betweenness=0.0953 | flagships=5
+Saba Hinrichs- Krapels | TU Delft | betweenness=0.0907 | flagships=4
+Yvonne van Everdingen | Erasmus University Rotterdam | betweenness=0.0817 | flagships=2
+Hester Lingsma | Erasmus MC | betweenness=0.0703 | flagships=4
+Loes Keijsers | Erasmus University Rotterdam | betweenness=0.0694 | flagships=1
+Van Veelen * | Erasmus MC | betweenness=0.0692 | flagships=1
+Amir Zadpoor | TU Delft | betweenness=0.0636 | flagships=4
+Sita Bierma- Zeinstra | Erasmus MC | betweenness=0.0607 | flagships=1
+David Abbink | TU Delft | betweenness=0.0598 | flagships=2
 
 Top 10 cross-flagship people
 --------------------------------------------------
 Kees Ahaus | Erasmus University Rotterdam | flagships=7 | degree=259
-Ken Redekop | Erasmus University Rotterdam | flagships=6 | degree=146
 Joost Gribnau | Erasmus MC | flagships=6 | degree=202
-Marcel Reinders | TU Delft | flagships=5 | degree=215
-Marleen de Mul | Erasmus University Rotterdam | flagships=5 | degree=104
-Massimo Mastrangeli | TU Delft | flagships=5 | degree=95
+Ken Redekop | Erasmus University Rotterdam | flagships=6 | degree=146
 Carin Uyl – de Groot | Erasmus University Rotterdam | flagships=5 | degree=154
-Eline Bunnik | Erasmus MC | flagships=4 | degree=80
+Massimo Mastrangeli | TU Delft | flagships=5 | degree=95
+Marleen de Mul | Erasmus University Rotterdam | flagships=5 | degree=104
+Marcel Reinders | TU Delft | flagships=5 | degree=215
+Hester Lingsma | Erasmus MC | flagships=4 | degree=116
 Hub Zwart | Erasmus University Rotterdam | flagships=4 | degree=101
-Gijsje Koender- ink | TU Delft | flagships=4 | degree=92
+Eline Bunnik | Erasmus MC | flagships=4 | degree=80
 
 Top institution collaborations
 --------------------------------------------------
