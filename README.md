@@ -1,6 +1,6 @@
 # Flagships SNA
 
-This repository builds a social network analysis (SNA) dashboard from the cleaned Flagships applicant data.
+This repository builds a multi-call social network analysis (SNA) dashboard from Flagship, Open Mind, Impuls, and Sustainable Health Programs data.
 
 ## Project Flow
 
@@ -60,6 +60,8 @@ The expertise enrichment command writes:
 Manual program data can be added through `input_manual/sustainable_health_programs.csv`.
 The cleaning step appends those rows to the cleaned applicant dataset and the SNA step derives the corresponding person-person and person-organisation edges from the same rows.
 
+Open Mind and Impuls data is managed in `Data/convergence_openmind_impuls_cleaned_v1.xlsx`. The cleaning step validates and imports `Projects_clean`, `People_clean`, and `Person_Project_Edges`. Its projects remain available for provenance, quality checks, search, person project context, and relationship weights, but are not published as Flagship nodes.
+
 HealthTech Campus thematic mapping is editable in `Data/campus_project_cluster_mapping.csv`.
 Optional project-partner additions can be added in `Data/campus_project_partner_mapping.csv`; existing flagship partner records are still merged where they match selected campus projects.
 
@@ -69,11 +71,14 @@ Open `output_sna/person_network_interactive.html` in a browser after running the
 
 Useful controls:
 
+- `Calls`: selects one or more calls. An empty selection means all calls; `Reset` restores that state.
 - `Alleen gekozen flagships`: limits the overview to the 10 selected flagship groups.
-- `Zoeken`: searches people by name, email, institution, department, role, flagship title, and expertise text.
+- `Zoeken`: searches people by name, email, institution, department, role, flagship title, validated expertise, and call-scoped project context.
 - `Instelling` and `Afdeling`: filter person views and flagship drilldowns on cleaned institution and department groups.
 - `Expertise` and `Confidence`: filter people with/without expertise and by confidence level.
 - `Export manual expertise edits`: downloads local browser edits as `manual_expertise_edits.csv`.
+
+The `People` view is person-first and sizes nodes using weighted degree within the active calls. Person details deliberately keep validated `Expertise` separate from project-derived `Projectcontext`. The `Calls` view compares calls, shared people, themes, project types, and compact import-quality counts. Existing Flagships, Convergence, Campus, and Partners views all respect the active call selection.
 
 The selected flagship groups are configured in `sna_pipeline/config.py`. ALIVE combines source flagships `2022014` and `2022030`.
 
@@ -142,6 +147,7 @@ Manual expertise wins over online enrichment for summary, confidence, and notes.
 - `config/institutions.py`: core institutions and institution colors.
 - `config/selected_flagships.py`: selected flagship group definitions.
 - `data/field_cleaning.py`: deterministic institution and department cleaning plus audit reports.
+- `data/convergence_calls.py`: validated Open Mind/Impuls workbook import, project context, co-participation edges, and quality metadata.
 - `clean_fields.py`: cleaning entrypoint for `python3 -m sna_pipeline.clean_fields`.
 - `data/load.py`: CSV loading and person id resolution.
 - `network/graph_builder.py`: NetworkX person graph construction.

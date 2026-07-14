@@ -9,9 +9,11 @@ def build_person_records_and_edges(G, applicants, person_metrics):
     expertise_map = load_expertise_map()
 
     person_flagships = defaultdict(list)
+    person_project_contexts = defaultdict(dict)
     person_calls = defaultdict(dict)
     for _, row in applicants.iterrows():
         proposal_key = row.get("proposal_key", row.get("flagship_id", ""))
+        is_dashboard_project = clean_text(row.get("dashboard_project_node", "")).lower() != "false"
         item = {
             "id": proposal_key,
             "title": row["flagship_title"],
@@ -22,7 +24,21 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             "call_id": row.get("call_id", ""),
             "call_name": row.get("call_name", ""),
         }
-        person_flagships[row["person_id"]].append(item)
+        if is_dashboard_project:
+            person_flagships[row["person_id"]].append(item)
+        else:
+            summary = clean_text(row.get("project_summary", row.get("program_description", "")))
+            person_project_contexts[row["person_id"]][proposal_key] = {
+                "id": proposal_key,
+                "project_id": row.get("proposal_id", row.get("flagship_id", "")),
+                "title": row.get("proposal_title", row.get("flagship_title", "")),
+                "call_id": row.get("call_id", ""),
+                "call_name": row.get("call_name", ""),
+                "theme": row.get("project_theme", ""),
+                "project_type": row.get("project_type", ""),
+                "role": row.get("role", ""),
+                "summary": summary[:500],
+            }
         call_id = row.get("call_id", "")
         if call_id:
             person_calls[row["person_id"]][call_id] = {
@@ -40,6 +56,8 @@ def build_person_records_and_edges(G, applicants, person_metrics):
         department_group = attrs.get("department_group") or "Unknown"
         expertise = expertise_map.get(node, empty_expertise())
         flagships = sorted(person_flagships.get(node, []), key=lambda x: x["id"])
+        project_contexts = sorted(person_project_contexts.get(node, {}).values(), key=lambda x: (x["call_name"], x["title"]))
+        derived_topics = sorted({item["theme"] for item in project_contexts if clean_text(item["theme"])})
         calls = sorted(person_calls.get(node, {}).values(), key=lambda x: x["id"])
         search_parts = [
             attrs.get("name", node),
@@ -57,6 +75,10 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             " ".join(item["title"] for item in flagships),
             " ".join(item["role"] for item in flagships),
             " ".join(item["name"] for item in calls),
+            " ".join(item["title"] for item in project_contexts),
+            " ".join(item["theme"] for item in project_contexts),
+            " ".join(item["role"] for item in project_contexts),
+            " ".join(item["summary"] for item in project_contexts),
         ]
         persons.append({
             "id": node,
@@ -78,6 +100,8 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             "calls": calls,
             "proposal_keys": attrs.get("proposal_keys", ""),
             "flagships": flagships,
+            "project_contexts": project_contexts,
+            "derived_topics": derived_topics,
             "expertise_keywords": expertise.get("expertise_keywords", ""),
             "expertise_summary": expertise.get("expertise_summary", ""),
             "expertise_source_url": expertise.get("expertise_source_url", ""),
@@ -86,6 +110,7 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             "expertise_last_checked": expertise.get("expertise_last_checked", ""),
             "expertise_manual_note": expertise.get("expertise_manual_note", ""),
             "expertise_origin": expertise.get("expertise_origin", ""),
+            "base_search_text": " ".join(clean_text(part).lower() for part in search_parts[:-4] if clean_text(part)),
             "search_text": " ".join(clean_text(part).lower() for part in search_parts if clean_text(part)),
             "is_placeholder": bool(attrs.get("is_placeholder_id", False)),
         })
@@ -103,6 +128,10 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             "flagship_titles": attrs.get("flagship_titles", []),
             "call_ids": attrs.get("call_ids", []),
             "call_names": attrs.get("call_names", []),
+            "call_weights": attrs.get("call_weights", {}),
+            "project_weights": attrs.get("project_weights", {}),
+            "project_ids": sorted(attrs.get("project_weights", {})),
+            "project_titles": attrs.get("flagship_titles", []),
         })
 
     return persons, edges

@@ -54,6 +54,7 @@
     let manualExpertiseEdits = loadManualExpertiseEdits();
     applyManualExpertiseEdits();
     const personsById = new Map(DATA.persons.map(p => [p.id, p]));
+    const callsById = new Map((DATA.calls || []).map(call => [call.id, call]));
     const flagshipsById = new Map([...DATA.flagships, ...DATA.selected_flagship_groups].map(f => [f.id, f]));
     const partnersById = new Map((DATA.partners || []).map(partner => [partner.id, partner]));
     const partnerLinksById = new Map((DATA.partner_flagship_links || []).map(link => [link.id, link]));
@@ -76,6 +77,7 @@
     const convergenceProfilesById = new Map(convergenceOverview.flagships.map(profile => [profile.id, profile]));
     const edgesByPerson = new Map();
     let globalSearchControl = null;
+    let callFilterControl = null;
     let searchRenderTimer = null;
     let networkFitTimer = null;
     let networkPhysicsTimer = null;
@@ -90,6 +92,7 @@
       flagshipFocusPerson: '',
       selectedInstitution: '',
       selectedDepartment: '',
+      selectedCallIds: [],
       keyword: '',
       keywordLabel: '',
       selectedPartnerCategory: '',
@@ -100,6 +103,7 @@
       edgeMode: 'backbone',
       currentNodes: [],
       currentEdges: [],
+      personScopeStats: new Map(),
     };
 
     function snapshotState() {
@@ -111,6 +115,7 @@
         flagshipFocusPerson: activeState.flagshipFocusPerson || '',
         selectedInstitution: activeState.selectedInstitution || '',
         selectedDepartment: activeState.selectedDepartment || '',
+        selectedCallIds: [...(activeState.selectedCallIds || [])],
         keyword: activeState.keyword || '',
       keywordLabel: activeState.keywordLabel || '',
       selectedPartnerCategory: activeState.selectedPartnerCategory || '',
@@ -159,6 +164,7 @@
       document.getElementById('flagshipSelect').value = snapshot.selectedFlagship || '';
       document.getElementById('institutionFilter').value = snapshot.selectedInstitution || '';
       document.getElementById('departmentFilter').value = snapshot.selectedDepartment || '';
+      if (callFilterControl) callFilterControl.setValue(snapshot.selectedCallIds || [], true);
       document.getElementById('partnerCategoryFilter').value = snapshot.selectedPartnerCategory || '';
       document.getElementById('partnerCollaborationFilter').value = snapshot.selectedPartnerCollaboration || '';
       document.getElementById('minWeight').value = String(snapshot.minWeight || 1);
@@ -179,6 +185,7 @@
     function restoreState(snapshot) {
       Object.assign(activeState, snapshot);
       applySnapshotToControls(snapshot);
+      refreshScopedControls();
       document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.view === snapshot.view));
       renderActiveView();
     }
@@ -244,6 +251,67 @@
     }
     const fmt = new Intl.NumberFormat('nl-NL');
 
+    function splitValues(value) {
+      if (Array.isArray(value)) return value.filter(Boolean);
+      return String(value || '').split(';').map(item => item.trim()).filter(Boolean);
+    }
+
+    function selectedCallSet() {
+      return new Set(activeState.selectedCallIds || []);
+    }
+
+    function passesCallIds(callIds) {
+      const selected = selectedCallSet();
+      if (!selected.size) return true;
+      return splitValues(callIds).some(callId => selected.has(callId));
+    }
+
+    function passCall(person) {
+      return passesCallIds((person.calls || []).map(call => call.id));
+    }
+
+    function scopedProjectContexts(person) {
+      return (person.project_contexts || []).filter(context => passesCallIds([context.call_id]));
+    }
+
+    function filteredEdgeWeight(edge) {
+      const weights = edge.call_weights || {};
+      const selected = selectedCallSet();
+      if (!selected.size) return Number(edge.weight || 0);
+      return [...selected].reduce((total, callId) => total + Number(weights[callId] || 0), 0);
+    }
+
+    function scopedEdge(edge) {
+      return { ...edge, weight: filteredEdgeWeight(edge) };
+    }
+
+    function refreshPersonScopeStats() {
+      const stats = new Map();
+      for (const person of DATA.persons) stats.set(person.id, { degree: 0, weightedDegree: 0 });
+      for (const edge of DATA.edges) {
+        const weight = filteredEdgeWeight(edge);
+        if (weight <= 0) continue;
+        for (const personId of [edge.source, edge.target]) {
+          const item = stats.get(personId) || { degree: 0, weightedDegree: 0 };
+          item.degree += 1;
+          item.weightedDegree += weight;
+          stats.set(personId, item);
+        }
+      }
+      activeState.personScopeStats = stats;
+    }
+
+    function callFilterLabel() {
+      const selected = activeState.selectedCallIds || [];
+      if (!selected.length) return DATA.calls.length === 1 ? DATA.calls[0].name : 'Alle calls';
+      return selected.map(id => callsById.get(id)?.name || id).join(' + ');
+    }
+
+    function updateCallBadge() {
+      const badge = document.getElementById('activeCallBadge');
+      if (badge) badge.textContent = callFilterLabel();
+    }
+
     const network = new vis.Network(
       document.getElementById('network'),
       { nodes: new vis.DataSet([]), edges: new vis.DataSet([]) },
@@ -277,13 +345,14 @@
     }
 
     function personNode(person, showLabel = false) {
-      const size = 12 + Math.min(32, Math.sqrt(Math.max(person.weighted_degree, person.degree)) * 3.2);
+      const scoped = activeState.personScopeStats.get(person.id) || { degree: 0, weightedDegree: 0 };
+      const size = 12 + Math.min(32, Math.sqrt(Math.max(scoped.weightedDegree, scoped.degree, 1)) * 3.2);
       const color = groupColorForPerson(person);
       const border = person.is_placeholder ? '#111827' : '#ffffff';
       return {
         id: person.id,
         label: showLabel ? person.name : '',
-        value: Math.max(1, person.weighted_degree),
+        value: Math.max(1, scoped.weightedDegree),
         size,
         color: {
           background: color,
@@ -327,6 +396,8 @@
 
     function renderPersonTooltipContent(person) {
       const swatch = groupColorForPerson(person);
+      const scoped = activeState.personScopeStats.get(person.id) || { degree: 0, weightedDegree: 0 };
+      const contexts = scopedProjectContexts(person);
       return `
         <div class="tooltip-title">
           <span class="swatch" style="background:${swatch}"></span>
@@ -336,9 +407,10 @@
           <span>Instelling</span><span>${escapeHtml(person.institution_clean || person.institution || '-')}</span>
           <span>Afdeling</span><span>${escapeHtml(departmentDisplay(person))}</span>
           <span>Groep</span><span>${escapeHtml(groupLabelForPerson(person))}</span>
-          <span>Degree</span><span>${person.degree}</span>
-          <span>Betweenness</span><span>${person.betweenness.toFixed(4)}</span>
-          <span>Flagships</span><span>${person.n_flagships}</span>
+          <span>Degree</span><span>${fmt.format(scoped.degree)}</span>
+          <span>Weighted</span><span>${fmt.format(scoped.weightedDegree)}</span>
+          <span>Betweenness</span><span>${person.betweenness.toFixed(4)} (globaal)</span>
+          <span>Projectcontext</span><span>${fmt.format(contexts.length)}</span>
         </div>
         <div class="tooltip-hint">Klik om details of dit persoonsnetwerk te openen.</div>
       `;
@@ -476,6 +548,11 @@
       const flagshipTitles = raw.flagship_titles && raw.flagship_titles.length
         ? raw.flagship_titles.join('; ')
         : (raw.flagships || []).map(id => flagshipsById.get(id)?.title || id).join('; ');
+      const selected = selectedCallSet();
+      const callNames = Object.keys(raw.call_weights || {})
+        .filter(callId => !selected.size || selected.has(callId))
+        .map(callId => callsById.get(callId)?.name || callId)
+        .join('; ');
       return `
         <div class="tooltip-title">
           <span class="swatch" style="background:#98a2b3"></span>
@@ -484,8 +561,9 @@
         <div class="tooltip-grid">
           <span>Persoon</span><span>${escapeHtml(source?.name || raw.source || edge.from || '-')}</span>
           <span>Persoon</span><span>${escapeHtml(target?.name || raw.target || edge.to || '-')}</span>
-          <span>Weight</span><span>${fmt.format(Number(raw.weight || edge.value || 1))}</span>
-          <span>Flagships</span><span>${escapeHtml(flagshipTitles || '-')}</span>
+          <span>Weight</span><span>${fmt.format(filteredEdgeWeight(raw))}</span>
+          <span>Calls</span><span>${escapeHtml(callNames || '-')}</span>
+          <span>Projecten</span><span>${escapeHtml(flagshipTitles || '-')}</span>
         </div>
       `;
     }
@@ -551,6 +629,16 @@
       if (edge.kind === 'convergence-flagship-link') return renderSharedFlagshipEdgeTooltip(edge, 'Convergence link', true);
       if (edge.kind === 'campus-project-cluster-link' || edge.kind === 'campus-project-partner-link') return renderCampusEdgeTooltip(edge);
       if (edge.kind === 'partner-flagship-link') return renderPartnerEdgeTooltip(edge);
+      if (edge.kind === 'call-overlap') {
+        const raw = edge.raw || edge;
+        return `
+          <div class="tooltip-title"><span class="swatch" style="background:#7c3aed"></span><span>Gedeelde personen</span></div>
+          <div class="tooltip-grid">
+            <span>Van</span><span>${escapeHtml(callsById.get(raw.source)?.name || raw.source)}</span>
+            <span>Naar</span><span>${escapeHtml(callsById.get(raw.target)?.name || raw.target)}</span>
+            <span>Personen</span><span>${fmt.format(raw.weight || 0)}</span>
+          </div>`;
+      }
       return '';
     }
 
@@ -574,6 +662,25 @@
         color: { background: '#155eef', border: '#ffffff' },
         font: { size: 12 },
         kind: 'flagship',
+      };
+    }
+
+    function callNode(call) {
+      const color = hashColor(call.id);
+      return {
+        id: `call:${call.id}`,
+        label: call.name,
+        value: Math.max(1, call.n_people || 1),
+        size: 24 + Math.min(38, Math.sqrt(Math.max(1, call.n_people || 1)) * 1.8),
+        color: {
+          background: color,
+          border: '#ffffff',
+          highlight: { background: color, border: '#111827' },
+          hover: { background: color, border: '#111827' },
+        },
+        font: { size: 14 },
+        kind: 'call',
+        callId: call.id,
       };
     }
 
@@ -679,11 +786,14 @@
     }
 
     function visibleFlagships() {
-      return activeState.selectedOnly ? DATA.selected_flagship_groups : DATA.flagships;
+      const source = activeState.selectedOnly ? DATA.selected_flagship_groups : DATA.flagships;
+      return source.filter(flagship => passesCallIds(splitValues(flagship.call_id)));
     }
 
     function visibleFlagshipLinks() {
-      return activeState.selectedOnly ? DATA.selected_flagship_links : DATA.flagship_links;
+      const visibleIds = new Set(visibleFlagships().map(flagship => flagship.id));
+      const source = activeState.selectedOnly ? DATA.selected_flagship_links : DATA.flagship_links;
+      return source.filter(link => visibleIds.has(link.source) && visibleIds.has(link.target));
     }
 
     function flagshipMemberIds(flagship) {
@@ -704,7 +814,7 @@
         activeState.selectedPartnerCategory === MULTI_LINK_PARTNER_FILTER ||
         link.partner_category === activeState.selectedPartnerCategory;
       const collaborationOk = !activeState.selectedPartnerCollaboration || (link.collaboration_types || []).includes(activeState.selectedPartnerCollaboration);
-      return categoryOk && collaborationOk;
+      return categoryOk && collaborationOk && passesCallIds([link.call_id]);
     }
 
     function partnerCategoryFilterLabel() {
@@ -729,7 +839,7 @@
     }
 
     function passCampusProjectFilters(project) {
-      return true;
+      return passesCallIds(project.call_ids || []);
     }
 
     function passesCampusPartnerFilters(row) {
@@ -738,7 +848,7 @@
         row.partner_type === activeState.selectedPartnerCategory;
       const collaborationOk = !activeState.selectedPartnerCollaboration ||
         (row.collaboration_types || []).includes(activeState.selectedPartnerCollaboration);
-      return categoryOk && collaborationOk;
+      return categoryOk && collaborationOk && passesCallIds(row.call_ids || row.call_id || []);
     }
 
     function filterCampusPartnerRows(rows) {
@@ -934,6 +1044,17 @@
       document.getElementById('viewEdges').textContent = fmt.format(edges.length);
       document.getElementById('viewTitle').textContent = title;
       document.getElementById('viewSubtitle').textContent = subtitle;
+      const emptyState = document.getElementById('networkEmpty');
+      if (nodes.length) {
+        emptyState.hidden = true;
+        emptyState.textContent = '';
+      } else {
+        const scope = callFilterLabel();
+        emptyState.textContent = selectedCallSet().size
+          ? `Geen relevante of gevalideerde gegevens voor ${scope} in deze view.`
+          : 'Geen gegevens voor de huidige combinatie van filters.';
+        emptyState.hidden = false;
+      }
 
       const signature = networkSignature(nodes, edges);
       if (signature === lastNetworkSignature) return;
@@ -966,7 +1087,11 @@
 
     function passKeyword(person) {
       if (!activeState.keyword) return true;
-      return (person.search_text || '').includes(activeState.keyword);
+      const contextText = scopedProjectContexts(person)
+        .map(item => `${item.title} ${item.theme} ${item.role} ${item.summary}`)
+        .join(' ')
+        .toLowerCase();
+      return `${person.base_search_text || person.search_text || ''} ${contextText}`.includes(activeState.keyword);
     }
 
     function passFlagshipScope(person) {
@@ -978,7 +1103,7 @@
     }
 
     function passKeywordNetworkFilters(person) {
-      return passInstitution(person) && passDepartment(person) && passFlagshipScope(person) && passKeyword(person);
+      return passCall(person) && passInstitution(person) && passDepartment(person) && passFlagshipScope(person) && passKeyword(person);
     }
 
     function sortPeopleByConnectorScore(left, right) {
@@ -989,11 +1114,12 @@
     }
 
     function passPersonFilters(person) {
-      return passInstitution(person) && passDepartment(person) && passKeyword(person);
+      return passCall(person) && passInstitution(person) && passDepartment(person) && passKeyword(person);
     }
 
     function passWeight(edge) {
-      return Number(edge.weight || 1) >= activeState.minWeight;
+      const weight = filteredEdgeWeight(edge);
+      return weight > 0 && weight >= activeState.minWeight;
     }
 
     function maxEdgeCount(nodeCount) {
@@ -1003,7 +1129,7 @@
     }
 
     function personEdgeWidth(edge) {
-      return 0.8 + Math.min(3.5, Math.sqrt(Number(edge.weight || 1)) * 0.8);
+      return 0.8 + Math.min(3.5, Math.sqrt(Math.max(1, filteredEdgeWeight(edge))) * 0.8);
     }
 
     function chooseBackboneEdges(edges, nodeIds) {
@@ -1036,7 +1162,7 @@
       };
 
       const sorted = [...edges].sort((a, b) =>
-        b.weight - a.weight ||
+        filteredEdgeWeight(b) - filteredEdgeWeight(a) ||
         (personsById.get(b.source)?.betweenness || 0) + (personsById.get(b.target)?.betweenness || 0) -
         ((personsById.get(a.source)?.betweenness || 0) + (personsById.get(a.target)?.betweenness || 0))
       );
@@ -1138,6 +1264,111 @@
       showFlagshipDetails(flagship, edges.length, allVisibleEdges.length);
     }
 
+    function renderPeopleOverview() {
+      const people = DATA.persons.filter(passPersonFilters);
+      const peopleIds = new Set(people.map(person => person.id));
+      const allEdges = DATA.edges.filter(edge =>
+        peopleIds.has(edge.source) && peopleIds.has(edge.target) && passWeight(edge)
+      );
+      const displayedEdges = chooseBackboneEdges(allEdges, peopleIds);
+      const topIds = new Set([...people]
+        .sort((left, right) => {
+          const leftStats = activeState.personScopeStats.get(left.id) || { weightedDegree: 0 };
+          const rightStats = activeState.personScopeStats.get(right.id) || { weightedDegree: 0 };
+          return rightStats.weightedDegree - leftStats.weightedDegree || right.betweenness - left.betweenness;
+        })
+        .slice(0, 20)
+        .map(person => person.id));
+      const nodes = people.map(person => personNode(person, topIds.has(person.id)));
+      const edges = displayedEdges.map(edge => ({
+        id: `people:${edge.source}--${edge.target}`,
+        from: edge.source,
+        to: edge.target,
+        width: personEdgeWidth(edge),
+        label: filteredEdgeWeight(edge) > 2 ? String(filteredEdgeWeight(edge)) : '',
+        kind: 'person-edge',
+        raw: edge,
+      }));
+      setNetwork(
+        nodes,
+        edges,
+        'People-overzicht',
+        `${people.length} personen, ${edges.length}/${allEdges.length} call-gefilterde relaties getoond (${callFilterLabel()}).`
+      );
+      markActiveFlagship('');
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>People</h3>
+        <div class="kv"><span>Callscope</span><span>${escapeHtml(callFilterLabel())}</span></div>
+        <div class="kv"><span>Personen</span><span>${fmt.format(people.length)}</span></div>
+        <div class="kv"><span>Relaties</span><span>${fmt.format(allEdges.length)}</span></div>
+        <div class="kv"><span>Getoond</span><span>${fmt.format(edges.length)} backbone-relaties</span></div>
+      `;
+    }
+
+    function visibleCalls() {
+      return (DATA.calls || []).filter(call => passesCallIds([call.id]));
+    }
+
+    function renderCallCards(calls) {
+      document.getElementById('callCards').innerHTML = calls.map(call => {
+        const themes = Object.entries(call.themes || {}).slice(0, 3).map(([theme, count]) => `${theme}: ${count}`).join(' · ');
+        return `
+          <div class="call-card" data-call-id="${escapeHtml(call.id)}">
+            <strong>${escapeHtml(call.name)}</strong>
+            <span>${fmt.format(call.n_people)} personen · ${fmt.format(call.n_projects)} projecten · ${fmt.format(call.n_relationships)} relaties</span>
+            <span>${fmt.format(call.n_institutions)} instellingen${themes ? ` · ${escapeHtml(themes)}` : ''}</span>
+          </div>`;
+      }).join('');
+    }
+
+    function renderCallQuality(calls) {
+      const quality = DATA.import_quality || { totals: {}, by_call: {}, unresolved_projects: [] };
+      const callIds = new Set(calls.map(call => call.id));
+      const rows = calls.map(call => {
+        const item = quality.by_call?.[call.id];
+        if (!item) return `<div><b>${escapeHtml(call.name)}</b>: geen aparte importwaarschuwingen.</div>`;
+        return `<div><b>${escapeHtml(call.name)}</b>: ${fmt.format(item.missing_email || 0)} zonder e-mail/fallback-id · ${fmt.format(item.unknown_institution || 0)} onbekende instelling · ${fmt.format(item.possible_duplicates || 0)} mogelijke duplicaten · ${fmt.format(item.institution_conflicts || 0)} instellingconflicten.</div>`;
+      });
+      const unresolved = (quality.unresolved_projects || [])
+        .filter(project => callIds.has(project.call_id))
+        .map(project => `<div class="detail-card"><b>${escapeHtml(project.title)}</b><div class="subtle">${escapeHtml(project.call_name)} · ${escapeHtml(project.issue)}</div></div>`)
+        .join('');
+      const totals = quality.totals || {};
+      document.getElementById('callQuality').innerHTML = `
+        ${rows.join('')}
+        ${totals.projects ? `<div><b>${fmt.format(totals.network_projects || 0)}</b> van <b>${fmt.format(totals.projects)}</b> bronprojecten gekoppeld; <b>${fmt.format(totals.unlinked_people || 0)}</b> ongekoppelde persoon.</div>` : ''}
+        ${unresolved || '<div>Geen ongekoppelde projecten binnen deze callscope.</div>'}
+      `;
+    }
+
+    function renderCallsOverview() {
+      const calls = visibleCalls();
+      const callIds = new Set(calls.map(call => call.id));
+      renderCallCards(calls);
+      renderCallQuality(calls);
+      const nodes = calls.map(callNode);
+      const edges = (DATA.call_overlaps || [])
+        .filter(edge => callIds.has(edge.source) && callIds.has(edge.target))
+        .map(edge => ({
+          id: `call-overlap:${edge.source}--${edge.target}`,
+          from: `call:${edge.source}`,
+          to: `call:${edge.target}`,
+          value: edge.weight,
+          width: 1 + Math.sqrt(edge.weight),
+          label: edgeLabel(edge.weight),
+          kind: 'call-overlap',
+          raw: edge,
+        }));
+      setNetwork(nodes, edges, 'Callportfolio', `${calls.length} calls en ${edges.length} overlaprelaties binnen ${callFilterLabel()}.`);
+      markActiveFlagship('');
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>Callportfolio</h3>
+        <div class="kv"><span>Callscope</span><span>${escapeHtml(callFilterLabel())}</span></div>
+        <div class="kv"><span>Calls</span><span>${fmt.format(calls.length)}</span></div>
+        <div class="kv"><span>Personen</span><span>${fmt.format(new Set(calls.flatMap(call => DATA.persons.filter(person => (person.calls || []).some(item => item.id === call.id)).map(person => person.id))).size)}</span></div>
+      `;
+    }
+
     function collectNeighborhood(personId, depth) {
       const selected = new Set([personId]);
       const traversedEdges = new Set();
@@ -1175,7 +1406,7 @@
           from: edge.source,
           to: edge.target,
           width: personEdgeWidth(edge),
-          label: edge.weight > 2 ? String(edge.weight) : '',
+          label: filteredEdgeWeight(edge) > 2 ? String(filteredEdgeWeight(edge)) : '',
           kind: 'person-edge',
           raw: edge,
         }));
@@ -1219,7 +1450,7 @@
           from: edge.source,
           to: edge.target,
           width: personEdgeWidth(edge),
-          label: edge.weight > 2 ? String(edge.weight) : '',
+          label: filteredEdgeWeight(edge) > 2 ? String(filteredEdgeWeight(edge)) : '',
           kind: 'person-edge',
           raw: edge,
         }));
@@ -1259,7 +1490,7 @@
 
     function renderDepartmentNetwork(departmentGroup) {
       const people = DATA.persons
-        .filter(person => person.department_group === departmentGroup && passInstitution(person) && passKeyword(person));
+        .filter(person => passCall(person) && person.department_group === departmentGroup && passInstitution(person) && passKeyword(person));
       const ids = new Set(people.map(person => person.id));
       const edges = DATA.edges
         .filter(edge => ids.has(edge.source) && ids.has(edge.target) && passWeight(edge))
@@ -1268,7 +1499,7 @@
           from: edge.source,
           to: edge.target,
           width: personEdgeWidth(edge),
-          label: edge.weight > 2 ? String(edge.weight) : '',
+          label: filteredEdgeWeight(edge) > 2 ? String(filteredEdgeWeight(edge)) : '',
           kind: 'person-edge',
           raw: edge,
         }));
@@ -1290,7 +1521,7 @@
 
     function renderInstitutionNetwork(institution) {
       const people = DATA.persons
-        .filter(person => (person.institution_clean || person.institution) === institution && passDepartment(person) && passKeyword(person));
+        .filter(person => passCall(person) && (person.institution_clean || person.institution) === institution && passDepartment(person) && passKeyword(person));
       const ids = new Set(people.map(person => person.id));
       const edges = DATA.edges
         .filter(edge => ids.has(edge.source) && ids.has(edge.target) && passWeight(edge))
@@ -1299,7 +1530,7 @@
           from: edge.source,
           to: edge.target,
           width: personEdgeWidth(edge),
-          label: edge.weight > 2 ? String(edge.weight) : '',
+          label: filteredEdgeWeight(edge) > 2 ? String(filteredEdgeWeight(edge)) : '',
           kind: 'person-edge',
           raw: edge,
         }));
@@ -1317,6 +1548,10 @@
         <div class="kv"><span>Trefwoord</span><span>${escapeHtml(activeState.keyword || '-')}</span></div>
       `;
       markActiveFlagship('');
+    }
+
+    function visibleConvergenceProfiles() {
+      return (convergenceOverview.flagships || []).filter(profile => passesCallIds(profile.call_ids || []));
     }
 
     function convergenceTooltip(profile) {
@@ -1351,7 +1586,7 @@
 
     function renderConvergenceBars() {
       const bars = document.getElementById('convergenceBars');
-      bars.innerHTML = convergenceOverview.flagships.map(profile => {
+      bars.innerHTML = visibleConvergenceProfiles().map(profile => {
         const total = Math.max(1, profile.total_applicants || 0);
         const segments = convergenceOverview.institution_groups.map(group => {
           const count = profile.counts[group] || 0;
@@ -1374,6 +1609,7 @@
 
     function renderConvergenceRanking() {
       const target = document.getElementById('convergenceRanking');
+      const visibleIds = new Set(visibleConvergenceProfiles().map(profile => profile.id));
       target.innerHTML = `
         <table class="convergence-table">
           <thead>
@@ -1385,7 +1621,7 @@
             </tr>
           </thead>
           <tbody>
-            ${convergenceOverview.ranking.map(profile => `
+            ${convergenceOverview.ranking.filter(profile => visibleIds.has(profile.id)).map(profile => `
               <tr data-convergence-flagship="${escapeHtml(profile.id)}">
                 <td>${escapeHtml(profile.title)}</td>
                 <td>${profile.diversity_score.toFixed(3)}</td>
@@ -1655,8 +1891,11 @@
       renderConvergenceRanking();
       bindConvergenceItems();
 
-      const nodes = convergenceOverview.network_nodes.map(convergenceFlagshipNode);
+      const profiles = visibleConvergenceProfiles();
+      const visibleIds = new Set(profiles.map(profile => profile.id));
+      const nodes = convergenceOverview.network_nodes.filter(node => visibleIds.has(node.id)).map(convergenceFlagshipNode);
       const edges = convergenceOverview.network_edges
+        .filter(link => visibleIds.has(link.source) && visibleIds.has(link.target))
         .filter(link => link.weight >= activeState.minWeight)
         .map(link => ({
           id: `convergence:${link.source}--${link.target}`,
@@ -1671,8 +1910,8 @@
 
       setNetwork(nodes, edges, 'Convergence overview', `${nodes.length} gekozen flagships, ${edges.length}/${convergenceOverview.network_edges.length} shared-person relaties getoond.`);
       markActiveFlagship('');
-      const multiGroup = convergenceOverview.flagships.filter(profile => profile.n_institution_groups > 1).length;
-      const strongest = [...convergenceOverview.network_edges]
+      const multiGroup = profiles.filter(profile => profile.n_institution_groups > 1).length;
+      const strongest = [...convergenceOverview.network_edges].filter(edge => visibleIds.has(edge.source) && visibleIds.has(edge.target))
         .sort((a, b) => b.weight - a.weight)
         .slice(0, 5)
         .map(edge => {
@@ -1683,9 +1922,9 @@
         .join('');
       document.getElementById('selectionDetails').innerHTML = `
         <h3>Convergence</h3>
-        <div class="kv"><span>Flagships</span><span>${convergenceOverview.flagships.length}</span></div>
+        <div class="kv"><span>Flagships</span><span>${profiles.length}</span></div>
         <div class="kv"><span>Multi-instelling</span><span>${multiGroup}</span></div>
-        <div class="kv"><span>Binnen 1 groep</span><span>${convergenceOverview.flagships.length - multiGroup}</span></div>
+        <div class="kv"><span>Binnen 1 groep</span><span>${profiles.length - multiGroup}</span></div>
         <div class="kv"><span>Sterkste links</span><span>${strongest || '-'}</span></div>
       `;
     }
@@ -1828,14 +2067,24 @@
       activeState.selectedFlagship = document.getElementById('flagshipSelect').value;
       activeState.hopDepth = Number(document.getElementById('hopDepth').value || 1);
       activeState.edgeMode = 'backbone';
+      refreshPersonScopeStats();
+      updateCallBadge();
+      renderQualityPanel();
       updateFlagshipControls();
       renderFlagshipList();
       document.getElementById('convergencePanel').hidden = true;
+      document.getElementById('callsPanel').hidden = true;
       if (activeState.view === 'convergence') {
         document.getElementById('convergencePanel').hidden = false;
+      } else if (activeState.view === 'calls') {
+        document.getElementById('callsPanel').hidden = false;
       }
 
-      if (activeState.view === 'convergence') {
+      if (activeState.view === 'calls') {
+        renderCallsOverview();
+      } else if (activeState.view === 'people') {
+        renderPeopleOverview();
+      } else if (activeState.view === 'convergence') {
         renderConvergenceOverview();
       } else if (activeState.view === 'campus') {
         renderCampusOverview();
@@ -1957,6 +2206,15 @@
 
     function showPersonDetails(person) {
       const flagshipRows = person.flagships.map(item => `<div>${escapeHtml(item.id)} · ${escapeHtml(item.title)}</div>`).join('');
+      const scopedStats = activeState.personScopeStats.get(person.id) || { degree: 0, weightedDegree: 0 };
+      const contexts = scopedProjectContexts(person);
+      const topics = [...new Set(contexts.map(item => item.theme).filter(Boolean))];
+      const contextRows = contexts.slice(0, 16).map(item => `
+        <div class="list-item">
+          <div class="list-item-title">${escapeHtml(item.title)}</div>
+          <div class="subtle">${escapeHtml(item.call_name)} · ${escapeHtml(item.role || 'rol onbekend')} · ${escapeHtml(item.theme || item.project_type || 'geen thema')}</div>
+          ${item.summary ? `<div class="subtle">${escapeHtml(item.summary)}</div>` : ''}
+        </div>`).join('');
       document.getElementById('selectionDetails').innerHTML = `
         <h3>${escapeHtml(person.name)}</h3>
         <div class="kv"><span>Instelling</span><span>${escapeHtml(person.institution_clean || person.institution)}</span></div>
@@ -1966,12 +2224,20 @@
         ${person.department_raw && person.department_raw !== (person.department_clean || person.department) ? `<div class="kv"><span>Afdeling ruw</span><span>${escapeHtml(person.department_raw)}</span></div>` : ''}
         <div class="kv"><span>Rol</span><span>${escapeHtml(person.role || '-')}</span></div>
         <div class="kv"><span>Email/id</span><span>${escapeHtml(person.email || person.id)}</span></div>
-        <div class="kv"><span>Degree</span><span>${person.degree}</span></div>
-        <div class="kv"><span>Weighted</span><span>${person.weighted_degree}</span></div>
-        <div class="kv"><span>Betweenness</span><span>${person.betweenness.toFixed(4)}</span></div>
+        <div class="kv"><span>Degree</span><span>${fmt.format(scopedStats.degree)}</span></div>
+        <div class="kv"><span>Weighted</span><span>${fmt.format(scopedStats.weightedDegree)}</span></div>
+        <div class="kv"><span>Betweenness</span><span>${person.betweenness.toFixed(4)} (globaal)</span></div>
         <div class="kv"><span>Community</span><span>${person.community || '-'}</span></div>
         <div class="kv"><span>Flagships</span><span>${flagshipRows || '-'}</span></div>
         ${renderExpertiseDetails(person)}
+        <div class="expertise-box">
+          <h3>Projectcontext</h3>
+          <div class="subtle">Afgeleid van projectdeelname; dit is geen gevalideerde persoonlijke expertise.</div>
+          <div class="chips">${topics.map(topic => `<span class="chip">${escapeHtml(topic)}</span>`).join('') || '<span class="chip">Geen projectthema binnen deze callscope</span>'}</div>
+          <div class="kv"><span>Projecten</span><span>${fmt.format(contexts.length)}</span></div>
+          <div class="list">${contextRows || '<div class="subtle">Geen projectcontext binnen de geselecteerde calls.</div>'}</div>
+          ${contexts.length > 16 ? `<div class="subtle">Eerste 16 van ${fmt.format(contexts.length)} projecten getoond.</div>` : ''}
+        </div>
         ${person.is_placeholder ? '<div class="detail-card"><b>Datakwaliteit:</b> deze node gebruikt een fallback-id omdat de e-mail placeholder-achtig is.</div>' : ''}
       `;
     }
@@ -2045,11 +2311,14 @@
 
     function renderQualityPanel() {
       const quality = DATA.quality;
+      const scopedPeople = DATA.persons.filter(passCall);
+      const scopedEdges = DATA.edges.filter(edge => filteredEdgeWeight(edge) > 0);
       const partnerQuality = DATA.partner_quality || {};
       const campusQuality = campusData.quality || {};
       document.getElementById('qualityPanel').innerHTML = `
-        <div><b>${fmt.format(quality.people)}</b> personen</div>
-        <div><b>${fmt.format(quality.edges)}</b> co-applicant relaties totaal</div>
+        <div><b>${escapeHtml(callFilterLabel())}</b></div>
+        <div><b>${fmt.format(scopedPeople.length)}</b> personen</div>
+        <div><b>${fmt.format(scopedEdges.length)}</b> relaties binnen callscope</div>
         <div><b>${fmt.format(quality.flagships)}</b> flagships</div>
         <div><b>${fmt.format(quality.placeholder_person_ids)}</b> placeholder/fallback person ids</div>
         <div><b>${fmt.format(quality.raw_institution_values)}</b> ruwe instellingwaarden → <b>${fmt.format(quality.simplified_institution_values)}</b> genormaliseerd</div>
@@ -2071,7 +2340,7 @@
       if (view !== activeState.view) pushHistory();
       activeState.view = view;
       document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.view === view));
-      if (view === 'flagships' && activeState.selectedPerson) {
+      if (['flagships', 'people', 'calls'].includes(view) && activeState.selectedPerson) {
         if (globalSearchControl) globalSearchControl.clear(true);
         activeState.selectedPerson = '';
       }
@@ -2091,29 +2360,89 @@
       }, 180);
     }
 
+    function personSearchOption(person) {
+      const contexts = scopedProjectContexts(person);
+      return {
+        value: person.id,
+        text: person.name,
+        institution: person.institution_clean || person.institution,
+        department: person.department_clean || person.department,
+        department_group: person.department_group,
+        expertise_keywords: person.expertise_keywords,
+        expertise_summary: person.expertise_summary,
+        project_context: contexts.map(item => `${item.title} ${item.theme} ${item.role} ${item.summary}`).join(' '),
+        project_topics: [...new Set(contexts.map(item => item.theme).filter(Boolean))].join('; '),
+        email: person.email,
+      };
+    }
+
+    function setScopedNativeOptions(selectId, allLabel, values) {
+      const select = document.getElementById(selectId);
+      const current = select.value;
+      select.innerHTML = `<option value="">${escapeHtml(allLabel)}</option>` + values
+        .map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
+        .join('');
+      if (current && values.includes(current)) {
+        select.value = current;
+      } else {
+        select.value = '';
+        if (selectId === 'institutionFilter') activeState.selectedInstitution = '';
+        if (selectId === 'departmentFilter') activeState.selectedDepartment = '';
+      }
+    }
+
+    function refreshScopedControls() {
+      const people = DATA.persons.filter(passCall);
+      const scopedIds = new Set(people.map(person => person.id));
+      if (globalSearchControl) {
+        if (activeState.selectedPerson && !scopedIds.has(activeState.selectedPerson)) {
+          activeState.selectedPerson = '';
+          globalSearchControl.clear(true);
+        }
+        globalSearchControl.clearOptions();
+        globalSearchControl.addOptions(people.sort((a, b) => a.name.localeCompare(b.name)).map(personSearchOption));
+        globalSearchControl.refreshOptions(false);
+      }
+      const institutions = [...new Set(people.map(person => person.institution_clean || person.institution).filter(Boolean))].sort();
+      const departments = [...new Set(people.map(person => person.department_group || 'Unknown').filter(Boolean))].sort();
+      setScopedNativeOptions('institutionFilter', 'Alle instellingen', institutions);
+      setScopedNativeOptions('departmentFilter', 'Alle afdelingen', departments);
+      updateFlagshipControls();
+      updateCallBadge();
+    }
+
     function initControls() {
-      const personOptions = DATA.persons
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(person => ({
-          value: person.id,
-          text: person.name,
-          institution: person.institution_clean || person.institution,
-          department: person.department_clean || person.department,
-          department_group: person.department_group,
-          expertise_keywords: person.expertise_keywords,
-          expertise_summary: person.expertise_summary,
-          email: person.email,
-        }));
+      callFilterControl = new TomSelect('#callFilter', {
+        options: (DATA.calls || []).map(call => ({ value: call.id, text: call.name })),
+        valueField: 'value',
+        labelField: 'text',
+        searchField: ['text'],
+        plugins: ['remove_button'],
+        maxItems: null,
+        placeholder: 'Alle calls',
+        onChange: values => {
+          pushHistory();
+          activeState.selectedCallIds = Array.isArray(values) ? values : (values ? [values] : []);
+          refreshScopedControls();
+          renderActiveView();
+        },
+      });
+      if ((DATA.calls || []).length === 1) {
+        callFilterControl.setValue([DATA.calls[0].id], true);
+        callFilterControl.disable();
+      }
+
+      const personOptions = DATA.persons.filter(passCall).sort((a, b) => a.name.localeCompare(b.name)).map(personSearchOption);
       globalSearchControl = new TomSelect('#globalSearch', {
         options: personOptions,
         valueField: 'value',
         labelField: 'text',
-        searchField: ['text', 'institution', 'department', 'department_group', 'expertise_keywords', 'expertise_summary', 'email'],
+        searchField: ['text', 'institution', 'department', 'department_group', 'expertise_keywords', 'expertise_summary', 'project_context', 'project_topics', 'email'],
         maxOptions: 200,
         maxItems: 1,
         create: false,
         render: {
-          option: (data, escape) => `<div><strong>${escape(data.text)}</strong><div class="subtle">${escape(data.institution)} · ${escape(data.department_group || data.department || 'Unknown')} · ${escape(data.expertise_keywords || data.email || '')}</div></div>`,
+          option: (data, escape) => `<div><strong>${escape(data.text)}</strong><div class="subtle">${escape(data.institution)} · ${escape(data.department_group || data.department || 'Unknown')} · ${escape(data.project_topics || data.expertise_keywords || data.email || '')}</div></div>`,
         },
         onType: value => {
           const nextLabel = value.trim();
@@ -2152,16 +2481,7 @@
       });
 
       updateFlagshipControls();
-
-      const institutions = [...new Set(DATA.persons.map(person => person.institution_clean || person.institution).filter(Boolean))].sort();
-      document.getElementById('institutionFilter').innerHTML =
-        '<option value="">Alle instellingen</option>' +
-        institutions.map(inst => `<option value="${escapeHtml(inst)}">${escapeHtml(inst)}</option>`).join('');
-
-      const departments = [...new Set(DATA.persons.map(person => person.department_group || 'Unknown').filter(Boolean))].sort();
-      document.getElementById('departmentFilter').innerHTML =
-        '<option value="">Alle afdelingen</option>' +
-        departments.map(dept => `<option value="${escapeHtml(dept)}">${escapeHtml(dept)}</option>`).join('');
+      refreshScopedControls();
 
       const partnerFilters = DATA.partner_filters || { categories: [], collaboration_types: [] };
       document.getElementById('partnerCategoryFilter').innerHTML =
@@ -2197,13 +2517,16 @@
         document.getElementById('partnerCollaborationFilter').value = '';
         document.getElementById('minWeight').value = '1';
         document.getElementById('hopDepth').value = '1';
+        if (callFilterControl && (DATA.calls || []).length > 1) callFilterControl.clear(true);
         if (globalSearchControl) globalSearchControl.clear(true);
         activeState.selectedPerson = '';
         activeState.keyword = '';
         activeState.keywordLabel = '';
         activeState.flagshipFocusPerson = '';
+        activeState.selectedCallIds = [];
         activeState.selectedPartnerCategory = '';
         activeState.selectedPartnerCollaboration = '';
+        refreshScopedControls();
         setSidebarCollapsed(false);
         isRestoringHistory = true;
         setView('flagships');
@@ -2266,6 +2589,15 @@
       document.getElementById('exportExpertiseEdits').addEventListener('click', exportManualExpertiseEdits);
 
       document.addEventListener('click', event => {
+        const callItem = event.target.closest('[data-call-id]');
+        if (callItem) {
+          pushHistory();
+          activeState.selectedCallIds = [callItem.dataset.callId];
+          if (callFilterControl) callFilterControl.setValue(activeState.selectedCallIds, true);
+          refreshScopedControls();
+          setView('people');
+          return;
+        }
         const editExpertiseItem = event.target.closest('[data-edit-expertise]');
         if (editExpertiseItem) {
           renderExpertiseForm(personsById.get(editExpertiseItem.dataset.editExpertise));
@@ -2366,7 +2698,14 @@
       }
       if (!params.nodes.length) return;
       const id = params.nodes[0];
-      if (activeState.view === 'partners' && partnersById.has(id)) {
+      const selectedNode = activeState.currentNodes.find(node => node.id === id);
+      if (activeState.view === 'calls' && selectedNode?.kind === 'call') {
+        pushHistory();
+        activeState.selectedCallIds = [selectedNode.callId];
+        if (callFilterControl) callFilterControl.setValue(activeState.selectedCallIds, true);
+        refreshScopedControls();
+        setView('people');
+      } else if (activeState.view === 'partners' && partnersById.has(id)) {
         showPartnerDetails(id);
       } else if (activeState.view === 'campus' && campusProjectsByNodeId.has(id)) {
         showCampusProjectDetails(id);
@@ -2389,7 +2728,7 @@
         activeState.flagshipFocusPerson = '';
         renderFlagship(id);
       } else if (personsById.has(id)) {
-        if (activeState.view === 'person' || activeState.view === 'connectors' || (activeState.view === 'flagships' && (activeState.selectedDepartment || activeState.selectedInstitution) && !activeState.selectedFlagship)) {
+        if (activeState.view === 'person' || activeState.view === 'people' || activeState.view === 'connectors' || (activeState.view === 'flagships' && (activeState.selectedDepartment || activeState.selectedInstitution) && !activeState.selectedFlagship)) {
           openPersonNetwork(id);
           hidePersonTooltip();
         } else if (activeState.view === 'flagships' && activeState.selectedFlagship) {

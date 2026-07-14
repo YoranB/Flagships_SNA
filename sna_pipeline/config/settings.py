@@ -14,6 +14,7 @@ INPUT_MANUAL_EXPERTISE = MANUAL_FOLDER / "person_expertise_manual.csv"
 INPUT_MANUAL_SUSTAINABLE_HEALTH_PROGRAMS = MANUAL_FOLDER / "sustainable_health_programs.csv"
 CAMPUS_CLUSTER_MAPPING = Path("Data/campus_project_cluster_mapping.csv")
 CAMPUS_PARTNER_MAPPING = Path("Data/campus_project_partner_mapping.csv")
+INPUT_CONVERGENCE_CALLS_XLSX = Path("Data/convergence_openmind_impuls_cleaned_v1.xlsx")
 
 INPUT_APPLICANTS = CLEANED_APPLICANTS if CLEANED_APPLICANTS.exists() else READY_APPLICANTS
 INPUT_PERSON_EDGES = Path("output_ready/person_person_edges_sna_ready.csv")

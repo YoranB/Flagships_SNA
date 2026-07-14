@@ -3,6 +3,7 @@ import pandas as pd
 from ..config import CLEANED_APPLICANTS, INPUT_ORG_EDGES, INPUT_PERSON_EDGES, READY_APPLICANTS
 from ..text_utils import clean_text, is_placeholder_email, normalize_for_id, simplify_institution, split_semicolon_values
 from .manual_programs import build_manual_org_edges, build_manual_person_edges
+from .convergence_calls import build_convergence_person_edges
 
 
 DEFAULT_CALL_ID = "flagship"
@@ -149,6 +150,10 @@ def make_person_id(row):
     email = clean_text(row["email"]).lower()
     name_key = normalize_for_id(row["person_name_clean"])
     if is_placeholder_email(email):
+        source_person_uid = clean_text(row.get("source_person_uid", ""))
+        source_namespace = clean_text(row.get("source_namespace", ""))
+        if source_person_uid and source_namespace:
+            return f"source-person::{normalize_for_id(source_namespace)}::{source_person_uid}"
         proposal_key = clean_text(row.get("proposal_key", "")) or make_proposal_key(
             row.get("call_id", DEFAULT_CALL_ID),
             row.get("proposal_id", row.get("flagship_id", DEFAULT_UNKNOWN_PROPOSAL_ID)),
@@ -262,6 +267,18 @@ def load_data():
             [
                 person_edges.reindex(columns=sorted(set(person_edges.columns) | set(manual_person_edges.columns))),
                 manual_person_edges.reindex(columns=sorted(set(person_edges.columns) | set(manual_person_edges.columns))),
+            ],
+            ignore_index=True,
+        ).fillna("")
+        person_edges = ensure_person_edge_call_columns(person_edges)
+
+    convergence_person_edges = build_convergence_person_edges(applicants)
+    if not convergence_person_edges.empty:
+        columns = sorted(set(person_edges.columns) | set(convergence_person_edges.columns))
+        person_edges = pd.concat(
+            [
+                person_edges.reindex(columns=columns),
+                convergence_person_edges.reindex(columns=columns),
             ],
             ignore_index=True,
         ).fillna("")

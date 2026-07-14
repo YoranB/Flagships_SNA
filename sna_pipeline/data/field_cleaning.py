@@ -13,6 +13,7 @@ from ..config import (
 )
 from ..text_utils import clean_text, compact_spaces, simplify_institution
 from .manual_programs import append_manual_applicants
+from .convergence_calls import append_convergence_applicants
 
 
 KNOWN_DEPARTMENT_PATTERNS = [
@@ -184,6 +185,7 @@ def clean_applicants(input_path=READY_APPLICANTS, output_path=CLEANED_APPLICANTS
     for col in applicants.columns:
         applicants[col] = applicants[col].apply(clean_text)
     applicants = append_manual_applicants(applicants)
+    applicants = append_convergence_applicants(applicants)
 
     applicants["institution_raw"] = applicants.get("institution", "")
     applicants["institution_clean"] = applicants["institution_raw"].apply(simplify_institution)

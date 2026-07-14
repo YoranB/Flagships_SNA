@@ -8,7 +8,7 @@ from ..text_utils import clean_text, normalize_for_id
 
 
 SUSTAINABLE_HEALTH_CALL_ID = "sustainable-health-programs"
-SUSTAINABLE_HEALTH_CALL_NAME = "Sustainable health programs"
+SUSTAINABLE_HEALTH_CALL_NAME = "Sustainable Health Programs (SHP)"
 MANUAL_EXTRACTION_METHOD = "manual_sustainable_health_programs"
 MANUAL_CONFIDENCE = "verified_manual"
 MANUAL_SOURCE_FILE = "manual:sustainable_health_programs"
@@ -76,6 +76,8 @@ def load_manual_applicants(path=INPUT_MANUAL_SUSTAINABLE_HEALTH_PROGRAMS):
 
     for column, default in MANUAL_PROGRAM_DEFAULTS.items():
         manual[column] = manual[column].replace("", default)
+    manual["call_id"] = SUSTAINABLE_HEALTH_CALL_ID
+    manual["call_name"] = SUSTAINABLE_HEALTH_CALL_NAME
 
     manual["email"] = manual["email"].str.lower()
     manual["proposal_id"] = manual["proposal_id"].where(manual["proposal_id"] != "", manual["flagship_id"])

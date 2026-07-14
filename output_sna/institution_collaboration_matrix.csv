@@ -1,260 +1,263 @@
 ﻿institution_a,institution_b,weight,n_flagships,flagships
-Erasmus MC,TU Delft,3140,38,flagship::2022001; flagship::2022002; flagship::2022003; flagship::2022004; flagship::2022005; flagship::2022006; flagship::2022007; flagship::2022008; flagship::2022009; flagship::2022010; flagship::2022011; flagship::2022012; flagship::2022013; flagship::2022014; flagship::2022015; flagship::2022016; flagship::2022017; flagship::2022018; flagship::2022019; flagship::2022020; flagship::2022021; flagship::2022022; flagship::2022023; flagship::2022024; flagship::2022025; flagship::2022026; flagship::2022027; flagship::2022029; flagship::2022030; flagship::2022031; flagship::2022032; flagship::2022033; flagship::2022034; flagship::2022035; flagship::2022036; sustainable-health-programs::shp-smart-or2030; sustainable-health-programs::shp-technological-innovations-for-nurses; sustainable-health-programs::shp-zero-emission-endoscopy
-Erasmus MC,Erasmus University Rotterdam,2558,39,flagship::2022001; flagship::2022002; flagship::2022003; flagship::2022004; flagship::2022005; flagship::2022006; flagship::2022007; flagship::2022008; flagship::2022009; flagship::2022010; flagship::2022011; flagship::2022012; flagship::2022013; flagship::2022014; flagship::2022015; flagship::2022016; flagship::2022017; flagship::2022018; flagship::2022019; flagship::2022020; flagship::2022021; flagship::2022022; flagship::2022023; flagship::2022024; flagship::2022025; flagship::2022026; flagship::2022027; flagship::2022028; flagship::2022029; flagship::2022030; flagship::2022031; flagship::2022032; flagship::2022033; flagship::2022034; flagship::2022035; flagship::2022036; sustainable-health-programs::shp-smart-or2030; sustainable-health-programs::shp-technological-innovations-for-nurses; sustainable-health-programs::shp-zero-emission-endoscopy
-Erasmus University Rotterdam,TU Delft,1252,38,flagship::2022001; flagship::2022002; flagship::2022003; flagship::2022004; flagship::2022005; flagship::2022006; flagship::2022007; flagship::2022008; flagship::2022009; flagship::2022010; flagship::2022011; flagship::2022012; flagship::2022013; flagship::2022014; flagship::2022015; flagship::2022016; flagship::2022017; flagship::2022018; flagship::2022019; flagship::2022020; flagship::2022021; flagship::2022022; flagship::2022023; flagship::2022024; flagship::2022025; flagship::2022026; flagship::2022027; flagship::2022029; flagship::2022030; flagship::2022031; flagship::2022032; flagship::2022033; flagship::2022034; flagship::2022035; flagship::2022036; sustainable-health-programs::shp-smart-or2030; sustainable-health-programs::shp-technological-innovations-for-nurses; sustainable-health-programs::shp-zero-emission-endoscopy
+Erasmus MC,TU Delft,3556,154,flagship::2022001; flagship::2022002; flagship::2022003; flagship::2022004; flagship::2022005; flagship::2022006; flagship::2022007; flagship::2022008; flagship::2022009; flagship::2022010; flagship::2022011; flagship::2022012; flagship::2022013; flagship::2022014; flagship::2022015; flagship::2022016; flagship::2022017; flagship::2022018; flagship::2022019; flagship::2022020; flagship::2022021; flagship::2022022; flagship::2022023; flagship::2022024; flagship::2022025; flagship::2022026; flagship::2022027; flagship::2022029; flagship::2022030; flagship::2022031; flagship::2022032; flagship::2022033; flagship::2022034; flagship::2022035; flagship::2022036; impuls::impuls_cht01; impuls::impuls_cht02; impuls::impuls_cht03; impuls::impuls_cht04; impuls::impuls_cht05; impuls::impuls_cht06; impuls::impuls_cht07; impuls::impuls_cht08; impuls::impuls_cht09; impuls::impuls_cht10; impuls::impuls_cht11; impuls::impuls_cht12; impuls::impuls_cht13; impuls::impuls_cht14; impuls::impuls_cht15; impuls::impuls_cht16; impuls::impuls_cht17; open-mind::openmind_001; open-mind::openmind_003; open-mind::openmind_004; open-mind::openmind_005; open-mind::openmind_008; open-mind::openmind_009; open-mind::openmind_011; open-mind::openmind_012; open-mind::openmind_014; open-mind::openmind_015; open-mind::openmind_016; open-mind::openmind_018; open-mind::openmind_019; open-mind::openmind_020; open-mind::openmind_021; open-mind::openmind_022; open-mind::openmind_023; open-mind::openmind_024; open-mind::openmind_025; open-mind::openmind_026; open-mind::openmind_027; open-mind::openmind_028; open-mind::openmind_029; open-mind::openmind_030; open-mind::openmind_031; open-mind::openmind_032; open-mind::openmind_034; open-mind::openmind_035; open-mind::openmind_036; open-mind::openmind_037; open-mind::openmind_038; open-mind::openmind_039; open-mind::openmind_040; open-mind::openmind_041; open-mind::openmind_043; open-mind::openmind_044; open-mind::openmind_045; open-mind::openmind_046; open-mind::openmind_047; open-mind::openmind_049; open-mind::openmind_050; open-mind::openmind_053; open-mind::openmind_054; open-mind::openmind_055; open-mind::openmind_056; open-mind::openmind_057; open-mind::openmind_058; open-mind::openmind_059; open-mind::openmind_061; open-mind::openmind_062; open-mind::openmind_065; open-mind::openmind_066; open-mind::openmind_067; open-mind::openmind_068; open-mind::openmind_070; open-mind::openmind_072; open-mind::openmind_073; open-mind::openmind_074; open-mind::openmind_076; open-mind::openmind_077; open-mind::openmind_078; open-mind::openmind_079; open-mind::openmind_080; open-mind::openmind_081; open-mind::openmind_082; open-mind::openmind_083; open-mind::openmind_084; open-mind::openmind_085; open-mind::openmind_086; open-mind::openmind_089; open-mind::openmind_090; open-mind::openmind_091; open-mind::openmind_092; open-mind::openmind_094; open-mind::openmind_095; open-mind::openmind_096; open-mind::openmind_097; open-mind::openmind_098; open-mind::openmind_099; open-mind::openmind_100; open-mind::openmind_101; open-mind::openmind_102; open-mind::openmind_106; open-mind::openmind_107; open-mind::openmind_109; open-mind::openmind_110; open-mind::openmind_111; open-mind::openmind_112; open-mind::openmind_113; open-mind::openmind_114; open-mind::openmind_115; open-mind::openmind_116; open-mind::openmind_117; open-mind::openmind_118; open-mind::openmind_119; open-mind::openmind_120; open-mind::openmind_122; open-mind::openmind_124; open-mind::openmind_125; sustainable-health-programs::shp-smart-or2030; sustainable-health-programs::shp-technological-innovations-for-nurses; sustainable-health-programs::shp-zero-emission-endoscopy
+Erasmus MC,Erasmus University Rotterdam,2651,72,flagship::2022001; flagship::2022002; flagship::2022003; flagship::2022004; flagship::2022005; flagship::2022006; flagship::2022007; flagship::2022008; flagship::2022009; flagship::2022010; flagship::2022011; flagship::2022012; flagship::2022013; flagship::2022014; flagship::2022015; flagship::2022016; flagship::2022017; flagship::2022018; flagship::2022019; flagship::2022020; flagship::2022021; flagship::2022022; flagship::2022023; flagship::2022024; flagship::2022025; flagship::2022026; flagship::2022027; flagship::2022028; flagship::2022029; flagship::2022030; flagship::2022031; flagship::2022032; flagship::2022033; flagship::2022034; flagship::2022035; flagship::2022036; open-mind::openmind_002; open-mind::openmind_007; open-mind::openmind_010; open-mind::openmind_011; open-mind::openmind_013; open-mind::openmind_014; open-mind::openmind_023; open-mind::openmind_027; open-mind::openmind_028; open-mind::openmind_034; open-mind::openmind_041; open-mind::openmind_042; open-mind::openmind_052; open-mind::openmind_056; open-mind::openmind_059; open-mind::openmind_061; open-mind::openmind_062; open-mind::openmind_064; open-mind::openmind_074; open-mind::openmind_075; open-mind::openmind_082; open-mind::openmind_087; open-mind::openmind_088; open-mind::openmind_093; open-mind::openmind_096; open-mind::openmind_100; open-mind::openmind_106; open-mind::openmind_109; open-mind::openmind_111; open-mind::openmind_113; open-mind::openmind_115; open-mind::openmind_119; open-mind::openmind_120; sustainable-health-programs::shp-smart-or2030; sustainable-health-programs::shp-technological-innovations-for-nurses; sustainable-health-programs::shp-zero-emission-endoscopy
+Erasmus University Rotterdam,TU Delft,1297,63,flagship::2022001; flagship::2022002; flagship::2022003; flagship::2022004; flagship::2022005; flagship::2022006; flagship::2022007; flagship::2022008; flagship::2022009; flagship::2022010; flagship::2022011; flagship::2022012; flagship::2022013; flagship::2022014; flagship::2022015; flagship::2022016; flagship::2022017; flagship::2022018; flagship::2022019; flagship::2022020; flagship::2022021; flagship::2022022; flagship::2022023; flagship::2022024; flagship::2022025; flagship::2022026; flagship::2022027; flagship::2022029; flagship::2022030; flagship::2022031; flagship::2022032; flagship::2022033; flagship::2022034; flagship::2022035; flagship::2022036; open-mind::openmind_011; open-mind::openmind_014; open-mind::openmind_017; open-mind::openmind_023; open-mind::openmind_027; open-mind::openmind_028; open-mind::openmind_034; open-mind::openmind_041; open-mind::openmind_056; open-mind::openmind_059; open-mind::openmind_060; open-mind::openmind_061; open-mind::openmind_062; open-mind::openmind_074; open-mind::openmind_082; open-mind::openmind_096; open-mind::openmind_100; open-mind::openmind_103; open-mind::openmind_106; open-mind::openmind_109; open-mind::openmind_111; open-mind::openmind_113; open-mind::openmind_115; open-mind::openmind_119; open-mind::openmind_120; sustainable-health-programs::shp-smart-or2030; sustainable-health-programs::shp-technological-innovations-for-nurses; sustainable-health-programs::shp-zero-emission-endoscopy
 Erasmus MC,Multiple core institutions,375,13,flagship::2022005; flagship::2022011; flagship::2022012; flagship::2022013; flagship::2022014; flagship::2022016; flagship::2022018; flagship::2022020; flagship::2022021; flagship::2022023; flagship::2022024; flagship::2022032; flagship::2022035
 Multiple core institutions,TU Delft,179,13,flagship::2022005; flagship::2022011; flagship::2022012; flagship::2022013; flagship::2022014; flagship::2022016; flagship::2022018; flagship::2022020; flagship::2022021; flagship::2022023; flagship::2022024; flagship::2022032; flagship::2022035
 Erasmus MC,Microsoft,123,1,flagship::2022003
 Erasmus University Rotterdam,Multiple core institutions,122,13,flagship::2022005; flagship::2022011; flagship::2022012; flagship::2022013; flagship::2022014; flagship::2022016; flagship::2022018; flagship::2022020; flagship::2022021; flagship::2022023; flagship::2022024; flagship::2022032; flagship::2022035
+Erasmus MC,Unknown,93,25,flagship::2022026; open-mind::openmind_002; open-mind::openmind_005; open-mind::openmind_006; open-mind::openmind_012; open-mind::openmind_020; open-mind::openmind_036; open-mind::openmind_042; open-mind::openmind_050; open-mind::openmind_056; open-mind::openmind_062; open-mind::openmind_069; open-mind::openmind_070; open-mind::openmind_072; open-mind::openmind_076; open-mind::openmind_087; open-mind::openmind_097; open-mind::openmind_100; open-mind::openmind_102; open-mind::openmind_104; open-mind::openmind_111; open-mind::openmind_112; open-mind::openmind_116; open-mind::openmind_120; open-mind::openmind_124
 Approach ed and interested,Erasmus MC,87,1,flagship::2022009
+TU Delft,Unknown,84,20,flagship::2022026; open-mind::openmind_005; open-mind::openmind_012; open-mind::openmind_020; open-mind::openmind_036; open-mind::openmind_050; open-mind::openmind_056; open-mind::openmind_060; open-mind::openmind_062; open-mind::openmind_070; open-mind::openmind_072; open-mind::openmind_076; open-mind::openmind_097; open-mind::openmind_100; open-mind::openmind_102; open-mind::openmind_111; open-mind::openmind_112; open-mind::openmind_116; open-mind::openmind_120; open-mind::openmind_124
 Avegen,Erasmus MC,82,1,flagship::2022003
-Erasmus MC,Internal Medicine,41,1,flagship::2022003
-Erasmus MC,Surgery,41,1,flagship::2022003
-Bayer,Erasmus MC,41,1,flagship::2022003
-Erasmus MC,yeverdingen@rsm.nl,41,1,flagship::2022003
-Erasmus MC,lab / Obstetrics and,41,1,flagship::2022003
-Erasmus MC,info@ankeschrage.nl,41,1,flagship::2022003
-Erasmus MC,VGZ,41,1,flagship::2022003
-Erasmus MC,University,41,1,flagship::2022003
 Corsano,Erasmus MC,41,1,flagship::2022003
-Erasmus MC,Health Holland,41,1,flagship::2022003
-Erasmus MC,Soulve,41,1,flagship::2022003
-Erasmus MC,Somnox,41,1,flagship::2022003
+Erasmus MC,yeverdingen@rsm.nl,41,1,flagship::2022003
+Erasmus MC,info@ankeschrage.nl,41,1,flagship::2022003
+Erasmus MC,lab / Obstetrics and,41,1,flagship::2022003
+Erasmus MC,VGZ,41,1,flagship::2022003
 Erasmus MC,HELLP Stichting,41,1,flagship::2022003
-Erasmus MC,RIVM,41,1,flagship::2022003
+Bayer,Erasmus MC,41,1,flagship::2022003
+Erasmus MC,Internal Medicine,41,1,flagship::2022003
 Erasmus MC,Molecular Genetics,41,1,flagship::2022003
+Erasmus MC,Health Holland,41,1,flagship::2022003
+Erasmus MC,Surgery,41,1,flagship::2022003
+Erasmus MC,RIVM,41,1,flagship::2022003
+Erasmus MC,Somnox,41,1,flagship::2022003
+Erasmus MC,University,41,1,flagship::2022003
 Erasmus MC,Rotterdam,41,1,flagship::2022003
 Erasmus MC,Voedingscentrum,41,1,flagship::2022003
+Erasmus MC,Soulve,41,1,flagship::2022003
+Erasmus University Rotterdam,Unknown,33,10,flagship::2022026; open-mind::openmind_002; open-mind::openmind_042; open-mind::openmind_056; open-mind::openmind_060; open-mind::openmind_062; open-mind::openmind_087; open-mind::openmind_100; open-mind::openmind_111; open-mind::openmind_120
 Approach ed and interested,Erasmus University Rotterdam,33,1,flagship::2022009
+Erasmus MC,PHARMO Institute,29,1,flagship::2022009
 Erasmus MC,"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",29,1,flagship::2022009
 Erasmus MC,TKI Health Holland,29,1,flagship::2022009
-Erasmus MC,GenomeS can BV,29,1,flagship::2022009
-Erasmus MC,PHARMO Institute,29,1,flagship::2022009
-Erasmus MC,VSOP,29,1,flagship::2022009
 "Dept. Medicine University Melbourn e, Melbourn",Erasmus MC,29,1,flagship::2022009
+Erasmus MC,VSOP,29,1,flagship::2022009
+Erasmus MC,GenomeS can BV,29,1,flagship::2022009
 Approach ed and interested,TU Delft,24,1,flagship::2022009
 Microsoft,TU Delft,21,1,flagship::2022003
 Erasmus MC,ricola Van,17,1,flagship::2022020
 Duncan arcel,Erasmus MC,17,1,flagship::2022020
+Erasmus University Rotterdam,nd,15,1,flagship::2022012
 Erasmus University Rotterdam,Microsoft,15,1,flagship::2022003
+Dutch Patient Association for patients with bipolar disorder and their relatives,Erasmus University Rotterdam,15,1,flagship::2022012
 Erasmus University Rotterdam,"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",15,1,flagship::2022012
 Erasmus University Rotterdam,Prof. dr. Mark,15,1,flagship::2022012
-Dutch Patient Association for patients with bipolar disorder and their relatives,Erasmus University Rotterdam,15,1,flagship::2022012
-Erasmus MC,Unknown,15,1,flagship::2022026
-Erasmus University Rotterdam,nd,15,1,flagship::2022012
 Avegen,TU Delft,14,1,flagship::2022003
-Erasmus MC,Inspired Ambitions,13,1,flagship::2022005
 Dr. Ernst Huls,Erasmus MC,13,1,flagship::2022021
+Erasmus MC,Inspired Ambitions,13,1,flagship::2022005
 Erasmus MC,Prof.dr. Claartje,13,1,flagship::2022021
-TU Delft,ricola Van,12,1,flagship::2022020
+Duncan arcel,TU Delft,12,1,flagship::2022020
 Erasmus University Rotterdam,Public a.vangri,12,1,flagship::2022034
 Erasmus MC,LUMC,12,1,flagship::2022028
-Duncan arcel,TU Delft,12,1,flagship::2022020
-Erasmus University Rotterdam,TKI Health Holland,11,1,flagship::2022009
-Erasmus University Rotterdam,GenomeS can BV,11,1,flagship::2022009
+TU Delft,ricola Van,12,1,flagship::2022020
 "Dept. Medicine University Melbourn e, Melbourn",Erasmus University Rotterdam,11,1,flagship::2022009
-Dr. Ernst Huls,Erasmus University Rotterdam,11,1,flagship::2022021
-Erasmus University Rotterdam,"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",11,1,flagship::2022009
-Dr . Sandra Sülz,Erasmus MC,11,1,flagship::2022018
 Erasmus University Rotterdam,Prof.dr. Claartje,11,1,flagship::2022021
-Erasmus University Rotterdam,VSOP,11,1,flagship::2022009
+Dr . Sandra Sülz,Erasmus MC,11,1,flagship::2022018
+Erasmus University Rotterdam,TKI Health Holland,11,1,flagship::2022009
 Erasmus University Rotterdam,PHARMO Institute,11,1,flagship::2022009
+Erasmus University Rotterdam,"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",11,1,flagship::2022009
+Dr. Ernst Huls,Erasmus University Rotterdam,11,1,flagship::2022021
+Erasmus University Rotterdam,GenomeS can BV,11,1,flagship::2022009
+Erasmus University Rotterdam,VSOP,11,1,flagship::2022009
 Avegen,Erasmus University Rotterdam,10,1,flagship::2022003
-Erasmus University Rotterdam,Unknown,10,1,flagship::2022026
-Erasmus MC,"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",9,1,flagship::2022012
-Erasmus MC,"Human Medicines, Hematology- Oncology Department",9,1,flagship::2022022
-Erasmus MC,nd,9,1,flagship::2022012
 Dutch Patient Association for patients with bipolar disorder and their relatives,Erasmus MC,9,1,flagship::2022012
+Erasmus MC,nd,9,1,flagship::2022012
+Erasmus MC,"Human Medicines, Hematology- Oncology Department",9,1,flagship::2022022
 Erasmus MC,Prof. dr. Mark,9,1,flagship::2022012
-Erasmus MC,Garvan Institute,8,1,flagship::2022035
-"Dept. Medicine University Melbourn e, Melbourn",TU Delft,8,1,flagship::2022009
-"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",TU Delft,8,1,flagship::2022009
-Erasmus University Rotterdam,LUMC,8,1,flagship::2022028
+Erasmus MC,"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",9,1,flagship::2022012
+Other,TU Delft,9,5,open-mind::openmind_014; open-mind::openmind_017; open-mind::openmind_020; open-mind::openmind_030; open-mind::openmind_045
 Dr. Ernst Huls,TU Delft,8,1,flagship::2022021
+"Dept. Medicine University Melbourn e, Melbourn",TU Delft,8,1,flagship::2022009
+Erasmus MC,Garvan Institute,8,1,flagship::2022035
+Erasmus MC,Other,8,4,open-mind::openmind_014; open-mind::openmind_020; open-mind::openmind_030; open-mind::openmind_045
 TKI Health Holland,TU Delft,8,1,flagship::2022009
+Inspired Ambitions,TU Delft,8,1,flagship::2022005
+Prof.dr. Claartje,TU Delft,8,1,flagship::2022021
 PHARMO Institute,TU Delft,8,1,flagship::2022009
+Erasmus MC,TNO,8,1,flagship::2022035
 GenomeS can BV,TU Delft,8,1,flagship::2022009
 TU Delft,VSOP,8,1,flagship::2022009
-Prof.dr. Claartje,TU Delft,8,1,flagship::2022021
-Erasmus MC,TNO,8,1,flagship::2022035
-Inspired Ambitions,TU Delft,8,1,flagship::2022005
-Internal Medicine,TU Delft,7,1,flagship::2022003
-Prof. dr. Mark,TU Delft,7,1,flagship::2022012
-Soulve,TU Delft,7,1,flagship::2022003
-RIVM,TU Delft,7,1,flagship::2022003
-Dutch Patient Association for patients with bipolar disorder and their relatives,TU Delft,7,1,flagship::2022012
-Health Holland,TU Delft,7,1,flagship::2022003
-Rotterdam,TU Delft,7,1,flagship::2022003
-HELLP Stichting,TU Delft,7,1,flagship::2022003
-Somnox,TU Delft,7,1,flagship::2022003
-Molecular Genetics,TU Delft,7,1,flagship::2022003
+Erasmus University Rotterdam,LUMC,8,1,flagship::2022028
+"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",TU Delft,8,1,flagship::2022009
 Bayer,TU Delft,7,1,flagship::2022003
-Surgery,TU Delft,7,1,flagship::2022003
-TU Delft,lab / Obstetrics and,7,1,flagship::2022003
-TU Delft,yeverdingen@rsm.nl,7,1,flagship::2022003
-TU Delft,info@ankeschrage.nl,7,1,flagship::2022003
-TU Delft,Voedingscentrum,7,1,flagship::2022003
-TU Delft,VGZ,7,1,flagship::2022003
-TU Delft,University,7,1,flagship::2022003
-Corsano,TU Delft,7,1,flagship::2022003
+Somnox,TU Delft,7,1,flagship::2022003
+HELLP Stichting,TU Delft,7,1,flagship::2022003
+Rotterdam,TU Delft,7,1,flagship::2022003
+Health Holland,TU Delft,7,1,flagship::2022003
+Molecular Genetics,TU Delft,7,1,flagship::2022003
 TU Delft,"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",7,1,flagship::2022012
+RIVM,TU Delft,7,1,flagship::2022003
+TU Delft,University,7,1,flagship::2022003
+Dutch Patient Association for patients with bipolar disorder and their relatives,TU Delft,7,1,flagship::2022012
+TU Delft,VGZ,7,1,flagship::2022003
+Surgery,TU Delft,7,1,flagship::2022003
+TU Delft,info@ankeschrage.nl,7,1,flagship::2022003
+Prof. dr. Mark,TU Delft,7,1,flagship::2022012
+Internal Medicine,TU Delft,7,1,flagship::2022003
+TU Delft,yeverdingen@rsm.nl,7,1,flagship::2022003
+Soulve,TU Delft,7,1,flagship::2022003
 TU Delft,nd,7,1,flagship::2022012
+TU Delft,Voedingscentrum,7,1,flagship::2022003
+TU Delft,lab / Obstetrics and,7,1,flagship::2022003
+Corsano,TU Delft,7,1,flagship::2022003
+Public a.vangri,TU Delft,6,1,flagship::2022034
 Avegen,Microsoft,6,1,flagship::2022003
 Erasmus University Rotterdam,Inspired Ambitions,6,1,flagship::2022005
-Public a.vangri,TU Delft,6,1,flagship::2022034
-Erasmus University Rotterdam,Somnox,5,1,flagship::2022003
-: Samantha,Erasmus University Rotterdam,5,1,flagship::2022027
-Erasmus University Rotterdam,info@ankeschrage.nl,5,1,flagship::2022003
-Erasmus University Rotterdam,Voedingscentrum,5,1,flagship::2022003
 Prof. Dr. ir. Erik van,TU Delft,5,1,flagship::2022006
-Erasmus University Rotterdam,VGZ,5,1,flagship::2022003
-Erasmus University Rotterdam,yeverdingen@rsm.nl,5,1,flagship::2022003
-Erasmus University Rotterdam,University,5,1,flagship::2022003
-Erasmus University Rotterdam,HELLP Stichting,5,1,flagship::2022003
 Garvan Institute,TU Delft,5,1,flagship::2022035
+TNO,TU Delft,5,1,flagship::2022035
+: Samantha,Erasmus University Rotterdam,5,1,flagship::2022027
+Erasmus University Rotterdam,Somnox,5,1,flagship::2022003
+Erasmus University Rotterdam,Molecular Genetics,5,1,flagship::2022003
+Erasmus University Rotterdam,Internal Medicine,5,1,flagship::2022003
+Dr . Sandra Sülz,TU Delft,5,1,flagship::2022018
+Corsano,Erasmus University Rotterdam,5,1,flagship::2022003
+Erasmus University Rotterdam,Health Holland,5,1,flagship::2022003
+Erasmus University Rotterdam,HELLP Stichting,5,1,flagship::2022003
+Erasmus University Rotterdam,RIVM,5,1,flagship::2022003
+Erasmus University Rotterdam,yeverdingen@rsm.nl,5,1,flagship::2022003
+Erasmus University Rotterdam,Rotterdam,5,1,flagship::2022003
 Erasmus University Rotterdam,Soulve,5,1,flagship::2022003
 Erasmus University Rotterdam,Surgery,5,1,flagship::2022003
-Erasmus University Rotterdam,Health Holland,5,1,flagship::2022003
-Erasmus University Rotterdam,Internal Medicine,5,1,flagship::2022003
+Erasmus University Rotterdam,VGZ,5,1,flagship::2022003
+Erasmus University Rotterdam,Voedingscentrum,5,1,flagship::2022003
+Erasmus University Rotterdam,info@ankeschrage.nl,5,1,flagship::2022003
 Bayer,Erasmus University Rotterdam,5,1,flagship::2022003
-Corsano,Erasmus University Rotterdam,5,1,flagship::2022003
-Erasmus University Rotterdam,RIVM,5,1,flagship::2022003
-Erasmus University Rotterdam,Rotterdam,5,1,flagship::2022003
-Erasmus University Rotterdam,Molecular Genetics,5,1,flagship::2022003
 Erasmus University Rotterdam,lab / Obstetrics and,5,1,flagship::2022003
-Dr . Sandra Sülz,TU Delft,5,1,flagship::2022018
-TNO,TU Delft,5,1,flagship::2022035
-TU Delft,Unknown,5,1,flagship::2022026
-: Samantha,Erasmus MC,4,1,flagship::2022027
-Erasmus University Rotterdam,Prof. Dr. ir. Erik van,4,1,flagship::2022006
-Dr . Sandra Sülz,Multiple core institutions,4,1,flagship::2022018
+Erasmus University Rotterdam,University,5,1,flagship::2022003
 "Human Medicines, Hematology- Oncology Department",TU Delft,4,1,flagship::2022022
+Other,Unknown,4,2,open-mind::openmind_020; open-mind::openmind_033
+Erasmus University Rotterdam,Prof. Dr. ir. Erik van,4,1,flagship::2022006
+: Samantha,Erasmus MC,4,1,flagship::2022027
 Erasmus MC,Prof. Dr. ir. Erik van,4,1,flagship::2022006
 : Samantha,TU Delft,4,1,flagship::2022027
-Microsoft,Soulve,3,1,flagship::2022003
-Microsoft,Rotterdam,3,1,flagship::2022003
-HELLP Stichting,Microsoft,3,1,flagship::2022003
-Microsoft,Somnox,3,1,flagship::2022003
-Microsoft,University,3,1,flagship::2022003
-Microsoft,Surgery,3,1,flagship::2022003
-Microsoft,Molecular Genetics,3,1,flagship::2022003
-Microsoft,VGZ,3,1,flagship::2022003
-Erasmus University Rotterdam,TNO,3,1,flagship::2022035
-Microsoft,Voedingscentrum,3,1,flagship::2022003
-Microsoft,info@ankeschrage.nl,3,1,flagship::2022003
-Microsoft,lab / Obstetrics and,3,1,flagship::2022003
-Microsoft,yeverdingen@rsm.nl,3,1,flagship::2022003
-Microsoft,RIVM,3,1,flagship::2022003
-Corsano,Microsoft,3,1,flagship::2022003
-Internal Medicine,Microsoft,3,1,flagship::2022003
-Bayer,Microsoft,3,1,flagship::2022003
-Approach ed and interested,GenomeS can BV,3,1,flagship::2022009
-Approach ed and interested,"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",3,1,flagship::2022009
+Dr . Sandra Sülz,Multiple core institutions,4,1,flagship::2022018
 Approach ed and interested,PHARMO Institute,3,1,flagship::2022009
+Approach ed and interested,GenomeS can BV,3,1,flagship::2022009
+Microsoft,Surgery,3,1,flagship::2022003
+Microsoft,Soulve,3,1,flagship::2022003
+Microsoft,Somnox,3,1,flagship::2022003
+Microsoft,Rotterdam,3,1,flagship::2022003
+Microsoft,RIVM,3,1,flagship::2022003
+Microsoft,Molecular Genetics,3,1,flagship::2022003
+Approach ed and interested,"Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",3,1,flagship::2022009
 Erasmus MC,Public a.vangri,3,1,flagship::2022034
+Approach ed and interested,"Dept. Medicine University Melbourn e, Melbourn",3,1,flagship::2022009
+Health Holland,Microsoft,3,1,flagship::2022003
+Bayer,Microsoft,3,1,flagship::2022003
 Approach ed and interested,TKI Health Holland,3,1,flagship::2022009
 Approach ed and interested,VSOP,3,1,flagship::2022009
-Health Holland,Microsoft,3,1,flagship::2022003
+HELLP Stichting,Microsoft,3,1,flagship::2022003
+Internal Medicine,Microsoft,3,1,flagship::2022003
+Corsano,Microsoft,3,1,flagship::2022003
+Erasmus University Rotterdam,TNO,3,1,flagship::2022035
+Microsoft,University,3,1,flagship::2022003
+Microsoft,lab / Obstetrics and,3,1,flagship::2022003
 Erasmus University Rotterdam,Garvan Institute,3,1,flagship::2022035
-Approach ed and interested,"Dept. Medicine University Melbourn e, Melbourn",3,1,flagship::2022009
+Microsoft,yeverdingen@rsm.nl,3,1,flagship::2022003
+Microsoft,VGZ,3,1,flagship::2022003
+Microsoft,info@ankeschrage.nl,3,1,flagship::2022003
+Microsoft,Voedingscentrum,3,1,flagship::2022003
+Avegen,Molecular Genetics,2,1,flagship::2022003
+Avegen,Somnox,2,1,flagship::2022003
+Avegen,Internal Medicine,2,1,flagship::2022003
+Garvan Institute,Multiple core institutions,2,1,flagship::2022035
+Avegen,Health Holland,2,1,flagship::2022003
+Avegen,RIVM,2,1,flagship::2022003
+Avegen,HELLP Stichting,2,1,flagship::2022003
+Avegen,VGZ,2,1,flagship::2022003
+Avegen,Corsano,2,1,flagship::2022003
 Inspired Ambitions,Multiple core institutions,2,1,flagship::2022005
 Avegen,Bayer,2,1,flagship::2022003
-Avegen,HELLP Stichting,2,1,flagship::2022003
-Avegen,Molecular Genetics,2,1,flagship::2022003
-Avegen,Corsano,2,1,flagship::2022003
-Duncan arcel,Erasmus University Rotterdam,2,1,flagship::2022020
-Garvan Institute,Multiple core institutions,2,1,flagship::2022035
-Multiple core institutions,Prof.dr. Claartje,2,1,flagship::2022021
-Avegen,Internal Medicine,2,1,flagship::2022003
+Avegen,Voedingscentrum,2,1,flagship::2022003
+Avegen,info@ankeschrage.nl,2,1,flagship::2022003
+Avegen,University,2,1,flagship::2022003
 Erasmus University Rotterdam,ricola Van,2,1,flagship::2022020
-Multiple core institutions,ricola Van,2,1,flagship::2022020
-Avegen,Health Holland,2,1,flagship::2022003
-Multiple core institutions,TNO,2,1,flagship::2022035
-Avegen,RIVM,2,1,flagship::2022003
-Avegen,Rotterdam,2,1,flagship::2022003
-Avegen,Somnox,2,1,flagship::2022003
-Avegen,yeverdingen@rsm.nl,2,1,flagship::2022003
 Avegen,lab / Obstetrics and,2,1,flagship::2022003
+Avegen,yeverdingen@rsm.nl,2,1,flagship::2022003
+Erasmus University Rotterdam,Other,2,2,open-mind::openmind_014; open-mind::openmind_017
 Dr . Sandra Sülz,Erasmus University Rotterdam,2,1,flagship::2022018
 Dr. Ernst Huls,Multiple core institutions,2,1,flagship::2022021
-Avegen,Voedingscentrum,2,1,flagship::2022003
+Multiple core institutions,TNO,2,1,flagship::2022035
+Duncan arcel,Erasmus University Rotterdam,2,1,flagship::2022020
 Duncan arcel,Multiple core institutions,2,1,flagship::2022020
-Avegen,info@ankeschrage.nl,2,1,flagship::2022003
-Avegen,VGZ,2,1,flagship::2022003
 Avegen,Surgery,2,1,flagship::2022003
+Multiple core institutions,ricola Van,2,1,flagship::2022020
+Multiple core institutions,Prof.dr. Claartje,2,1,flagship::2022021
 Avegen,Soulve,2,1,flagship::2022003
-Avegen,University,2,1,flagship::2022003
+Avegen,Rotterdam,2,1,flagship::2022003
+RIVM,Rotterdam,1,1,flagship::2022003
+RIVM,University,1,1,flagship::2022003
+RIVM,Soulve,1,1,flagship::2022003
+RIVM,Somnox,1,1,flagship::2022003
+RIVM,Surgery,1,1,flagship::2022003
+Molecular Genetics,Voedingscentrum,1,1,flagship::2022003
 Prof. dr. Mark,nd,1,1,flagship::2022012
-Surgery,yeverdingen@rsm.nl,1,1,flagship::2022003
-University,info@ankeschrage.nl,1,1,flagship::2022003
-PHARMO Institute,VSOP,1,1,flagship::2022009
-University,Voedingscentrum,1,1,flagship::2022003
-University,lab / Obstetrics and,1,1,flagship::2022003
 Prof. dr. Mark,"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",1,1,flagship::2022012
+PHARMO Institute,VSOP,1,1,flagship::2022009
 PHARMO Institute,TKI Health Holland,1,1,flagship::2022009
-Molecular Genetics,VGZ,1,1,flagship::2022003
+RIVM,Voedingscentrum,1,1,flagship::2022003
 Multiple core institutions,nd,1,1,flagship::2022012
 Multiple core institutions,"The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",1,1,flagship::2022012
+Multiple core institutions,Prof. dr. Mark,1,1,flagship::2022012
+Molecular Genetics,yeverdingen@rsm.nl,1,1,flagship::2022003
+Molecular Genetics,lab / Obstetrics and,1,1,flagship::2022003
+RIVM,VGZ,1,1,flagship::2022003
+Rotterdam,info@ankeschrage.nl,1,1,flagship::2022003
+RIVM,info@ankeschrage.nl,1,1,flagship::2022003
+VGZ,yeverdingen@rsm.nl,1,1,flagship::2022003
+VGZ,info@ankeschrage.nl,1,1,flagship::2022003
+VGZ,Voedingscentrum,1,1,flagship::2022003
 University,yeverdingen@rsm.nl,1,1,flagship::2022003
+University,lab / Obstetrics and,1,1,flagship::2022003
+University,info@ankeschrage.nl,1,1,flagship::2022003
+University,Voedingscentrum,1,1,flagship::2022003
 University,VGZ,1,1,flagship::2022003
 "The Dutch Psychiatric Association (NVvP) is a membership association of, for and by psychiatrists. More",nd,1,1,flagship::2022012
 TKI Health Holland,VSOP,1,1,flagship::2022009
-Surgery,University,1,1,flagship::2022003
+Surgery,yeverdingen@rsm.nl,1,1,flagship::2022003
 Surgery,lab / Obstetrics and,1,1,flagship::2022003
 Surgery,info@ankeschrage.nl,1,1,flagship::2022003
 Surgery,Voedingscentrum,1,1,flagship::2022003
 Surgery,VGZ,1,1,flagship::2022003
-VGZ,info@ankeschrage.nl,1,1,flagship::2022003
-Soulve,University,1,1,flagship::2022003
-Soulve,VGZ,1,1,flagship::2022003
-Soulve,Voedingscentrum,1,1,flagship::2022003
-Soulve,info@ankeschrage.nl,1,1,flagship::2022003
+Surgery,University,1,1,flagship::2022003
+Soulve,yeverdingen@rsm.nl,1,1,flagship::2022003
 Soulve,lab / Obstetrics and,1,1,flagship::2022003
-Multiple core institutions,Prof. dr. Mark,1,1,flagship::2022012
-Molecular Genetics,yeverdingen@rsm.nl,1,1,flagship::2022003
-Molecular Genetics,lab / Obstetrics and,1,1,flagship::2022003
-Molecular Genetics,info@ankeschrage.nl,1,1,flagship::2022003
-Molecular Genetics,Voedingscentrum,1,1,flagship::2022003
-VGZ,Voedingscentrum,1,1,flagship::2022003
-RIVM,Rotterdam,1,1,flagship::2022003
+Soulve,info@ankeschrage.nl,1,1,flagship::2022003
+Soulve,Voedingscentrum,1,1,flagship::2022003
+Soulve,VGZ,1,1,flagship::2022003
+Soulve,University,1,1,flagship::2022003
 VGZ,lab / Obstetrics and,1,1,flagship::2022003
-Somnox,Surgery,1,1,flagship::2022003
+Voedingscentrum,info@ankeschrage.nl,1,1,flagship::2022003
+RIVM,lab / Obstetrics and,1,1,flagship::2022003
+Voedingscentrum,lab / Obstetrics and,1,1,flagship::2022003
+RIVM,yeverdingen@rsm.nl,1,1,flagship::2022003
+Rotterdam,Somnox,1,1,flagship::2022003
+Rotterdam,Soulve,1,1,flagship::2022003
+Rotterdam,Surgery,1,1,flagship::2022003
+Rotterdam,University,1,1,flagship::2022003
 Rotterdam,VGZ,1,1,flagship::2022003
 Rotterdam,Voedingscentrum,1,1,flagship::2022003
-Rotterdam,info@ankeschrage.nl,1,1,flagship::2022003
 Rotterdam,lab / Obstetrics and,1,1,flagship::2022003
 Rotterdam,yeverdingen@rsm.nl,1,1,flagship::2022003
 Somnox,Soulve,1,1,flagship::2022003
+Somnox,Surgery,1,1,flagship::2022003
 Somnox,University,1,1,flagship::2022003
-Rotterdam,Surgery,1,1,flagship::2022003
 Somnox,VGZ,1,1,flagship::2022003
 Somnox,Voedingscentrum,1,1,flagship::2022003
 Somnox,info@ankeschrage.nl,1,1,flagship::2022003
 Somnox,lab / Obstetrics and,1,1,flagship::2022003
 Somnox,yeverdingen@rsm.nl,1,1,flagship::2022003
 Soulve,Surgery,1,1,flagship::2022003
-Rotterdam,University,1,1,flagship::2022003
-Rotterdam,Soulve,1,1,flagship::2022003
-VGZ,yeverdingen@rsm.nl,1,1,flagship::2022003
-RIVM,University,1,1,flagship::2022003
-Voedingscentrum,info@ankeschrage.nl,1,1,flagship::2022003
-Voedingscentrum,lab / Obstetrics and,1,1,flagship::2022003
-RIVM,Somnox,1,1,flagship::2022003
-RIVM,Soulve,1,1,flagship::2022003
-RIVM,Surgery,1,1,flagship::2022003
-Voedingscentrum,yeverdingen@rsm.nl,1,1,flagship::2022003
-info@ankeschrage.nl,lab / Obstetrics and,1,1,flagship::2022003
 info@ankeschrage.nl,yeverdingen@rsm.nl,1,1,flagship::2022003
-RIVM,VGZ,1,1,flagship::2022003
-RIVM,Voedingscentrum,1,1,flagship::2022003
-RIVM,info@ankeschrage.nl,1,1,flagship::2022003
-RIVM,lab / Obstetrics and,1,1,flagship::2022003
-RIVM,yeverdingen@rsm.nl,1,1,flagship::2022003
-Rotterdam,Somnox,1,1,flagship::2022003
-Soulve,yeverdingen@rsm.nl,1,1,flagship::2022003
+info@ankeschrage.nl,lab / Obstetrics and,1,1,flagship::2022003
+Voedingscentrum,yeverdingen@rsm.nl,1,1,flagship::2022003
+Molecular Genetics,info@ankeschrage.nl,1,1,flagship::2022003
 Garvan Institute,TNO,1,1,flagship::2022035
-Molecular Genetics,University,1,1,flagship::2022003
-Molecular Genetics,Surgery,1,1,flagship::2022003
+Molecular Genetics,VGZ,1,1,flagship::2022003
+GenomeS can BV,VSOP,1,1,flagship::2022009
 Corsano,Surgery,1,1,flagship::2022003
 Corsano,University,1,1,flagship::2022003
 Corsano,VGZ,1,1,flagship::2022003
@@ -301,9 +304,9 @@ Corsano,Health Holland,1,1,flagship::2022003
 Corsano,Internal Medicine,1,1,flagship::2022003
 Corsano,Molecular Genetics,1,1,flagship::2022003
 GenomeS can BV,TKI Health Holland,1,1,flagship::2022009
-GenomeS can BV,VSOP,1,1,flagship::2022009
 HELLP Stichting,Health Holland,1,1,flagship::2022003
-Internal Medicine,Voedingscentrum,1,1,flagship::2022003
+Molecular Genetics,University,1,1,flagship::2022003
+HELLP Stichting,Internal Medicine,1,1,flagship::2022003
 Health Holland,yeverdingen@rsm.nl,1,1,flagship::2022003
 Internal Medicine,Molecular Genetics,1,1,flagship::2022003
 Internal Medicine,RIVM,1,1,flagship::2022003
@@ -313,8 +316,8 @@ Internal Medicine,Soulve,1,1,flagship::2022003
 Internal Medicine,Surgery,1,1,flagship::2022003
 Internal Medicine,University,1,1,flagship::2022003
 Internal Medicine,VGZ,1,1,flagship::2022003
+Internal Medicine,Voedingscentrum,1,1,flagship::2022003
 Internal Medicine,info@ankeschrage.nl,1,1,flagship::2022003
-Health Holland,info@ankeschrage.nl,1,1,flagship::2022003
 Internal Medicine,lab / Obstetrics and,1,1,flagship::2022003
 Internal Medicine,yeverdingen@rsm.nl,1,1,flagship::2022003
 "Koç University School of Medicine ( KUSoM) Koç University Hospital, Istanbul",PHARMO Institute,1,1,flagship::2022009
@@ -324,9 +327,10 @@ Molecular Genetics,RIVM,1,1,flagship::2022003
 Molecular Genetics,Rotterdam,1,1,flagship::2022003
 Molecular Genetics,Somnox,1,1,flagship::2022003
 Molecular Genetics,Soulve,1,1,flagship::2022003
+Molecular Genetics,Surgery,1,1,flagship::2022003
 Health Holland,lab / Obstetrics and,1,1,flagship::2022003
+Health Holland,info@ankeschrage.nl,1,1,flagship::2022003
 Health Holland,Voedingscentrum,1,1,flagship::2022003
-HELLP Stichting,Internal Medicine,1,1,flagship::2022003
 HELLP Stichting,info@ankeschrage.nl,1,1,flagship::2022003
 HELLP Stichting,Molecular Genetics,1,1,flagship::2022003
 HELLP Stichting,RIVM,1,1,flagship::2022003

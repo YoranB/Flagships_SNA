@@ -23,8 +23,24 @@ def read_text(path):
     return text
 
 
-def create_interactive_network(G, applicants, person_metrics, flagship_metrics, partners=None):
-    data = build_dashboard_data(G, applicants, person_metrics, flagship_metrics, partners)
+def create_interactive_network(
+    G,
+    applicants,
+    person_metrics,
+    flagship_metrics,
+    partners=None,
+    project_catalog=None,
+    import_quality=None,
+):
+    data = build_dashboard_data(
+        G,
+        applicants,
+        person_metrics,
+        flagship_metrics,
+        partners,
+        project_catalog,
+        import_quality,
+    )
     data_json = json.dumps(data, ensure_ascii=False).replace("</", "<\/")
 
     html = read_text(TEMPLATE_PATH)

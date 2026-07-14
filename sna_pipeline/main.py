@@ -11,6 +11,7 @@ from .config import (
 )
 from .dashboard.render import create_interactive_network
 from .data.load import load_data
+from .data.convergence_calls import load_convergence_dashboard_metadata
 from .network.graph_builder import build_person_graph
 from .network.metrics import calculate_flagship_metrics, calculate_institution_collaboration, calculate_person_metrics
 from .partners import load_partners
@@ -20,6 +21,7 @@ from .reporting.outputs import save_excel_outputs, write_summary
 def main():
     applicants, person_edges, org_edges = load_data()
     partners = load_partners()
+    project_catalog, import_quality = load_convergence_dashboard_metadata()
 
     G = build_person_graph(applicants, person_edges)
 
@@ -39,7 +41,15 @@ def main():
 
     save_excel_outputs(person_metrics, flagship_metrics, institution_matrix, top_connectors)
 
-    create_interactive_network(G, applicants, person_metrics, flagship_metrics, partners)
+    create_interactive_network(
+        G,
+        applicants,
+        person_metrics,
+        flagship_metrics,
+        partners,
+        project_catalog,
+        import_quality,
+    )
     write_summary(G, person_metrics, flagship_metrics, institution_matrix)
 
     print("Done")

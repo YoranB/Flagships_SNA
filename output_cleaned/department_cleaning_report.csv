@@ -1,55 +1,74 @@
 ﻿department_raw,department_clean,department_group,count
+,Unknown,Unknown,268
+Radiology & Nuclear Medicine,Radiology and Nuclear Medicine,Radiology and Nuclear Medicine,41
+"Electrical Engineering, Mathematics and Computer Science","Electrical Engineering, Mathematics and Computer Science","Electrical Engineering, Mathematics and Computer Science",38
+Applied Sciences,Applied Sciences,Applied Sciences,29
+Cardiology,Cardiology,Cardiology,29
+Industrial Design Engineering,Industrial Design Engineering,Industrial Design Engineering,29
+Erasmus School of Health Policy & Management (ESHPM),Erasmus School of Health Policy and Management,Erasmus School of Health Policy and Management,25
+"Mechanical, Maritime and Materials Engineering","Mechanical, Maritime and Materials Engineering","Mechanical, Maritime and Materials Engineering",23
+Molecular Genetics,Molecular Genetics,Molecular Genetics,23
+Epidemiology,Epidemiology,Epidemiology,21
+Rehabilitation Medicine,Rehabilitation Medicine,Rehabilitation Medicine,21
+Public Health,Public Health,Public Health,19
 Imaging Physics,Imaging Physics,Imaging Physics,18
 ESHPM,Eshpm,Eshpm,17
-Molecular Genetics,Molecular Genetics,Molecular Genetics,17
-Public Health,Public Health,Public Health,17
-Cardiology,Cardiology,Cardiology,15
-Internal Medicine,Internal Medicine,Internal Medicine,15
+Surgery,Surgery,Surgery,17
+Internal Medicine,Internal Medicine,Internal Medicine,16
 Erasmus School of Health Policy & Management,Erasmus School of Health Policy and Management,Erasmus School of Health Policy and Management,13
 Biomechanical Engineering,Biomechanical Engineering,Biomechanical Engineering,12
-Industrial Design Engineering,Industrial Design Engineering,Industrial Design Engineering,12
-Radiology & Nuclear Medicine,Radiology and Nuclear Medicine,Radiology and Nuclear Medicine,12
-Surgery,Surgery,Surgery,11
-Epidemiology,Epidemiology,Epidemiology,10
+Medical Oncology,Medical Oncology,Medical Oncology,10
+Pathology,Pathology,Pathology,10
+Urology,Urology,Urology,10
 Clinical Genetics,Clinical Genetics,Clinical Genetics,9
+"Medical Ethics, Philosophy and History of Medicine","Medical Ethics, Philosophy and History of Medicine","Medical Ethics, Philosophy and History of Medicine",9
+Neurology,Neurology,Neurology,9
 Radiology and Nuclear Medicine,Radiology and Nuclear Medicine,Radiology and Nuclear Medicine,9
 Radiotherapy,Radiotherapy,Radiotherapy,9
-Rehabilitation Medicine,Rehabilitation Medicine,Rehabilitation Medicine,9
 Adult ICU,Adult ICU,Adult ICU,8
 Biomechanical engineering,Biomechanical Engineering,Biomechanical Engineering,8
+Developmental Biology,Developmental Biology,Developmental Biology,8
 Erasmus School of Economics,Erasmus School of Economics,Erasmus School of Economics,8
-Neurology,Neurology,Neurology,8
+Orthopaedics and Sports Medicine,Orthopaedics,Orthopaedics,8
 ESHCC,Eshcc,Eshcc,7
 Microelectronics,Microelectronics,Microelectronics,7
+Psychiatry,Psychiatry,Psychiatry,7
 Department of Clinical Genetics,Clinical Genetics,Clinical Genetics,6
-Developmental Biology,Developmental Biology,Developmental Biology,6
 Erasmus School of Social and Behavioural Sciences,Erasmus School of Social and Behavioural Sciences,Erasmus School of Social and Behavioural Sciences,6
 General Practice,General Practice,General Practice,6
 IDE,Ide,Ide,6
+Neurosciences,Neurosciences,Neuroscience,6
 Anesthesiology,Anesthesiology,Anesthesiology,5
 Applied Economics,Applied Economics,Applied Economics,5
 Bionanoscience,Bionanoscience,Bionanoscience,5
+Cell Biology,Cell Biology,Cell Biology,5
 Engineering Systems and Services,Engineering Systems and Services,Engineering Systems and Services,5
+Erasmus School of Social and Behavioural Sciences (ESSB),Erasmus School of Social and Behavioural Sciences (Essb),Erasmus School of Social and Behavioural Sciences (Essb),5
 Health Care Governance,Health Care Governance,Health Care Governance,5
+Hematology,Hematology,Hematology,5
 MMIZ,Mmiz,Mmiz,5
-Medical Oncology,Medical Oncology,Medical Oncology,5
+Rheumatology,Rheumatology,Rheumatology,5
+Sophia Childeren's Hospital,Sophia Childeren'S Hospital,Sophia Childeren'S Hospital,5
 TPM,Tpm,Tpm,5
-,Unknown,Unknown,4
+"Technology, Policy and Management","Technology, Policy and Management","Technology, Policy and Management",5
+Aerospace Engineering,Aerospace Engineering,Aerospace Engineering,4
 BioMechanical Engineering,Biomechanical Engineering,Biomechanical Engineering,4
 Biomedical Engineering,Biomedical Engineering,Biomedical Engineering,4
-Cell Biology,Cell Biology,Cell Biology,4
 Cognitive Robotics,Cognitive Robotics,Cognitive Robotics,4
 ES Health Policy & Management,Es Health Policy and Management,Es Health Policy and Management,4
+"Electrical Engineering, Mathematics and Computer Science; Mechanical, Maritime and Materials Engineering","Electrical Engineering, Mathematics and Computer Science; Mechanical, Maritime and Materials Engineering","Electrical Engineering, Mathematics and Computer Science",4
+Erasmus School of Law,Erasmus School of Law,Erasmus School of Law,4
 Health Economics,Health Economics,Health Economics,4
 Neuroscie nce,Neuroscience,Neuroscience,4
 Oral & Maxillofacial Surgery,Surgery,Surgery,4
-Pathology,Pathology,Pathology,4
+"Otorhinolaryngology, Head and Neck surgery",Surgery,Surgery,4
 Precision and Microsystems Engineering,Precision and Microsystems Engineering,Precision and Microsystems Engineering,4
 Radio- therapy,Radio- Therapy,Radio- Therapy,4
 Rijndam Rehabilitation/ Dept Rehabilitation Medicine,Rijndam Rehabilitation / Rehabilitation Medicine,Rijndam Rehabilitation / Rehabilitation Medicine,4
 Tenured,Tenured,Tenured,4
 Web Information Systems,Web Information Systems,Web Information Systems,4
 Bionanoscienc e,Bionanoscienc E,Bionanoscienc E,3
+Biostatistics,Biostatistics,Biostatistics,3
 Chemical Engineering,Chemical Engineering,Chemical Engineering,3
 Clinical Epidemiology,Clinical Epidemiology,Clinical Epidemiology,3
 Delft Institute Applied Mathematics,Delft Institute Applied Mathematics,Delft Institute Applied Mathematics,3
@@ -57,11 +76,11 @@ Department of Cell Biology,Cell Biology,Cell Biology,3
 Department of Child and Adolescent Psychiatry,Psychiatry,Psychiatry,3
 Department of Psychiatry,Psychiatry,Psychiatry,3
 Department of Public Health,Public Health,Public Health,3
+Dermatology,Dermatology,Dermatology,3
 ESHCC Media and Communic ation,Eshcc Media and Communic Ation,Eshcc Media and Communic Ation,3
 ESPhil,Esphil,Esphil,3
 "Ear, Nose, THroat Surgery",Surgery,Surgery,3
 Erasmus School,Erasmus School,Erasmus School,3
-Erasmus School of Law,Erasmus School of Law,Erasmus School of Law,3
 "Fac. 3mE, dept. BMechE","Fac. 3me, Bmeche","Fac. 3me, Bmeche",3
 Health Policy & Management,Health Policy and Management,Health Policy and Management,3
 Health Policy and Management,Health Policy and Management,Health Policy and Management,3
@@ -76,18 +95,20 @@ Microsoft Europe,Microsoft Europe,Microsoft Europe,3
 Neuroscience,Neuroscience,Neuroscience,3
 Orthopedics & Sports medicine,Orthopedics and Sports Medicine,Orthopedics and Sports Medicine,3
 Pathology & bioinformatics,Pathology,Pathology,3
-Psychiatry,Psychiatry,Psychiatry,3
+Pharmacy,Pharmacy,Pharmacy,3
 RSM,Rsm,Rsm,3
 Radiation Science and Technology,Radiation Science and Technology,Radiation Science and Technology,3
 Radiology,Radiology,Radiology,3
 Rotterdam School of Management,Rotterdam School of Management,Rotterdam School of Management,3
-Urology,Urology,Urology,3
+Rotterdam School of Management (RSM),Rotterdam School of Management (Rsm),Rotterdam School of Management (Rsm),3
+- Other; Obstetrics and Gynaecology,- Other; Obstetrics and Gynaecology,- Other,2
 Avegen Health,Avegen Health,Avegen Health,2
 Biomaterials and Tissue Bio- mechanics,Biomaterials and Tissue Bio- Mechanics,Biomaterials and Tissue Bio- Mechanics,2
 Bionanosc ience,Bionanosc Ience,Bionanosc Ience,2
 Biotechnology,Biotechnology,Biotechnology,2
 Center for Systems and Control,Center for Systems and Control,Center for Systems and Control,2
 Chemical engineering,Chemical Engineering,Chemical Engineering,2
+Child and Adolescent Psychiatry; Sophia Childeren's Hospital,Psychiatry; Sophia Childeren'S Hospital,Psychiatry,2
 Clinical Chemistry,Clinical Chemistry,Clinical Chemistry,2
 Clinical Psychology,Psychology,Psychology,2
 Clinical psychology,Psychology,Psychology,2
@@ -103,6 +124,7 @@ Department of Neuroscience,Neuroscience,Neuroscience,2
 "Department of Orthopedics, Section Physical Therapy","Orthopedics, Physical Therapy","Orthopedics, Physical Therapy",2
 Department of Pediatric Surgery,Surgery,Surgery,2
 Department of Pediatrics,Pediatrics,Pediatrics,2
+"Department of Psychology, Education and Child Studies",Psychology,Psychology,2
 Dermatology/ Center for Pediatric Dermatology,Dermatology / Center for Pediatric Dermatology,Dermatology / Center for Pediatric Dermatology,2
 Development al Biology,Development Al Biology,Development Al Biology,2
 EEMCS,Eemcs,Eemcs,2
@@ -114,6 +136,7 @@ ESHPM/ Law & Health Care (LHC),Eshpm / Law and Health Care (Lhc),Eshpm / Law and
 ESSB,Essb,Essb,2
 EUR,Eur,Eur,2
 Erasmus,Erasmus,Erasmus,2
+Erasmus School of Economics (ESE),Erasmus School of Economics (Ese),Erasmus School of Economics (Ese),2
 Erasmus School of Health Policy & Manage- ment,Erasmus School of Health Policy and Manage- Ment,Erasmus School of Health Policy and Manage- Ment,2
 Erasmus School of Health Policy and Management,Erasmus School of Health Policy and Management,Erasmus School of Health Policy and Management,2
 Erasmus School of Philosoph y,Erasmus School of Philosoph Y,Erasmus School of Philosoph Y,2
@@ -126,7 +149,6 @@ Gastroenterology & Hepatology,Gastroenterology and Hepatology,Gastroenterology a
 General Pediatrics,General Pediatrics,General Pediatrics,2
 Health Services Management & Organisation,Health Services Management and Organisation,Health Services Management and Organisation,2
 Healthcare Governance,Healthcare Governance,Healthcare Governance,2
-Hematology,Hematology,Hematology,2
 Hospital pharmacy,Pharmacy,Pharmacy,2
 Housing and Urban Development Studies,Housing and Urban Development Studies,Housing and Urban Development Studies,2
 ICU,ICU,ICU,2
@@ -139,10 +161,12 @@ Internal,Internal,Internal,2
 Inwendige Geneeskunde,Inwendige Geneeskunde,Inwendige Geneeskunde,2
 Inwendige Geneeskunde / Kinderchirurgie,Inwendige Geneeskunde / Kinderchirurgie,Inwendige Geneeskunde / Kinderchirurgie,2
 Law & Healthcare,Law and Healthcare,Law and Healthcare,2
-"Medical Ethics, Philosophy and History of Medicine","Medical Ethics, Philosophy and History of Medicine","Medical Ethics, Philosophy and History of Medicine",2
 Medical Informatics,Medical Informatics,Medical Informatics,2
 Multi-Actor Systems,Multi-Actor Systems,Multi-Actor Systems,2
 N.a.,N.A.,N.A.,2
+N/A; Applied Sciences,N / A; Applied Sciences,N / A,2
+"N/A; Mechanical, Maritime and Materials Engineering","N / A; Mechanical, Maritime and Materials Engineering",N / A,2
+N/A; Medical Oncology,N / A; Medical Oncology,N / A,2
 Oncology,Oncology,Oncology,2
 Optical Imaging Centre,Optical Imaging Centre,Optical Imaging Centre,2
 Orthopaedics & Sports Medicine,Orthopaedics,Orthopaedics,2
@@ -154,6 +178,7 @@ Pediatric Surgery,Surgery,Surgery,2
 "Psycholog y, Education and Child Studies","Psycholog Y, Education and Child Studies","Psycholog Y, Education and Child Studies",2
 "Psychology, Education and Child Studies",Psychology,Psychology,2
 Radiation Oncology,Radiation Oncology,Radiation Oncology,2
+Radiation Oncology; Radiotherapy,Radiation Oncology; Radiotherapy,Radiation Oncology,2
 "Radiology & Nuclear Medicine, BIGR",Radiology and Nuclear Medicine,Radiology and Nuclear Medicine,2
 "Safety & Security at VTI, TPM","Safety and Security At Vti, Tpm","Safety and Security At Vti, Tpm",2
 Surgical Oncology,Surgical Oncology,Surgical Oncology,2
@@ -161,19 +186,19 @@ Surgical Oncology,Surgical Oncology,Surgical Oncology,2
 "TPM, Values, Technology and Innovation","Tpm, Values, Technology and Innovation","Tpm, Values, Technology and Innovation",2
 TU Delft,Tu Delft,Tu Delft,2
 Technology and Operations management,Technology and Operations Management,Technology and Operations Management,2
-"Technology, Policy and Management","Technology, Policy and Management","Technology, Policy and Management",2
 Trauma surgery,Surgery,Surgery,2
 "Values, Technology & Innovation","Values, Technology and Innovation","Values, Technology and Innovation",2
 iMGZ,Imgz,Imgz,2
 tnw,Tnw,Tnw,2
+- Other,- Other,- Other,1
 3ME,3me,3me,1
 3ME/ Precision and Microsystems Engineering (PME),3me / Precision and Microsystems Engineering (Pme),3me / Precision and Microsystems Engineering (Pme),1
 Applie,Applie,Applie,1
 Applied Economics (ESE),Applied Economics (Ese),Applied Economics (Ese),1
 Applied Mathematics,Applied Mathematics,Applied Mathematics,1
-Applied Sciences,Applied Sciences,Applied Sciences,1
 Architectur e and the Built Environme nt,Architectur E and the Built Environme Nt,Architectur E and the Built Environme Nt,1
 Architecture & the Built Environment,Architecture and the Built Environment,Architecture and the Built Environment,1
+Architecture and the Built Environment,Architecture and the Built Environment,Architecture and the Built Environment,1
 Bayer Nederland,Bayer Nederland,Bayer Nederland,1
 Biiomechanical Engineering,Biiomechanical Engineering,Biiomechanical Engineering,1
 Bio Electronics,Bio Electronics,Bio Electronics,1
@@ -186,7 +211,6 @@ Biomechanical Engineering.,Biomechanical Engineering,Biomechanical Engineering,1
 Biomed. Eng./ Biomechanical Eng.,Biomed. Eng. / Biomechanical Eng.,Biomed. Eng. / Biomechanical Eng.,1
 Biomedical Eng./ Medical Imaging,Biomedical Eng. / Medical Imaging,Biomedical Eng. / Medical Imaging,1
 Biomedical Imaging Applied Sciences,Biomedical Imaging Applied Sciences,Biomedical Imaging Applied Sciences,1
-Biostatistics,Biostatistics,Biostatistics,1
 "Business Economics, Erasmus School of Economics","Business Economics, Erasmus School of Economics","Business Economics, Erasmus School of Economics",1
 CEO and Founder,Ceo and Founder,Ceo and Founder,1
 "Cardiology, Radiology & Nuclear Medicine",Radiology and Nuclear Medicine,Radiology and Nuclear Medicine,1
@@ -198,6 +222,7 @@ Cell biology,Cell Biology,Cell Biology,1
 Centre for Safety in Healthcare,Centre for Safety in Healthcare,Centre for Safety in Healthcare,1
 Chemical Engi- neering,Chemical Engi- Neering,Chemical Engi- Neering,1
 Child and Adolescent Psychiatry/Psychology,Psychiatry,Psychiatry,1
+Child psychiatry,Psychiatry,Psychiatry,1
 Child/Adolescent Psychiatry/ Psychology,Psychiatry,Psychiatry,1
 "Clinical Genetics, Radiology and Nuclear Medicine.",Radiology and Nuclear Medicine,Radiology and Nuclear Medicine,1
 Clinical genetics,Clinical Genetics,Clinical Genetics,1
@@ -243,7 +268,6 @@ Department of Otorhinolaryngology and Department of Neurophysiology,Otorhinolary
 Department of Pediatrics Department of Clinical Genetics,Clinical Genetics,Clinical Genetics,1
 Department of Plastic Surgery and Craniofacial surgery,Surgery,Surgery,1
 Department of Precision and Microsystems Engineering (PME),Precision and Microsystems Engineering (Pme),Precision and Microsystems Engineering (Pme),1
-"Department of Psychology, Education and Child Studies",Psychology,Psychology,1
 Department of Pulmonary Medicine,Pulmonary Medicine,Pulmonary Medicine,1
 Department of Radiology,Radiology,Radiology,1
 Department of Rehabilitation Medicine,Rehabilitation Medicine,Rehabilitation Medicine,1
@@ -255,7 +279,6 @@ Departments of Hospital Phar macy and Oncology,Departments of Hospital Phar Macy
 "Dept. Bionanoscience, Kavli Institute of Nanoscience","Bionanoscience, Kavli Institute of Nanoscience","Bionanoscience, Kavli Institute of Nanoscience",1
 "Dept. of Oral and Maxillofacial Surgery, Orthodontic and Special Dental Care",Surgery,Surgery,1
 "Dept. of Psychology, Education and Child Studies, EUR & Dept. of Child and Adolescent Psychiatry, EMC",Psychiatry,Psychiatry,1
-Dermatology,Dermatology,Dermatology,1
 Developm. Biology,Developm. Biology,Developm. Biology,1
 "Developm. Biology,",Developm. Biology,Developm. Biology,1
 "Director, pharmaco- epidemiologis t","Director, Pharmaco- Epidemiologis T","Director, Pharmaco- Epidemiologis T",1
@@ -282,7 +305,6 @@ Electrical Engineering Mathema- tics and Computer Science,Electrical Engineering
 "Elnathan Prinsen, directiesecretari aat@nvvp.net","Elnathan Prinsen, Directiesecretari Aat@Nvvp.Net","Elnathan Prinsen, Directiesecretari Aat@Nvvp.Net",1
 Endocrinolog y,Endocrinolog Y,Endocrinolog Y,1
 Erasmus Centre for Entrepreneur ship,Erasmus Centre for Entrepreneur Ship,Erasmus Centre for Entrepreneur Ship,1
-Erasmus School of Economics (ESE),Erasmus School of Economics (Ese),Erasmus School of Economics (Ese),1
 Erasmus School of Economics and Erasmus School of Health Policy Management,Erasmus School of Economics and Erasmus School of Health Policy Management,Erasmus School of Economics and Erasmus School of Health Policy Management,1
 Erasmus School of Health Policy &,Erasmus School of Health Policy and,Erasmus School of Health Policy and,1
 Erasmus School of Health Policy & Management / HTA,Erasmus School of Health Policy and Management,Erasmus School of Health Policy and Management,1
@@ -304,7 +326,10 @@ Ethics of Technologies,Ethics of Technologies,Ethics of Technologies,1
 "Faculty of Electrical Engineering, Mathematics & Computer Science and Erasmus School of Social and Behavioural Sciences, Director of the Leiden-Delft- Erasmus Center for Education","Faculty of Electrical Engineering, Mathematics and Computer Science and Erasmus School of Social and Behavioural Sciences, Director of the Leiden-Delft- Erasmus Center for Education","Faculty of Electrical Engineering, Mathematics and Computer Science and Erasmus School of Social and Behavioural Sciences, Director of the Leiden-Delft- Erasmus Center for Education",1
 Faculty of Industrial Design,Faculty of Industrial Design,Faculty of Industrial Design,1
 Faculty of Technology & Management,Faculty of Technology and Management,Faculty of Technology and Management,1
+Gastroenterology and Hepatology,Gastroenterology and Hepatology,Gastroenterology and Hepatology,1
 Generation R,Generation R,Generation R,1
+Genetic and Developmental Internist-Endocrinologist,Genetic and Developmental Internist-Endocrinologist,Genetic and Developmental Internist-Endocrinologist,1
+Gynaecological Oncology,Gynaecological Oncology,Gynaecological Oncology,1
 "Gynaecological Oncology & 3mE, dept. BMechE","Gynaecological Oncology and 3me, Bmeche","Gynaecological Oncology and 3me, Bmeche",1
 Gyneacological Oncology Biomechanical Engineering,Biomechanical Engineering,Biomechanical Engineering,1
 "HTA, Erasmus School of","Hta, Erasmus School of","Hta, Erasmus School of",1
@@ -340,6 +365,7 @@ Intensive Care,Intensive Care,Intensive Care,1
 Interactive Intelligence,Interactive Intelligence,Interactive Intelligence,1
 Internal Medi- cine,Internal Medi- Cine,Internal Medi- Cine,1
 Internal Medicine Erasmus MC Orthopedics & Sports medicine,Internal Medicine,Internal Medicine,1
+Internal Medicine Laboratories,Internal Medicine,Internal Medicine,1
 Internal Medicine/,Internal Medicine,Internal Medicine,1
 Internal and Geriatric Medicine,Internal and Geriatric Medicine,Internal and Geriatric Medicine,1
 Internal medicine,Internal Medicine,Internal Medicine,1
@@ -382,21 +408,23 @@ Obstetrics Education,Obstetrics Education,Obstetrics Education,1
 Obstetrics and Gynaecology,Obstetrics and Gynaecology,Obstetrics and Gynaecology,1
 Oncological and Gastrointestinal Surgery,Surgery,Surgery,1
 Operations,Operations,Operations,1
+Ophthalmology,Ophthalmology,Ophthalmology,1
 Optical Imaging Center,Optical Imaging Center,Optical Imaging Center,1
 Optical Imaging Centre & Pathology,Pathology,Pathology,1
 Oral and maxillofacial surgery,Surgery,Surgery,1
 Organizational Dynamics in the Digital Society,Organizational Dynamics in the Digital Society,Organizational Dynamics in the Digital Society,1
-Orthopaedics and Sports Medicine,Orthopaedics,Orthopaedics,1
 Orthopaedics and sports,Orthopaedics,Orthopaedics,1
 Orthopaedics and sports & Otorhino- laryngology / 3mE- Biomechanical Engineering,Biomechanical Engineering,Biomechanical Engineering,1
 Orthopedics & Sportsmedicine General practise,Orthopedics and Sportsmedicine General Practise,Orthopedics and Sportsmedicine General Practise,1
 Orthopedics & Sportsmedicine; Otorhinolaryngology BioMechanical Engineering,Orthopedics and Sportsmedicine; Biomechanical Engineering,Orthopedics and Sportsmedicine,1
+Other,Other,Other,1
 Otorhinolaryngol,Otorhinolaryngol,Otorhinolaryngol,1
 Otorhinolaryngol ogy & Head & Neck Surgery,Surgery,Surgery,1
 Otorhinolaryngol ogy and Head & Neck Surgery,Surgery,Surgery,1
 Otorhinolaryngology,Otorhinolaryngology,Otorhinolaryngology,1
 Outpatient Pharmacy,Pharmacy,Pharmacy,1
 Paediatric Nephrology,Paediatric Nephrology,Paediatric Nephrology,1
+"Paediatrics, Division of Neonatology","Paediatrics, Division of Neonatology","Paediatrics, Division of Neonatology",1
 Pediatric Gastroenterol ogy,Pediatric Gastroenterol Ogy,Pediatric Gastroenterol Ogy,1
 Pediatric Hematology,Pediatric Hematology,Pediatric Hematology,1
 Pediatric Metabolic Diseases,Pediatric Metabolic Diseases,Pediatric Metabolic Diseases,1
@@ -432,7 +460,6 @@ Regie op registers,Regie Op Registers,Regie Op Registers,1
 Research Policy Officer at Academic Affairs · Erasmus University Rotterdam,Research Policy Officer At Academic Affairs · Erasmus University Rotterdam,Research Policy Officer At Academic Affairs · Erasmus University Rotterdam,1
 Research Suite (IT),Research Suite (It),Research Suite (It),1
 Respiratory medicine,Respiratory Medicine,Respiratory Medicine,1
-Rheumatology,Rheumatology,Rheumatology,1
 SPIN,Spin,Spin,1
 School of Health Policy & Manageme nt,School of Health Policy and Manageme Nt,School of Health Policy and Manageme Nt,1
 School of Phi- losophy,School of Phi- Losophy,School of Phi- Losophy,1

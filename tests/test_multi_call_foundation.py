@@ -11,14 +11,25 @@ from sna_pipeline.dashboard.campus import (
     read_csv_mapping,
 )
 from sna_pipeline.dashboard.persons import build_person_records_and_edges
+from sna_pipeline.dashboard.flagships import build_flagship_records
 from sna_pipeline.data.load import (
     DEFAULT_CALL_ID,
     DEFAULT_CALL_NAME,
     add_person_ids,
+    build_edge_id_lookup,
     ensure_call_columns,
     ensure_person_edge_call_columns,
     ensure_proposal_columns,
+    resolve_edge_person_id,
 )
+from sna_pipeline.data.convergence_calls import (
+    build_convergence_applicants,
+    build_convergence_person_edges,
+    build_import_quality,
+    build_project_catalog,
+    read_convergence_workbook,
+)
+from sna_pipeline.data.field_cleaning import clean_department, department_group, department_tokens
 from sna_pipeline.data.manual_programs import (
     MANUAL_PROGRAM_COLUMNS,
     SUSTAINABLE_HEALTH_CALL_ID,
@@ -28,11 +39,147 @@ from sna_pipeline.data.manual_programs import (
     load_manual_applicants,
 )
 from sna_pipeline.network.graph_builder import build_person_graph
-from sna_pipeline.network.metrics import calculate_person_metrics
+from sna_pipeline.network.metrics import calculate_flagship_metrics, calculate_person_metrics
 from sna_pipeline.partners import normalize_partner_flagship_id
+from sna_pipeline.text_utils import simplify_institution
+
+
+def prepare_convergence_applicants(applicants):
+    applicants = ensure_call_columns(applicants)
+    applicants = ensure_proposal_columns(applicants)
+    applicants["institution_raw"] = applicants["institution"]
+    applicants["institution_clean"] = applicants["institution_raw"].apply(simplify_institution)
+    applicants["institution_simplified"] = applicants["institution_clean"]
+    applicants["department_raw"] = applicants["department"]
+    applicants["department_clean"] = applicants["department_raw"].apply(clean_department)
+    applicants["department_group"] = applicants["department_raw"].apply(department_group)
+    applicants["department_tokens"] = applicants["department_raw"].apply(department_tokens)
+    return applicants
 
 
 class MultiCallFoundationTest(unittest.TestCase):
+    def test_convergence_workbook_rejects_missing_sheets_and_columns(self):
+        with TemporaryDirectory() as tmpdir:
+            missing_sheet_path = Path(tmpdir) / "missing-sheet.xlsx"
+            with pd.ExcelWriter(missing_sheet_path) as writer:
+                pd.DataFrame({"project_uid": ["p1"]}).to_excel(
+                    writer, sheet_name="Projects_clean", index=False
+                )
+            with self.assertRaisesRegex(ValueError, "Missing sheets"):
+                read_convergence_workbook(missing_sheet_path)
+
+            missing_column_path = Path(tmpdir) / "missing-column.xlsx"
+            project_columns = {
+                "project_uid": ["p1"],
+                "call_name": ["Open Mind"],
+                "project_type": ["Research"],
+                "title": ["Project One"],
+                "theme": ["Health"],
+                "network_ready": ["yes"],
+                "source_files": ["source.xlsx"],
+                "data_quality": [""],
+            }
+            people_columns = {
+                "person_uid": ["person:1"],
+                "full_name": ["Ada Example"],
+                "email": ["ada@example.com"],
+                "position": ["Researcher"],
+                "institution": ["Erasmus MC"],
+                "faculty_or_department": ["Surgery"],
+                "source_files": ["source.xlsx"],
+                "raw_notes": [""],
+                "data_quality": [""],
+            }
+            membership_columns = {
+                "edge_uid": ["edge:1"],
+                "person_uid": ["person:1"],
+                "project_uid": ["p1"],
+                "roles": ["Applicant"],
+                "source_files": ["source.xlsx"],
+                "notes": [""],
+            }
+            with pd.ExcelWriter(missing_column_path) as writer:
+                pd.DataFrame(project_columns).to_excel(writer, sheet_name="Projects_clean", index=False)
+                pd.DataFrame(people_columns).to_excel(writer, sheet_name="People_clean", index=False)
+                pd.DataFrame(membership_columns).to_excel(
+                    writer, sheet_name="Person_Project_Edges", index=False
+                )
+            with self.assertRaisesRegex(ValueError, r"Projects_clean.*summary"):
+                read_convergence_workbook(missing_column_path)
+
+    def test_convergence_workbook_import_counts_and_quality(self):
+        bundle = read_convergence_workbook()
+        applicants = build_convergence_applicants(bundle)
+        catalog = build_project_catalog(bundle)
+        quality = build_import_quality(bundle)
+
+        self.assertEqual(len(catalog), 142)
+        self.assertEqual(sum(item["network_ready"] for item in catalog), 140)
+        self.assertEqual(len(applicants), 589)
+        self.assertEqual(applicants["source_person_uid"].nunique(), 500)
+        self.assertEqual(quality["totals"]["source_people"], 501)
+        self.assertEqual(quality["totals"]["unlinked_people"], 1)
+        self.assertEqual(len(quality["unresolved_projects"]), 2)
+
+    def test_convergence_missing_email_ids_are_stable_across_projects(self):
+        applicants = build_convergence_applicants(read_convergence_workbook())
+        applicants = ensure_call_columns(applicants)
+        applicants = ensure_proposal_columns(applicants)
+        applicants = add_person_ids(applicants)
+        missing = applicants[applicants["email"] == ""]
+        repeated = missing.groupby("source_person_uid").filter(lambda group: group["proposal_id"].nunique() > 1)
+
+        self.assertFalse(repeated.empty)
+        self.assertTrue((repeated.groupby("source_person_uid")["person_id"].nunique() == 1).all())
+        self.assertTrue(repeated["person_id"].str.startswith("source-person::").all())
+
+    def test_real_cross_call_people_keep_one_global_identity(self):
+        applicants = prepare_convergence_applicants(
+            build_convergence_applicants(read_convergence_workbook())
+        )
+        applicants = add_person_ids(applicants)
+        cross_call = applicants.groupby("source_person_uid").filter(
+            lambda group: group["call_id"].nunique() > 1
+        )
+
+        self.assertFalse(cross_call.empty)
+        self.assertTrue((cross_call.groupby("source_person_uid")["person_id"].nunique() == 1).all())
+        self.assertGreaterEqual(cross_call["source_person_uid"].nunique(), 1)
+
+    def test_convergence_edges_keep_call_contribution_weights(self):
+        applicants = build_convergence_applicants(read_convergence_workbook())
+        applicants = prepare_convergence_applicants(applicants)
+        person_edges = build_convergence_person_edges(applicants)
+        applicants = add_person_ids(applicants)
+        lookup = build_edge_id_lookup(applicants)
+        person_edges["source_id"] = person_edges.apply(lambda row: resolve_edge_person_id(row, "source", lookup), axis=1)
+        person_edges["target_id"] = person_edges.apply(lambda row: resolve_edge_person_id(row, "target", lookup), axis=1)
+        graph = build_person_graph(applicants, person_edges)
+
+        self.assertEqual(len(person_edges), 1216)
+        self.assertTrue(all(set(attrs["call_weights"]).issubset({"open-mind", "impuls"}) for _, _, attrs in graph.edges(data=True)))
+        self.assertTrue(all(sum(attrs["call_weights"].values()) == attrs["weight"] for _, _, attrs in graph.edges(data=True)))
+
+    def test_convergence_projects_become_person_context_not_flagship_nodes(self):
+        applicants = build_convergence_applicants(read_convergence_workbook())
+        first_project = applicants["proposal_id"].iloc[0]
+        applicants = applicants[applicants["proposal_id"] == first_project].copy()
+        applicants = prepare_convergence_applicants(applicants)
+        person_edges = build_convergence_person_edges(applicants)
+        applicants = add_person_ids(applicants)
+        lookup = build_edge_id_lookup(applicants)
+        person_edges["source_id"] = person_edges.apply(lambda row: resolve_edge_person_id(row, "source", lookup), axis=1)
+        person_edges["target_id"] = person_edges.apply(lambda row: resolve_edge_person_id(row, "target", lookup), axis=1)
+        graph = build_person_graph(applicants, person_edges)
+        person_metrics = calculate_person_metrics(graph, applicants)
+        persons, _ = build_person_records_and_edges(graph, applicants, person_metrics)
+        flagship_metrics = calculate_flagship_metrics(applicants)
+        flagship_data = build_flagship_records(applicants, person_metrics, flagship_metrics)
+
+        self.assertTrue(all(person["project_contexts"] for person in persons))
+        self.assertTrue(all(not person["flagships"] for person in persons))
+        self.assertEqual(flagship_data["flagships"], [])
+
     def test_legacy_rows_get_call_fallbacks_and_proposal_alias(self):
         applicants = pd.DataFrame({
             "flagship_id": ["2022001"],

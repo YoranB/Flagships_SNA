@@ -11,6 +11,21 @@ def merge_unique(left, right):
     return sorted(set((left or []) + (right or [])))
 
 
+def contribution_weights(values, weight):
+    keys = sorted(set(values or []))
+    if not keys:
+        return {}
+    contribution = float(weight) / len(keys)
+    return {key: contribution for key in keys}
+
+
+def merge_weight_maps(left, right):
+    merged = dict(left or {})
+    for key, value in (right or {}).items():
+        merged[key] = merged.get(key, 0) + float(value)
+    return merged
+
+
 def choose_group(values):
     cleaned = [v for v in values if v]
     if not cleaned:
@@ -105,6 +120,8 @@ def build_person_graph(applicants, person_edges):
         call_ids = split_semicolon_values(row.get("call_ids", ""))
         call_names = split_semicolon_values(row.get("call_names", ""))
         display_flagships = proposal_keys or legacy_flagship_ids
+        call_weights = contribution_weights(call_ids, weight)
+        project_weights = contribution_weights(proposal_keys or legacy_flagship_ids, weight)
 
         if G.has_edge(source, target):
             edge = G[source][target]
@@ -115,6 +132,8 @@ def build_person_graph(applicants, person_edges):
             edge["flagship_titles"] = merge_unique(edge.get("flagship_titles", []), flagship_titles)
             edge["call_ids"] = merge_unique(edge.get("call_ids", []), call_ids)
             edge["call_names"] = merge_unique(edge.get("call_names", []), call_names)
+            edge["call_weights"] = merge_weight_maps(edge.get("call_weights", {}), call_weights)
+            edge["project_weights"] = merge_weight_maps(edge.get("project_weights", {}), project_weights)
         else:
             G.add_edge(
                 source,
@@ -126,6 +145,8 @@ def build_person_graph(applicants, person_edges):
                 flagship_titles=flagship_titles,
                 call_ids=call_ids,
                 call_names=call_names,
+                call_weights=call_weights,
+                project_weights=project_weights,
                 relation_type=row.get("relation_type", "co_applicant"),
             )
 

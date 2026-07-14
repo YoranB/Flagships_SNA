@@ -139,6 +139,10 @@ def calculate_flagship_metrics(applicants):
             "call_name": group["call_name"].iloc[0],
             "flagship_title": group["flagship_title"].iloc[0],
             "proposal_title": group["proposal_title"].iloc[0] if "proposal_title" in group else group["flagship_title"].iloc[0],
+            "dashboard_project_node": not (
+                "dashboard_project_node" in group
+                and (group["dashboard_project_node"].astype(str).str.lower() == "false").all()
+            ),
             "source_file": group["source_file"].iloc[0] if "source_file" in group else "",
             "n_applicants": people,
             "n_institutions": len(institutions),

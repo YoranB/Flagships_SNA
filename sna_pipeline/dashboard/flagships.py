@@ -1,5 +1,7 @@
 from itertools import combinations
 
+import pandas as pd
+
 from ..config import SELECTED_FLAGSHIP_GROUPS
 from ..text_utils import clean_text, safe_float, split_semicolon_values
 
@@ -70,8 +72,14 @@ def build_flagship_links(flagship_people):
 
 
 def build_flagship_records(applicants, person_metrics, flagship_metrics):
+    visible_metrics = flagship_metrics[
+        flagship_metrics.get("dashboard_project_node", True).astype(bool)
+        if "dashboard_project_node" in flagship_metrics
+        else pd.Series(True, index=flagship_metrics.index)
+    ]
+    visible_proposal_keys = set(visible_metrics["proposal_key"])
     top_by_proposal = {}
-    for proposal_key, group in applicants.groupby("proposal_key"):
+    for proposal_key, group in applicants[applicants["proposal_key"].isin(visible_proposal_keys)].groupby("proposal_key"):
         people = set(group["person_id"])
         top = (
             person_metrics[person_metrics["person_id"].isin(people)]
@@ -90,7 +98,7 @@ def build_flagship_records(applicants, person_metrics, flagship_metrics):
         ]
 
     flagships = []
-    for _, row in flagship_metrics.sort_values("proposal_key").iterrows():
+    for _, row in visible_metrics.sort_values("proposal_key").iterrows():
         proposal_key = row["proposal_key"]
         legacy_id = row["flagship_id"]
         member_ids = sorted(set([proposal_key, legacy_id]))
@@ -123,7 +131,7 @@ def build_flagship_records(applicants, person_metrics, flagship_metrics):
 
     flagship_people = {
         proposal_key: set(group["person_id"])
-        for proposal_key, group in applicants.groupby("proposal_key")
+        for proposal_key, group in applicants[applicants["proposal_key"].isin(visible_proposal_keys)].groupby("proposal_key")
     }
     selected_flagship_people = {
         selected["id"]: set(

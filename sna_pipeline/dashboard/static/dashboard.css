@@ -179,9 +179,26 @@
       min-width: 0;
       flex: 1;
     }
+    .call-badge {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 6px;
+      padding: 3px 9px;
+      border: 1px solid #b9ccf8;
+      border-radius: 999px;
+      background: #eff4ff;
+      color: #174ea6;
+      font-size: 12px;
+      font-weight: 700;
+    }
     .sidebar-toggle {
       flex: 0 0 auto;
       min-width: 118px;
+    }
+    .network-stage {
+      position: relative;
+      min-height: 0;
+      height: 100%;
     }
     #network {
       width: 100%;
@@ -189,7 +206,23 @@
       min-height: 0;
       background: #fff;
     }
-    .convergence-panel {
+    .network-empty {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      transform: translate(-50%, -50%);
+      width: min(440px, calc(100% - 48px));
+      padding: 18px 22px;
+      border: 1px dashed #b8c5d8;
+      border-radius: 10px;
+      background: rgba(248, 250, 252, .96);
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .network-empty[hidden] { display: none; }
+    .convergence-panel, .calls-panel {
       display: grid;
       grid-template-columns: minmax(0, 1.35fr) minmax(260px, .85fr);
       gap: 12px;
@@ -199,7 +232,7 @@
       max-height: 300px;
       overflow: auto;
     }
-    .convergence-panel[hidden] {
+    .convergence-panel[hidden], .calls-panel[hidden] {
       display: none;
     }
     .convergence-card {
@@ -209,6 +242,32 @@
       background: #fff;
       padding: 12px;
       box-shadow: var(--shadow);
+    }
+    .call-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .call-card {
+      min-width: 0;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fafbfc;
+      cursor: pointer;
+    }
+    .call-card:hover {
+      border-color: var(--accent);
+      background: #f8fbff;
+    }
+    .call-card strong, .call-card span {
+      display: block;
+    }
+    .call-card span {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
     }
     .convergence-heading {
       display: flex;
@@ -486,10 +545,11 @@
         min-height: 72vh;
         height: 72vh;
       }
-      .convergence-panel {
+      .convergence-panel, .calls-panel {
         grid-template-columns: 1fr;
         max-height: none;
       }
+      .call-card-grid { grid-template-columns: 1fr; }
       .convergence-bar-row {
         grid-template-columns: minmax(0, 1fr);
       }
@@ -499,4 +559,5 @@
       #network {
         min-height: 560px;
       }
+      .network-stage { min-height: 560px; }
     }

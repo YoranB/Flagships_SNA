@@ -41,7 +41,7 @@ SELECTED_FLAGSHIP_GROUPS = [
     },
     {
         "id": "selected:sustainable-health-programs",
-        "title": "Sustainable health programs",
+        "title": "Sustainable Health Programs (SHP)",
         "member_ids": [
             "sustainable-health-programs::shp-smart-or2030",
             "sustainable-health-programs::shp-technological-innovations-for-nurses",

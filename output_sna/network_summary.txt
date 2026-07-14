@@ -1,61 +1,61 @@
 SOCIAL NETWORK ANALYSIS SUMMARY
 ==================================================
 
-Nodes, people: 723
-Edges, co-applicant relations: 14997
-Network density: 0.0575
-Connected components: 1
-Largest component size: 723
-Flagships: 39
+Nodes, people: 1117
+Edges, co-applicant relations: 16132
+Network density: 0.0259
+Connected components: 36
+Largest component size: 999
+Flagships: 179
 
 Top 10 by degree
 --------------------------------------------------
 Kees Ahaus | Erasmus University Rotterdam | degree=259 | flagships=7
-Marcel Reinders | TU Delft | degree=215 | flagships=5
-Joost Gribnau | Erasmus MC | degree=202 | flagships=6
+Marcel Reinders | TU Delft | degree=218 | flagships=6
+Joost Gribnau | Erasmus MC | degree=208 | flagships=7
 Carin Uyl – de Groot | Erasmus University Rotterdam | degree=154 | flagships=5
 Ken Redekop | Erasmus University Rotterdam | degree=146 | flagships=6
 Luc van der Laan | Erasmus MC | degree=127 | flagships=3
 Joyce van Meurs | Erasmus MC | degree=124 | flagships=3
 Pieter van Baal | Erasmus University Rotterdam | degree=119 | flagships=3
-Steven J.M. Habraken | Erasmus MC | degree=117 | flagships=2
+Linetta Koppert | Erasmus MC | degree=119 | flagships=3
 Hester Lingsma | Erasmus MC | degree=116 | flagships=4
 
 Top 10 by betweenness centrality
 --------------------------------------------------
-Kees Ahaus | Erasmus University Rotterdam | betweenness=0.1679 | flagships=7
-Marcel Reinders | TU Delft | betweenness=0.0953 | flagships=5
-Saba Hinrichs- Krapels | TU Delft | betweenness=0.0907 | flagships=4
-Yvonne van Everdingen | Erasmus University Rotterdam | betweenness=0.0817 | flagships=2
-Hester Lingsma | Erasmus MC | betweenness=0.0703 | flagships=4
-Loes Keijsers | Erasmus University Rotterdam | betweenness=0.0694 | flagships=1
-Van Veelen * | Erasmus MC | betweenness=0.0692 | flagships=1
-Amir Zadpoor | TU Delft | betweenness=0.0636 | flagships=4
-Sita Bierma- Zeinstra | Erasmus MC | betweenness=0.0607 | flagships=1
-David Abbink | TU Delft | betweenness=0.0598 | flagships=2
+Kees Ahaus | Erasmus University Rotterdam | betweenness=0.1275 | flagships=7
+Marcel Reinders | TU Delft | betweenness=0.0871 | flagships=6
+Sita Bierma- Zeinstra | Erasmus MC | betweenness=0.0617 | flagships=2
+Marie-Lise van Veelen-Vincent | Erasmus MC | betweenness=0.0614 | flagships=2
+Yvonne van Everdingen | Erasmus University Rotterdam | betweenness=0.0598 | flagships=2
+Saba Hinrichs- Krapels | TU Delft | betweenness=0.0593 | flagships=4
+Ken Redekop | Erasmus University Rotterdam | betweenness=0.0499 | flagships=6
+Loes Keijsers | Erasmus University Rotterdam | betweenness=0.0479 | flagships=1
+Dik van Gent | Erasmus MC | betweenness=0.0478 | flagships=3
+Amir Zadpoor | TU Delft | betweenness=0.0468 | flagships=4
 
 Top 10 cross-flagship people
 --------------------------------------------------
 Kees Ahaus | Erasmus University Rotterdam | flagships=7 | degree=259
-Joost Gribnau | Erasmus MC | flagships=6 | degree=202
+Joost Gribnau | Erasmus MC | flagships=7 | degree=208
+Maartje Schermer | Erasmus MC | flagships=7 | degree=104
+Stefan Klein | Erasmus MC | flagships=6 | degree=54
+Marleen de Mul | Erasmus University Rotterdam | flagships=6 | degree=106
+Massimo Mastrangeli | TU Delft | flagships=6 | degree=96
+Marcel Reinders | TU Delft | flagships=6 | degree=218
 Ken Redekop | Erasmus University Rotterdam | flagships=6 | degree=146
-Carin Uyl – de Groot | Erasmus University Rotterdam | flagships=5 | degree=154
-Massimo Mastrangeli | TU Delft | flagships=5 | degree=95
-Marleen de Mul | Erasmus University Rotterdam | flagships=5 | degree=104
-Marcel Reinders | TU Delft | flagships=5 | degree=215
-Hester Lingsma | Erasmus MC | flagships=4 | degree=116
-Hub Zwart | Erasmus University Rotterdam | flagships=4 | degree=101
-Eline Bunnik | Erasmus MC | flagships=4 | degree=80
+Pei-hua Huang | Erasmus MC | flagships=5 | degree=52
+Samantha Copeland | TU Delft | flagships=5 | degree=89
 
 Top institution collaborations
 --------------------------------------------------
-Erasmus MC <-> TU Delft | weight=3140 | flagships=38
-Erasmus MC <-> Erasmus University Rotterdam | weight=2558 | flagships=39
-Erasmus University Rotterdam <-> TU Delft | weight=1252 | flagships=38
+Erasmus MC <-> TU Delft | weight=3556 | flagships=154
+Erasmus MC <-> Erasmus University Rotterdam | weight=2651 | flagships=72
+Erasmus University Rotterdam <-> TU Delft | weight=1297 | flagships=63
 Erasmus MC <-> Multiple core institutions | weight=375 | flagships=13
 Multiple core institutions <-> TU Delft | weight=179 | flagships=13
 Erasmus MC <-> Microsoft | weight=123 | flagships=1
 Erasmus University Rotterdam <-> Multiple core institutions | weight=122 | flagships=13
+Erasmus MC <-> Unknown | weight=93 | flagships=25
 Approach ed and interested <-> Erasmus MC | weight=87 | flagships=1
-Avegen <-> Erasmus MC | weight=82 | flagships=1
-Erasmus MC <-> Internal Medicine | weight=41 | flagships=1
+TU Delft <-> Unknown | weight=84 | flagships=20

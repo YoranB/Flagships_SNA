@@ -1,9 +1,11 @@
 ﻿institution_raw,institution_clean,count
-Erasmus MC,Erasmus MC,207
+Erasmus MC,Erasmus MC,480
+TU Delft,TU Delft,306
 EMC,Erasmus MC,190
 EUR,Erasmus University Rotterdam,122
-TU Delft,TU Delft,110
 TUD,TU Delft,78
+,Unknown,61
+Erasmus University,Erasmus University Rotterdam,55
 ErasmusMC,Erasmus MC,39
 Erasmus University Rotterdam,Erasmus University Rotterdam,33
 TU Delft (TUD),TU Delft,11
@@ -11,6 +13,7 @@ TUDelft,TU Delft,10
 Erasmus MC (EMC),Erasmus MC,9
 Erasmus University Rotterdam (ESHPM),Erasmus University Rotterdam,9
 Delft University of Technology,TU Delft,7
+Other,Other,7
 TU-Delft,TU Delft,7
 Erasmus,Erasmus University Rotterdam,6
 Erasmus University Rotterdam (EUR),Erasmus University Rotterdam,6
@@ -29,10 +32,8 @@ EMC/ TUD,Multiple core institutions,2
 EMC; TUD,Multiple core institutions,2
 "EUR, ESHPM",Erasmus University Rotterdam,2
 "EUR, RSM",Erasmus University Rotterdam,2
-Erasmus University,Erasmus University Rotterdam,2
 LUMC,LUMC,2
 TUDelft; ErasmusMC,Multiple core institutions,2
-,Unknown,1
 : Samantha,: Samantha,1
 Bayer,Bayer,1
 Corsano,Corsano,1

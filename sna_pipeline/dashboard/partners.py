@@ -38,8 +38,10 @@ def build_partner_dashboard_data(partners, applicants, flagship_metrics):
         applicant_flagship_ids.update(applicants["proposal_key"].dropna().map(clean_text))
 
     flagship_title_map = flagship_metrics.set_index("flagship_id")["flagship_title"].to_dict()
+    call_map = flagship_metrics.set_index("flagship_id")[["call_id", "call_name"]].to_dict("index")
     if "proposal_key" in flagship_metrics:
         flagship_title_map.update(flagship_metrics.set_index("proposal_key")["flagship_title"].to_dict())
+        call_map.update(flagship_metrics.set_index("proposal_key")[["call_id", "call_name"]].to_dict("index"))
 
     links = []
     categories = set()
@@ -58,6 +60,8 @@ def build_partner_dashboard_data(partners, applicants, flagship_metrics):
             "flagship_id": row["flagship_id"],
             "flagship_title": flagship_title_map.get(row["flagship_id"], row.get("flagship_title_raw", "")),
             "flagship_title_raw": row.get("flagship_title_raw", ""),
+            "call_id": call_map.get(row["flagship_id"], {}).get("call_id", ""),
+            "call_name": call_map.get(row["flagship_id"], {}).get("call_name", ""),
             "partner_category": row["partner_category"],
             "partner_category_raw": row.get("partner_category_raw", ""),
             "collaboration_types": collaboration_types,
@@ -84,6 +88,8 @@ def build_partner_dashboard_data(partners, applicants, flagship_metrics):
             "categories": sorted(set(group["partner_category"])),
             "collaboration_types": type_values,
             "flagship_ids": sorted(set(group["flagship_id"])),
+            "call_ids": sorted(set(link["call_id"] for link in group_links if link["call_id"])),
+            "call_names": sorted(set(link["call_name"] for link in group_links if link["call_name"])),
             "n_flagships": int(group["flagship_id"].nunique()),
             "n_links": int(len(group)),
             "link_ids": [link["id"] for link in group_links],

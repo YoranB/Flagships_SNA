@@ -3,6 +3,7 @@ from itertools import combinations
 
 from ..config import CORE_INSTITUTIONS, SELECTED_FLAGSHIP_GROUPS
 from ..text_utils import clean_text, safe_float
+from ..text_utils import split_semicolon_values
 
 
 EXTERNAL_INSTITUTION_GROUP = "Externe/overige partners"
@@ -122,6 +123,8 @@ def build_convergence_overview(applicants, person_metrics, selected_flagship_gro
             "title": selected["title"],
             "member_ids": resolved_member_ids,
             "legacy_member_ids": selected["member_ids"],
+            "call_ids": split_semicolon_values(dashboard_group.get("call_id", "")),
+            "call_names": split_semicolon_values(dashboard_group.get("call_name", "")),
             "counts": counts,
             "total_applicants": total,
             "diversity_score": round(safe_float(diversity), 4),
