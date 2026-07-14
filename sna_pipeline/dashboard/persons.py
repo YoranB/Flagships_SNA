@@ -1,10 +1,20 @@
 from collections import defaultdict
 
 from ..enrichment.expertise import empty_expertise, load_expertise_map
-from ..text_utils import clean_text, safe_float
+from ..text_utils import clean_text, safe_float, split_semicolon_values
 
 
-def build_person_records_and_edges(G, applicants, person_metrics):
+def expertise_for_person(person_id, expertise_map):
+    candidates = [person_id]
+    if "|flagship::" in person_id:
+        candidates.append(person_id.replace("|flagship::", "|", 1))
+    for candidate in candidates:
+        if candidate in expertise_map:
+            return expertise_map[candidate], candidate
+    return empty_expertise(), ""
+
+
+def build_person_records_and_edges(G, applicants, person_metrics, include_expertise_quality=False):
     metric_map = person_metrics.set_index("person_id").to_dict("index")
     expertise_map = load_expertise_map()
 
@@ -47,6 +57,7 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             }
 
     persons = []
+    matched_expertise_ids = set()
     for node, attrs in G.nodes(data=True):
         metrics = metric_map.get(node, {})
         institution = attrs.get("institution") or "Unknown"
@@ -54,7 +65,12 @@ def build_person_records_and_edges(G, applicants, person_metrics):
         department = attrs.get("department") or ""
         department_clean = attrs.get("department_clean") or department
         department_group = attrs.get("department_group") or "Unknown"
-        expertise = expertise_map.get(node, empty_expertise())
+        expertise, matched_expertise_id = expertise_for_person(node, expertise_map)
+        if matched_expertise_id:
+            matched_expertise_ids.add(matched_expertise_id)
+        institution_units = split_semicolon_values(attrs.get("institution_units", "")) or [institution_clean or "Unknown"]
+        department_units = split_semicolon_values(attrs.get("department_units", "")) or [department_group]
+        has_expertise = bool(clean_text(expertise.get("expertise_keywords", "")) or clean_text(expertise.get("expertise_summary", "")))
         flagships = sorted(person_flagships.get(node, []), key=lambda x: x["id"])
         project_contexts = sorted(person_project_contexts.get(node, {}).values(), key=lambda x: (x["call_name"], x["title"]))
         derived_topics = sorted({item["theme"] for item in project_contexts if clean_text(item["theme"])})
@@ -85,10 +101,14 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             "name": attrs.get("name", node),
             "email": attrs.get("email", ""),
             "institution": institution,
+            "institution_raw": attrs.get("institution_raw", ""),
             "institution_clean": institution_clean,
+            "institution_units": institution_units,
             "department": department,
+            "department_raw": attrs.get("department_raw", ""),
             "department_clean": department_clean,
             "department_group": department_group,
+            "department_units": department_units,
             "department_tokens": attrs.get("department_tokens", ""),
             "role": attrs.get("role", ""),
             "degree": int(metrics.get("degree", 0) or 0),
@@ -110,6 +130,8 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             "expertise_last_checked": expertise.get("expertise_last_checked", ""),
             "expertise_manual_note": expertise.get("expertise_manual_note", ""),
             "expertise_origin": expertise.get("expertise_origin", ""),
+            "has_expertise": has_expertise,
+            "expertise_availability": "available" if has_expertise else "not_available",
             "base_search_text": " ".join(clean_text(part).lower() for part in search_parts[:-4] if clean_text(part)),
             "search_text": " ".join(clean_text(part).lower() for part in search_parts if clean_text(part)),
             "is_placeholder": bool(attrs.get("is_placeholder_id", False)),
@@ -134,4 +156,13 @@ def build_person_records_and_edges(G, applicants, person_metrics):
             "project_titles": attrs.get("flagship_titles", []),
         })
 
+    expertise_quality = {
+        "records": len(expertise_map),
+        "matched_records": len(matched_expertise_ids),
+        "unmatched_records": len(set(expertise_map) - matched_expertise_ids),
+        "unmatched_person_ids": sorted(set(expertise_map) - matched_expertise_ids),
+        "people_with_expertise": sum(person["has_expertise"] for person in persons),
+    }
+    if include_expertise_quality:
+        return persons, edges, expertise_quality
     return persons, edges

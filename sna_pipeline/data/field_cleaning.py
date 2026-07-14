@@ -11,7 +11,7 @@ from ..config import (
     OUT_UNMAPPED_DEPARTMENTS,
     READY_APPLICANTS,
 )
-from ..text_utils import clean_text, compact_spaces, simplify_institution
+from ..text_utils import clean_text, compact_spaces, institution_units, is_unknown_text, simplify_institution
 from .manual_programs import append_manual_applicants
 from .convergence_calls import append_convergence_applicants
 
@@ -56,7 +56,7 @@ OCR_FIXES = {
 
 def normalize_department_text(value):
     text = compact_spaces(value)
-    if not text:
+    if is_unknown_text(text):
         return ""
 
     text = text.replace("\n", " ").replace("\r", " ")
@@ -177,6 +177,8 @@ def build_unmapped_department_report(df):
 
 
 def clean_applicants(input_path=READY_APPLICANTS, output_path=CLEANED_APPLICANTS):
+    from .load import ensure_call_columns, ensure_proposal_columns
+
     input_path = Path(input_path)
     output_path = Path(output_path)
     CLEANED_FOLDER.mkdir(exist_ok=True)
@@ -186,12 +188,20 @@ def clean_applicants(input_path=READY_APPLICANTS, output_path=CLEANED_APPLICANTS
         applicants[col] = applicants[col].apply(clean_text)
     applicants = append_manual_applicants(applicants)
     applicants = append_convergence_applicants(applicants)
+    applicants = ensure_call_columns(applicants)
+    applicants = ensure_proposal_columns(applicants)
 
     applicants["institution_raw"] = applicants.get("institution", "")
     applicants["institution_clean"] = applicants["institution_raw"].apply(simplify_institution)
+    applicants["institution_units"] = applicants["institution_raw"].apply(
+        lambda value: "; ".join(institution_units(value))
+    )
     applicants["department_raw"] = applicants.get("department", "")
     applicants["department_clean"] = applicants["department_raw"].apply(clean_department)
     applicants["department_group"] = applicants["department_raw"].apply(department_group)
+    applicants["department_units"] = applicants["department_clean"].apply(
+        lambda value: "; ".join(split_department_parts(value)) or "Unknown"
+    )
     applicants["department_tokens"] = applicants["department_raw"].apply(department_tokens)
 
     applicants.to_csv(output_path, index=False, encoding="utf-8-sig")

@@ -1,7 +1,8 @@
 import pandas as pd
 
 from ..config import CLEANED_APPLICANTS, INPUT_ORG_EDGES, INPUT_PERSON_EDGES, READY_APPLICANTS
-from ..text_utils import clean_text, is_placeholder_email, normalize_for_id, simplify_institution, split_semicolon_values
+from ..text_utils import clean_text, institution_units, is_placeholder_email, normalize_for_id, simplify_institution, split_semicolon_values
+from .field_cleaning import clean_department, department_group, department_tokens, split_department_parts
 from .manual_programs import build_manual_org_edges, build_manual_person_edges
 from .convergence_calls import build_convergence_person_edges
 
@@ -296,18 +297,18 @@ def load_data():
         org_edges = ensure_call_columns(org_edges)
         org_edges = ensure_proposal_columns(org_edges)
 
-    if "institution_raw" not in applicants.columns:
-        applicants["institution_raw"] = applicants["institution"]
-    if "institution_clean" not in applicants.columns:
-        applicants["institution_clean"] = applicants["institution"].apply(simplify_institution)
-    if "department_raw" not in applicants.columns:
-        applicants["department_raw"] = applicants.get("department", "")
-    if "department_clean" not in applicants.columns:
-        applicants["department_clean"] = applicants.get("department", "")
-    if "department_group" not in applicants.columns:
-        applicants["department_group"] = applicants["department_clean"].where(applicants["department_clean"] != "", "Unknown")
-    if "department_tokens" not in applicants.columns:
-        applicants["department_tokens"] = ""
+    applicants["institution_raw"] = applicants.get("institution", "").apply(clean_text)
+    applicants["institution_clean"] = applicants["institution_raw"].apply(simplify_institution)
+    applicants["institution_units"] = applicants["institution_raw"].apply(
+        lambda value: "; ".join(institution_units(value))
+    )
+    applicants["department_raw"] = applicants.get("department", "").apply(clean_text)
+    applicants["department_clean"] = applicants["department_raw"].apply(clean_department)
+    applicants["department_group"] = applicants["department_raw"].apply(department_group)
+    applicants["department_units"] = applicants["department_clean"].apply(
+        lambda value: "; ".join(split_department_parts(value)) or "Unknown"
+    )
+    applicants["department_tokens"] = applicants["department_raw"].apply(department_tokens)
 
     applicants["institution_simplified"] = applicants["institution_clean"]
     applicants = add_person_ids(applicants)

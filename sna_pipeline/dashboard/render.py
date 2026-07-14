@@ -10,6 +10,7 @@ PROJECT_ROOT = PACKAGE_DIR.parent.parent
 TEMPLATE_PATH = PACKAGE_DIR / "templates" / "dashboard.html"
 DASHBOARD_CSS_PATH = PACKAGE_DIR / "static" / "dashboard.css"
 DASHBOARD_JS_PATH = PACKAGE_DIR / "static" / "dashboard.js"
+SEARCH_JS_PATH = PACKAGE_DIR / "static" / "search.js"
 VIS_CSS_PATH = PROJECT_ROOT / "lib" / "vis-9.1.2" / "vis-network.css"
 VIS_JS_PATH = PROJECT_ROOT / "lib" / "vis-9.1.2" / "vis-network.min.js"
 TOM_SELECT_CSS_PATH = PROJECT_ROOT / "lib" / "tom-select" / "tom-select.css"
@@ -51,6 +52,7 @@ def create_interactive_network(
         .replace("__DASHBOARD_CSS__", read_text(DASHBOARD_CSS_PATH))
         .replace("__VIS_JS__", read_text(VIS_JS_PATH).replace("</script", "<\/script"))
         .replace("__TOM_SELECT_JS__", read_text(TOM_SELECT_JS_PATH).replace("</script", "<\/script"))
+        .replace("__SEARCH_JS__", read_text(SEARCH_JS_PATH).replace("</script", "<\/script"))
         .replace("__DASHBOARD_JS__", read_text(DASHBOARD_JS_PATH).replace("</script", "<\/script"))
         .replace("__SNA_DATA__", data_json)
     )

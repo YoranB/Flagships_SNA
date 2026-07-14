@@ -4,6 +4,20 @@ import re
 import pandas as pd
 
 
+UNKNOWN_TEXT_VALUES = {
+    "",
+    "-",
+    "n a",
+    "na",
+    "none",
+    "not available",
+    "not applicable",
+    "null",
+    "onbekend",
+    "unknown",
+}
+
+
 def clean_text(value):
     if pd.isna(value):
         return ""
@@ -11,6 +25,10 @@ def clean_text(value):
 
 def compact_spaces(value):
     return re.sub(r"\s+", " ", clean_text(value))
+
+def is_unknown_text(value):
+    normalized = re.sub(r"[^a-z0-9]+", " ", compact_spaces(value).lower()).strip()
+    return normalized in UNKNOWN_TEXT_VALUES
 
 def normalize_for_id(value):
     value = compact_spaces(value).lower()
@@ -29,7 +47,7 @@ def is_placeholder_email(value):
 
 def simplify_institution(value):
     value = compact_spaces(value)
-    if not value:
+    if is_unknown_text(value):
         return "Unknown"
 
     low = value.lower()
@@ -100,6 +118,38 @@ def simplify_institution(value):
         return "Erasmus University Rotterdam"
 
     return value
+
+def institution_units(value):
+    """Return the explicit institution units represented by a raw affiliation."""
+    value = compact_spaces(value)
+    if is_unknown_text(value):
+        return ["Unknown"]
+
+    low_clean = re.sub(r"[^a-z0-9]+", " ", value.lower()).strip()
+    padded = f" {low_clean} "
+
+    def contains_any(phrases):
+        return any(f" {phrase} " in padded for phrase in phrases)
+
+    units = []
+    if contains_any(["erasmus mc", "erasmusmc", "eramsus mc", "emc"]):
+        units.append("Erasmus MC")
+    if contains_any(["tu delft", "tudelft", "delft university of technology", "tud"]):
+        units.append("TU Delft")
+    if contains_any([
+        "erasmus university rotterdam",
+        "erasmus university",
+        "erasmus universiteit",
+        "eshpm",
+        "eur",
+        "erasmus u",
+        "erasmus ur",
+    ]):
+        units.append("Erasmus University Rotterdam")
+
+    if units:
+        return list(dict.fromkeys(units))
+    return [simplify_institution(value)]
 
 def choose_display_name(names):
     values = [compact_spaces(v) for v in names if compact_spaces(v)]

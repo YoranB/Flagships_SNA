@@ -7,6 +7,10 @@ def join_unique(values):
     return "; ".join(sorted(set(v for v in values if v)))
 
 
+def join_unique_parts(values):
+    return "; ".join(sorted({part for value in values for part in split_semicolon_values(value)}))
+
+
 def merge_unique(left, right):
     return sorted(set((left or []) + (right or [])))
 
@@ -47,6 +51,8 @@ def add_placeholder_node(G, node_id, row, side):
         department_raw="",
         department_clean="",
         department_group="Unknown",
+        institution_units="Unknown",
+        department_units="Unknown",
         department_tokens="",
         role="",
         email=row.get(side, ""),
@@ -58,6 +64,11 @@ def add_placeholder_node(G, node_id, row, side):
 
 def build_person_graph(applicants, person_edges):
     G = nx.Graph()
+    applicants = applicants.copy()
+    if "institution_units" not in applicants:
+        applicants["institution_units"] = applicants.get("institution_clean", "Unknown")
+    if "department_units" not in applicants:
+        applicants["department_units"] = applicants.get("department_group", "Unknown")
 
     person_summary = (
         applicants.groupby("person_id")
@@ -66,10 +77,12 @@ def build_person_graph(applicants, person_edges):
             institution=("institution_simplified", choose_institution),
             institution_raw=("institution_raw", join_unique),
             institution_clean=("institution_clean", choose_institution),
+            institution_units=("institution_units", join_unique_parts),
             department=("department_clean", join_unique),
             department_raw=("department_raw", join_unique),
             department_clean=("department_clean", join_unique),
             department_group=("department_group", choose_group),
+            department_units=("department_units", join_unique_parts),
             department_tokens=("department_tokens", join_unique),
             role=("role", join_unique),
             email=("email", join_unique),
@@ -88,10 +101,12 @@ def build_person_graph(applicants, person_edges):
             institution=row["institution"] or "Unknown",
             institution_raw=row["institution_raw"],
             institution_clean=row["institution_clean"] or row["institution"] or "Unknown",
+            institution_units=row["institution_units"] or row["institution_clean"] or "Unknown",
             department=row["department"],
             department_raw=row["department_raw"],
             department_clean=row["department_clean"],
             department_group=row["department_group"] or "Unknown",
+            department_units=row["department_units"] or row["department_group"] or "Unknown",
             department_tokens=row["department_tokens"],
             role=row["role"],
             email=row["email"],

@@ -8,6 +8,7 @@ from .flagships import build_flagship_records
 from .partners import build_partner_dashboard_data
 from .persons import build_person_records_and_edges
 from .quality import build_quality_summary
+from .organisation import build_organisation_participation, build_proposal_records
 
 
 def _count_dict(values):
@@ -64,7 +65,9 @@ def build_dashboard_data(
     project_catalog=None,
     import_quality=None,
 ):
-    persons, edges = build_person_records_and_edges(G, applicants, person_metrics)
+    persons, edges, expertise_quality = build_person_records_and_edges(
+        G, applicants, person_metrics, include_expertise_quality=True
+    )
     flagship_data = build_flagship_records(applicants, person_metrics, flagship_metrics)
     quality, department_groups = build_quality_summary(
         applicants,
@@ -80,6 +83,18 @@ def build_dashboard_data(
     )
     partner_data = build_partner_dashboard_data(partners, applicants, flagship_metrics)
     campus_data = build_campus_dashboard_data(applicants, flagship_data, partner_data)
+    organisation_participation = build_organisation_participation(applicants)
+    quality.update({
+        "unknown_institution_people": len({
+            record["person_id"] for record in organisation_participation["records"]
+            if record["institution"] == "Unknown"
+        }),
+        "unknown_department_people": len({
+            record["person_id"] for record in organisation_participation["records"]
+            if record["department"] == "Unknown"
+        }),
+        "expertise": expertise_quality,
+    })
 
     return {
         "persons": persons,
@@ -87,6 +102,8 @@ def build_dashboard_data(
         "calls": build_call_records(applicants, edges, project_catalog),
         "call_overlaps": build_call_overlaps(applicants),
         "project_catalog": project_catalog or [],
+        "proposals": build_proposal_records(applicants),
+        "organisation_participation": organisation_participation,
         "import_quality": import_quality or {"totals": {}, "by_call": {}, "unresolved_projects": []},
         "flagships": flagship_data["flagships"],
         "flagship_links": flagship_data["flagship_links"],

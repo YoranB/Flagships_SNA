@@ -44,6 +44,8 @@
       person.expertise_confidence = edit.confidence || person._base_expertise_confidence || '';
       person.expertise_manual_note = edit.source_note || '';
       person.expertise_origin = hadOnline ? 'online_plus_manual' : 'manual';
+      person.has_expertise = expertiseHasContent(person);
+      person.expertise_availability = person.has_expertise ? 'available' : 'not_available';
       person.search_text = `${person._base_search_text || ''} ${person.expertise_keywords || ''} ${person.expertise_summary || ''}`.toLowerCase();
     }
     function applyManualExpertiseEdits() {
@@ -55,6 +57,8 @@
     applyManualExpertiseEdits();
     const personsById = new Map(DATA.persons.map(p => [p.id, p]));
     const callsById = new Map((DATA.calls || []).map(call => [call.id, call]));
+    const proposalsById = new Map((DATA.proposals || []).map(proposal => [proposal.id, proposal]));
+    const organisationData = DATA.organisation_participation || { records: [], institutions: [], departments: [], summary: {} };
     const flagshipsById = new Map([...DATA.flagships, ...DATA.selected_flagship_groups].map(f => [f.id, f]));
     const partnersById = new Map((DATA.partners || []).map(partner => [partner.id, partner]));
     const partnerLinksById = new Map((DATA.partner_flagship_links || []).map(link => [link.id, link]));
@@ -271,7 +275,32 @@
     }
 
     function scopedProjectContexts(person) {
-      return (person.project_contexts || []).filter(context => passesCallIds([context.call_id]));
+      const selectedIds = selectedProposalIds();
+      return (person.project_contexts || []).filter(context =>
+        passesCallIds([context.call_id]) && (!selectedIds.length || selectedIds.includes(context.id))
+      );
+    }
+
+    function scopedPersonFlagships(person) {
+      const selectedIds = selectedProposalIds();
+      return (person.flagships || []).filter(item =>
+        passesCallIds([item.call_id]) && (!selectedIds.length || selectedIds.includes(item.id) || selectedIds.includes(item.proposal_key))
+      );
+    }
+
+    function personInstitutionUnits(person) {
+      return person.institution_units?.length ? person.institution_units : [person.institution_clean || person.institution || 'Unknown'];
+    }
+
+    function personDepartmentUnits(person) {
+      return person.department_units?.length ? person.department_units : [person.department_group || 'Unknown'];
+    }
+
+    function personHasProposal(person, proposalId = activeState.selectedFlagship) {
+      if (!proposalId) return true;
+      const selectedIds = selectedProposalIds(proposalId);
+      return (person.flagships || []).some(item => selectedIds.includes(item.id) || selectedIds.includes(item.proposal_key)) ||
+        (person.project_contexts || []).some(item => selectedIds.includes(item.id));
     }
 
     function filteredEdgeWeight(edge) {
@@ -800,6 +829,12 @@
       return flagship.member_ids && flagship.member_ids.length ? flagship.member_ids : [flagship.id];
     }
 
+    function selectedProposalIds(proposalId = activeState.selectedFlagship) {
+      if (!proposalId) return [];
+      const flagship = flagshipsById.get(proposalId);
+      return flagship?.member_ids?.length ? flagship.member_ids : [proposalId];
+    }
+
     function countValues(values) {
       const counts = new Map();
       for (const value of values) {
@@ -1000,12 +1035,19 @@
 
     function updateFlagshipControls() {
       const current = activeState.selectedFlagship;
-      const options = visibleFlagships().sort((a, b) => a.title.localeCompare(b.title));
+      const options = (activeState.selectedOnly ? DATA.selected_flagship_groups : DATA.proposals || [])
+        .filter(proposal => passesCallIds(splitValues(proposal.call_id)))
+        .map(proposal => ({
+          id: proposal.id,
+          title: proposal.title,
+          call_name: proposal.call_name || 'Geselecteerde flagships',
+        }))
+        .sort((a, b) => a.call_name.localeCompare(b.call_name) || a.title.localeCompare(b.title));
       const flagshipSelect = document.getElementById('flagshipSelect');
-      flagshipSelect.innerHTML = '<option value="">Alle flagships</option>' + options
-        .map(flagship => `<option value="${escapeHtml(flagship.id)}">${escapeHtml(flagship.id.startsWith('selected:') ? flagship.title : flagship.id + ' · ' + flagship.title)}</option>`)
+      flagshipSelect.innerHTML = '<option value="">Alle proposals / flagships</option>' + options
+        .map(proposal => `<option value="${escapeHtml(proposal.id)}">${escapeHtml(proposal.call_name + ' · ' + proposal.title)}</option>`)
         .join('');
-      if (current && flagshipsById.has(current) && options.some(flagship => flagship.id === current)) {
+      if (current && options.some(proposal => proposal.id === current)) {
         flagshipSelect.value = current;
       } else {
         activeState.selectedFlagship = '';
@@ -1077,12 +1119,11 @@
     }
 
     function passInstitution(person) {
-      const institution = person.institution_clean || person.institution;
-      return !activeState.selectedInstitution || institution === activeState.selectedInstitution;
+      return !activeState.selectedInstitution || personInstitutionUnits(person).includes(activeState.selectedInstitution);
     }
 
     function passDepartment(person) {
-      return !activeState.selectedDepartment || person.department_group === activeState.selectedDepartment;
+      return !activeState.selectedDepartment || personDepartmentUnits(person).includes(activeState.selectedDepartment);
     }
 
     function passKeyword(person) {
@@ -1095,11 +1136,7 @@
     }
 
     function passFlagshipScope(person) {
-      if (!activeState.selectedFlagship) return true;
-      const flagship = flagshipsById.get(activeState.selectedFlagship);
-      if (!flagship) return true;
-      const memberIds = flagshipMemberIds(flagship);
-      return person.flagships.some(item => memberIds.includes(item.id));
+      return personHasProposal(person);
     }
 
     function passKeywordNetworkFilters(person) {
@@ -1114,7 +1151,7 @@
     }
 
     function passPersonFilters(person) {
-      return passCall(person) && passInstitution(person) && passDepartment(person) && passKeyword(person);
+      return passCall(person) && passInstitution(person) && passDepartment(person) && passFlagshipScope(person) && passKeyword(person);
     }
 
     function passWeight(edge) {
@@ -1436,6 +1473,222 @@
       setNetwork(nodes, edges, 'Top connectoren', `${people.length} personen gesorteerd op betweenness, flagships en weighted degree.`);
     }
 
+    function scopedOrganisationRecords() {
+      const selectedIds = selectedProposalIds();
+      return (organisationData.records || []).filter(record =>
+        passesCallIds([record.call_id]) &&
+        (!selectedIds.length || selectedIds.includes(record.proposal_key)) &&
+        (!activeState.selectedInstitution || record.institution === activeState.selectedInstitution) &&
+        (!activeState.selectedDepartment || record.department === activeState.selectedDepartment)
+      );
+    }
+
+    function aggregateOrganisationRecords(records) {
+      const institutionMap = new Map();
+      const departmentMap = new Map();
+      const ensure = (map, key, base) => {
+        if (!map.has(key)) map.set(key, { ...base, people: new Set(), departments: new Set(), proposals: new Map(), calls: new Map() });
+        return map.get(key);
+      };
+      for (const record of records) {
+        const institution = ensure(institutionMap, record.institution, { institution: record.institution });
+        institution.people.add(record.person_id);
+        institution.departments.add(record.department);
+        institution.proposals.set(record.proposal_key, { id: record.proposal_key, title: record.proposal_title });
+        institution.calls.set(record.call_id, { id: record.call_id, name: record.call_name });
+
+        const departmentKey = `${record.institution}\u0000${record.department}`;
+        const department = ensure(departmentMap, departmentKey, { institution: record.institution, department: record.department });
+        department.people.add(record.person_id);
+        department.proposals.set(record.proposal_key, { id: record.proposal_key, title: record.proposal_title });
+        department.calls.set(record.call_id, { id: record.call_id, name: record.call_name });
+      }
+      const finish = item => ({
+        ...item,
+        n_people: item.people.size,
+        n_departments: item.departments.size,
+        n_proposals: item.proposals.size,
+        n_calls: item.calls.size,
+        person_ids: [...item.people],
+        proposals: [...item.proposals.values()].sort((a, b) => a.title.localeCompare(b.title)),
+        calls: [...item.calls.values()].sort((a, b) => a.name.localeCompare(b.name)),
+      });
+      const institutions = [...institutionMap.values()].map(finish)
+        .sort((a, b) => b.n_people - a.n_people || a.institution.localeCompare(b.institution));
+      const departments = [...departmentMap.values()].map(finish)
+        .sort((a, b) => b.n_people - a.n_people || a.department.localeCompare(b.department));
+      return {
+        institutions,
+        departments,
+        summary: {
+          n_institutions: institutions.length,
+          n_departments: new Set(departments.map(item => item.department)).size,
+          n_people: new Set(records.map(item => item.person_id)).size,
+          n_proposals: new Set(records.map(item => item.proposal_key)).size,
+          n_calls: new Set(records.map(item => item.call_id)).size,
+        },
+      };
+    }
+
+    function compactLinks(items, labelKey) {
+      if (!items?.length) return '-';
+      const visible = items.slice(0, 3).map(item => item[labelKey]);
+      return `${visible.join(' · ')}${items.length > 3 ? ` · +${items.length - 3}` : ''}`;
+    }
+
+    function renderOrganisationOverview() {
+      const records = scopedOrganisationRecords();
+      const aggregate = aggregateOrganisationRecords(records);
+      const summary = aggregate.summary;
+      document.getElementById('organisationSummary').innerHTML = `
+        <div class="stat"><strong>${fmt.format(summary.n_institutions)}</strong><span class="subtle">faculties / institutions</span></div>
+        <div class="stat"><strong>${fmt.format(summary.n_departments)}</strong><span class="subtle">afdelingen</span></div>
+        <div class="stat"><strong>${fmt.format(summary.n_people)}</strong><span class="subtle">personen</span></div>
+        <div class="stat"><strong>${fmt.format(summary.n_proposals)}</strong><span class="subtle">voorstellen</span></div>
+        <div class="stat"><strong>${fmt.format(summary.n_calls)}</strong><span class="subtle">calls</span></div>
+      `;
+      document.getElementById('institutionParticipationTable').innerHTML = `
+        <table class="participation-table">
+          <thead><tr><th>Faculty / institution</th><th>People</th><th>Departments</th><th>Proposals</th><th>Calls</th></tr></thead>
+          <tbody>${aggregate.institutions.map(item => `
+            <tr data-org-institution="${escapeHtml(item.institution)}">
+              <td>${escapeHtml(item.institution)}</td>
+              <td>${fmt.format(item.n_people)}</td>
+              <td>${fmt.format(item.n_departments)}</td>
+              <td class="table-links" title="${escapeHtml(item.proposals.map(proposal => proposal.title).join('; '))}">${escapeHtml(compactLinks(item.proposals, 'title'))}</td>
+              <td class="table-links">${escapeHtml(compactLinks(item.calls, 'name'))}</td>
+            </tr>`).join('') || '<tr><td colspan="5">Geen participatie binnen deze filters.</td></tr>'}</tbody>
+        </table>`;
+      document.getElementById('departmentParticipationTable').innerHTML = `
+        <table class="participation-table">
+          <thead><tr><th>Department</th><th>Faculty / institution</th><th>People</th><th>Proposals</th><th>Calls</th></tr></thead>
+          <tbody>${aggregate.departments.map(item => `
+            <tr data-org-department="${escapeHtml(item.department)}" data-org-institution="${escapeHtml(item.institution)}">
+              <td>${escapeHtml(item.department)}</td>
+              <td>${escapeHtml(item.institution)}</td>
+              <td>${fmt.format(item.n_people)}</td>
+              <td class="table-links" title="${escapeHtml(item.proposals.map(proposal => proposal.title).join('; '))}">${escapeHtml(compactLinks(item.proposals, 'title'))}</td>
+              <td class="table-links">${escapeHtml(compactLinks(item.calls, 'name'))}</td>
+            </tr>`).join('') || '<tr><td colspan="5">Geen participatie binnen deze filters.</td></tr>'}</tbody>
+        </table>`;
+
+      const peopleIds = new Set(records.map(record => record.person_id));
+      const people = DATA.persons.filter(person => peopleIds.has(person.id));
+      const edges = chooseBackboneEdges(
+        DATA.edges.filter(edge => peopleIds.has(edge.source) && peopleIds.has(edge.target) && passWeight(edge)),
+        peopleIds
+      ).map(edge => ({
+        id: `organisation:${edgeKey(edge)}`,
+        from: edge.source,
+        to: edge.target,
+        width: personEdgeWidth(edge),
+        label: filteredEdgeWeight(edge) > 2 ? String(filteredEdgeWeight(edge)) : '',
+        kind: 'person-edge',
+        raw: edge,
+      }));
+      const topIds = new Set([...people].sort(sortPeopleByConnectorScore).slice(0, 20).map(person => person.id));
+      setNetwork(
+        people.map(person => personNode(person, topIds.has(person.id))),
+        edges,
+        'Organisatorische participatie',
+        `${fmt.format(summary.n_people)} personen uit ${fmt.format(summary.n_institutions)} faculties / institutions en ${fmt.format(summary.n_departments)} afdelingen.`
+      );
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>Organisatorische participatie</h3>
+        <div class="kv"><span>Callscope</span><span>${escapeHtml(callFilterLabel())}</span></div>
+        <div class="kv"><span>Proposal</span><span>${escapeHtml(proposalsById.get(activeState.selectedFlagship)?.title || 'Alle voorstellen')}</span></div>
+        <div class="kv"><span>Units</span><span>${fmt.format(summary.n_institutions)}</span></div>
+        <div class="kv"><span>Afdelingen</span><span>${fmt.format(summary.n_departments)}</span></div>
+        <div class="kv"><span>Personen</span><span>${fmt.format(summary.n_people)}</span></div>`;
+    }
+
+    function expertiseDocument(person) {
+      const contexts = scopedProjectContexts(person);
+      const flagships = scopedPersonFlagships(person);
+      const proposalRecords = [...flagships, ...contexts].map(item => proposalsById.get(item.proposal_key || item.id) || item);
+      return {
+        keywords: person.expertise_keywords || '',
+        summary: person.expertise_summary || '',
+        proposalTitleTheme: proposalRecords.map(item => `${item.title || ''} ${item.theme || ''}`).join(' '),
+        proposalSummary: proposalRecords.map(item => item.summary || '').join(' '),
+        department: personDepartmentUnits(person).join(' '),
+      };
+    }
+
+    function expertiseProjectLinks(person) {
+      const projects = [...scopedPersonFlagships(person), ...scopedProjectContexts(person)];
+      const seen = new Map();
+      for (const item of projects) {
+        const id = item.proposal_key || item.id;
+        if (!seen.has(id)) seen.set(id, proposalsById.get(id)?.title || item.title || id);
+      }
+      return [...seen.values()];
+    }
+
+    function renderExpertiseOverview() {
+      const query = activeState.keywordLabel || activeState.keyword;
+      const candidates = DATA.persons.filter(person =>
+        passCall(person) && passInstitution(person) && passDepartment(person) && passFlagshipScope(person)
+      );
+      if (!query) {
+        document.getElementById('expertiseSummary').innerHTML = '<div class="expertise-empty">Typ een expertise, bijvoorbeeld biostatistics, AI, epidemiology, prevention of data science.</div>';
+        document.getElementById('expertiseResults').innerHTML = '<div class="expertise-empty">Nog geen zoekterm ingevoerd.</div>';
+        setNetwork([], [], 'Expertise zoeken', 'Typ een expertise in het zoekveld om relevante personen te tonen.');
+        return;
+      }
+
+      const ranked = DashboardSearch.rank(candidates, query, expertiseDocument);
+      const visible = ranked.slice(0, 50);
+      const ids = new Set(visible.map(match => match.item.id));
+      const edges = DATA.edges.filter(edge => ids.has(edge.source) && ids.has(edge.target) && passWeight(edge)).map(edge => ({
+        id: `expertise:${edgeKey(edge)}`,
+        from: edge.source,
+        to: edge.target,
+        width: personEdgeWidth(edge),
+        label: filteredEdgeWeight(edge) > 2 ? String(filteredEdgeWeight(edge)) : '',
+        kind: 'person-edge',
+        raw: edge,
+      }));
+      const institutionCounts = countValues(ranked.flatMap(match => personInstitutionUnits(match.item)));
+      const departmentCounts = countValues(ranked.flatMap(match => personDepartmentUnits(match.item)));
+      document.getElementById('expertiseSummary').innerHTML = `
+        <div class="kv"><span>Zoekterm</span><span>${escapeHtml(query)}</span></div>
+        <div class="kv"><span>Matches</span><span>${fmt.format(ranked.length)}</span></div>
+        <div class="kv"><span>Met expertise</span><span>${fmt.format(ranked.filter(match => expertiseHasContent(match.item)).length)}</span></div>
+        <div class="kv"><span>Getoond</span><span>${fmt.format(visible.length)} in netwerk</span></div>
+        <div class="chips">${institutionCounts.slice(0, 5).map(([name, count]) => `<span class="chip">${escapeHtml(name)}: ${fmt.format(count)}</span>`).join('')}</div>
+        <div class="chips">${departmentCounts.slice(0, 5).map(([name, count]) => `<span class="chip">${escapeHtml(name)}: ${fmt.format(count)}</span>`).join('')}</div>`;
+      document.getElementById('expertiseResults').innerHTML = visible.map((match, index) => {
+        const person = match.item;
+        const projects = expertiseProjectLinks(person);
+        const calls = (person.calls || []).filter(call => passesCallIds([call.id])).map(call => call.name);
+        return `
+          <div class="expertise-result" data-person="${escapeHtml(person.id)}">
+            <div class="list-item-title">${index + 1}. ${escapeHtml(person.name)}</div>
+            <div class="subtle">${escapeHtml(personInstitutionUnits(person).join('; '))} · ${escapeHtml(personDepartmentUnits(person).join('; '))}</div>
+            <div class="chips">${match.reasons.map(reason => `<span class="chip">${escapeHtml(reason)}</span>`).join('')}</div>
+            ${expertiseHasContent(person)
+              ? `<div class="subtle expertise-summary-text"><b>${escapeHtml(person.expertise_keywords || 'Keywords not available')}</b>${person.expertise_summary ? ` · ${escapeHtml(person.expertise_summary)}` : ''}</div>`
+              : '<div class="subtle expertise-summary-text"><b>Expertise not available</b> · match via department or proposal context.</div>'}
+            <div class="subtle">Confidence: ${escapeHtml(person.expertise_confidence || 'Not available')} · ${escapeHtml(person.expertise_origin || 'Not available')}</div>
+            <div class="subtle">Proposals: ${escapeHtml(projects.join('; ') || 'None in scope')}</div>
+            <div class="subtle">Calls: ${escapeHtml(calls.join('; ') || 'None in scope')}</div>
+          </div>`;
+      }).join('') || '<div class="expertise-empty">Geen relevante personen gevonden binnen de actieve filters.</div>';
+      setNetwork(
+        visible.map(match => personNode(match.item, true)),
+        edges,
+        `Expertise: ${query}`,
+        `${fmt.format(visible.length)} van ${fmt.format(ranked.length)} matches getoond; tekstuele relevantie met maximaal 20% netwerkboost.`
+      );
+      document.getElementById('selectionDetails').innerHTML = `
+        <h3>Expertise zoekresultaten</h3>
+        <div class="kv"><span>Zoekterm</span><span>${escapeHtml(query)}</span></div>
+        <div class="kv"><span>Matches</span><span>${fmt.format(ranked.length)}</span></div>
+        <div class="kv"><span>Callscope</span><span>${escapeHtml(callFilterLabel())}</span></div>
+        <div class="kv"><span>Proposal</span><span>${escapeHtml(proposalsById.get(activeState.selectedFlagship)?.title || 'Alle voorstellen')}</span></div>`;
+    }
+
     function renderKeywordNetwork() {
       const keyword = activeState.keywordLabel || activeState.keyword;
       const allMatches = DATA.persons
@@ -1490,7 +1743,7 @@
 
     function renderDepartmentNetwork(departmentGroup) {
       const people = DATA.persons
-        .filter(person => passCall(person) && person.department_group === departmentGroup && passInstitution(person) && passKeyword(person));
+        .filter(person => passCall(person) && personDepartmentUnits(person).includes(departmentGroup) && passInstitution(person) && passKeyword(person));
       const ids = new Set(people.map(person => person.id));
       const edges = DATA.edges
         .filter(edge => ids.has(edge.source) && ids.has(edge.target) && passWeight(edge))
@@ -1521,7 +1774,7 @@
 
     function renderInstitutionNetwork(institution) {
       const people = DATA.persons
-        .filter(person => passCall(person) && (person.institution_clean || person.institution) === institution && passDepartment(person) && passKeyword(person));
+        .filter(person => passCall(person) && personInstitutionUnits(person).includes(institution) && passDepartment(person) && passKeyword(person));
       const ids = new Set(people.map(person => person.id));
       const edges = DATA.edges
         .filter(edge => ids.has(edge.source) && ids.has(edge.target) && passWeight(edge))
@@ -2074,16 +2327,26 @@
       renderFlagshipList();
       document.getElementById('convergencePanel').hidden = true;
       document.getElementById('callsPanel').hidden = true;
+      document.getElementById('organisationPanel').hidden = true;
+      document.getElementById('expertisePanel').hidden = true;
       if (activeState.view === 'convergence') {
         document.getElementById('convergencePanel').hidden = false;
       } else if (activeState.view === 'calls') {
         document.getElementById('callsPanel').hidden = false;
+      } else if (activeState.view === 'organisation') {
+        document.getElementById('organisationPanel').hidden = false;
+      } else if (activeState.view === 'expertise') {
+        document.getElementById('expertisePanel').hidden = false;
       }
 
       if (activeState.view === 'calls') {
         renderCallsOverview();
       } else if (activeState.view === 'people') {
         renderPeopleOverview();
+      } else if (activeState.view === 'organisation') {
+        renderOrganisationOverview();
+      } else if (activeState.view === 'expertise') {
+        renderExpertiseOverview();
       } else if (activeState.view === 'convergence') {
         renderConvergenceOverview();
       } else if (activeState.view === 'campus') {
@@ -2092,8 +2355,6 @@
         renderPartnerEcosystem();
       } else if (activeState.view === 'person' && activeState.selectedPerson) {
         renderPersonNeighborhood(activeState.selectedPerson);
-      } else if (activeState.view === 'person' && activeState.keyword) {
-        renderKeywordNetwork();
       } else if (activeState.view === 'connectors') {
         renderTopConnectors();
       } else if (activeState.selectedFlagship) {
@@ -2323,6 +2584,8 @@
         <div><b>${fmt.format(quality.placeholder_person_ids)}</b> placeholder/fallback person ids</div>
         <div><b>${fmt.format(quality.raw_institution_values)}</b> ruwe instellingwaarden → <b>${fmt.format(quality.simplified_institution_values)}</b> genormaliseerd</div>
         <div><b>${fmt.format(quality.raw_department_values || 0)}</b> ruwe afdelingen → <b>${fmt.format(quality.department_groups || 0)}</b> groepen</div>
+        <div><b>${fmt.format(quality.unknown_institution_people || 0)}</b> personen met instelling Unknown; <b>${fmt.format(quality.unknown_department_people || 0)}</b> met afdeling Unknown</div>
+        <div><b>${fmt.format(quality.expertise?.people_with_expertise || 0)}</b> personen met expertise; <b>${fmt.format(quality.expertise?.unmatched_records || 0)}</b> expertise-records ongematcht</div>
         <div><b>${fmt.format(partnerQuality.source_rows || 0)}</b> partnerrecords → <b>${fmt.format(partnerQuality.unique_partners || 0)}</b> unieke partners</div>
         <div><b>${fmt.format((partnerQuality.matched_flagship_ids || []).length)}</b> partner-flagships gematcht; <b>${fmt.format((partnerQuality.unmatched_flagship_ids || []).length)}</b> ongematcht</div>
         <div><b>${fmt.format(campusQuality.valid_projects || 0)}</b> campusprojecten → <b>${fmt.format((campusData.clusters || []).length)}</b> clusters</div>
@@ -2340,7 +2603,7 @@
       if (view !== activeState.view) pushHistory();
       activeState.view = view;
       document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.view === view));
-      if (['flagships', 'people', 'calls'].includes(view) && activeState.selectedPerson) {
+      if (['flagships', 'people', 'organisation', 'expertise', 'calls'].includes(view) && activeState.selectedPerson) {
         if (globalSearchControl) globalSearchControl.clear(true);
         activeState.selectedPerson = '';
       }
@@ -2403,8 +2666,8 @@
         globalSearchControl.addOptions(people.sort((a, b) => a.name.localeCompare(b.name)).map(personSearchOption));
         globalSearchControl.refreshOptions(false);
       }
-      const institutions = [...new Set(people.map(person => person.institution_clean || person.institution).filter(Boolean))].sort();
-      const departments = [...new Set(people.map(person => person.department_group || 'Unknown').filter(Boolean))].sort();
+      const institutions = [...new Set(people.flatMap(personInstitutionUnits).filter(Boolean))].sort();
+      const departments = [...new Set(people.flatMap(personDepartmentUnits).filter(Boolean))].sort();
       setScopedNativeOptions('institutionFilter', 'Alle instellingen', institutions);
       setScopedNativeOptions('departmentFilter', 'Alle afdelingen', departments);
       updateFlagshipControls();
@@ -2452,9 +2715,9 @@
           activeState.keyword = nextKeyword;
           if (activeState.selectedPerson) activeState.selectedPerson = '';
           if (activeState.keyword) {
-            markActiveViewTab('person');
+            markActiveViewTab('expertise');
           } else if (activeState.view === 'person') {
-            markActiveViewTab('flagships');
+            markActiveViewTab('expertise');
           }
           scheduleSearchRender();
         },
@@ -2474,7 +2737,7 @@
             activeState.selectedPerson = '';
             activeState.keyword = '';
             activeState.keywordLabel = '';
-            if (activeState.view === 'person') markActiveViewTab('flagships');
+            if (activeState.view === 'person') markActiveViewTab('expertise');
             renderActiveView();
           }
         }
@@ -2520,6 +2783,7 @@
         if (callFilterControl && (DATA.calls || []).length > 1) callFilterControl.clear(true);
         if (globalSearchControl) globalSearchControl.clear(true);
         activeState.selectedPerson = '';
+        activeState.selectedFlagship = '';
         activeState.keyword = '';
         activeState.keywordLabel = '';
         activeState.flagshipFocusPerson = '';
@@ -2537,16 +2801,16 @@
         pushHistory();
         activeState.selectedFlagship = event.target.value;
         activeState.flagshipFocusPerson = '';
-        if (activeState.view === 'partners') {
+        if (['partners', 'people', 'organisation', 'expertise'].includes(activeState.view)) {
           renderActiveView();
           return;
         }
         if (activeState.keyword) {
-          markActiveViewTab('person');
+          markActiveViewTab('expertise');
           renderActiveView();
           return;
         }
-        setView('flagships');
+        setView(flagshipsById.has(activeState.selectedFlagship) || !activeState.selectedFlagship ? 'flagships' : 'people');
       });
       document.getElementById('selectedOnlyToggle').addEventListener('change', () => {
         pushHistory();
@@ -2589,6 +2853,28 @@
       document.getElementById('exportExpertiseEdits').addEventListener('click', exportManualExpertiseEdits);
 
       document.addEventListener('click', event => {
+        const organisationDepartment = event.target.closest('[data-org-department]');
+        if (organisationDepartment) {
+          pushHistory();
+          activeState.selectedInstitution = organisationDepartment.dataset.orgInstitution;
+          activeState.selectedDepartment = organisationDepartment.dataset.orgDepartment;
+          document.getElementById('institutionFilter').value = activeState.selectedInstitution;
+          document.getElementById('departmentFilter').value = activeState.selectedDepartment;
+          markActiveViewTab('organisation');
+          renderActiveView();
+          return;
+        }
+        const organisationInstitution = event.target.closest('[data-org-institution]');
+        if (organisationInstitution) {
+          pushHistory();
+          activeState.selectedInstitution = organisationInstitution.dataset.orgInstitution;
+          activeState.selectedDepartment = '';
+          document.getElementById('institutionFilter').value = activeState.selectedInstitution;
+          document.getElementById('departmentFilter').value = '';
+          markActiveViewTab('organisation');
+          renderActiveView();
+          return;
+        }
         const callItem = event.target.closest('[data-call-id]');
         if (callItem) {
           pushHistory();
@@ -2663,7 +2949,7 @@
           activeState.selectedFlagship = flagshipItem.dataset.flagship;
           activeState.flagshipFocusPerson = '';
           if (activeState.keyword) {
-            markActiveViewTab('person');
+            markActiveViewTab('expertise');
             renderActiveView();
             return;
           }

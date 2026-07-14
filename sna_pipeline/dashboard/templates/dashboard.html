@@ -24,6 +24,8 @@ __DASHBOARD_CSS__
         <div class="tabs" role="tablist">
           <button class="tab active" data-view="flagships">Flagships</button>
           <button class="tab" data-view="people">People</button>
+          <button class="tab" data-view="organisation">Organisation</button>
+          <button class="tab" data-view="expertise">Expertise</button>
           <button class="tab" data-view="calls">Calls</button>
           <button class="tab" data-view="convergence">Convergence</button>
           <button class="tab" data-view="campus">Campus</button>
@@ -42,11 +44,11 @@ __DASHBOARD_CSS__
           <select id="callFilter" multiple placeholder="Alle calls"></select>
         </div>
         <div class="field">
-          <label for="globalSearch">Zoeken</label>
-          <select id="globalSearch" placeholder="Zoek persoon of typ trefwoord"></select>
+          <label for="globalSearch">Persoon of expertise zoeken</label>
+          <select id="globalSearch" placeholder="Zoek persoon of typ expertise"></select>
         </div>
         <div class="field">
-          <label for="flagshipSelect">Flagship</label>
+          <label for="flagshipSelect">Proposal / flagship</label>
           <select id="flagshipSelect"></select>
         </div>
         <div class="field">
@@ -146,6 +148,45 @@ __DASHBOARD_CSS__
           <div id="convergenceRanking"></div>
         </section>
       </div>
+      <div id="organisationPanel" class="analysis-panel organisation-panel" hidden>
+        <section class="analysis-card organisation-summary-card">
+          <div class="convergence-heading">
+            <h3>Organisatorische participatie</h3>
+            <div class="subtle">Faculty / institution en afdeling</div>
+          </div>
+          <div id="organisationSummary" class="stats"></div>
+        </section>
+        <section class="analysis-card">
+          <div class="convergence-heading">
+            <h3>Faculty / institution</h3>
+            <div class="subtle">Klik een rij om het netwerk te filteren</div>
+          </div>
+          <div id="institutionParticipationTable" class="table-scroll"></div>
+        </section>
+        <section class="analysis-card">
+          <div class="convergence-heading">
+            <h3>Afdelingen</h3>
+            <div class="subtle">Personen en gekoppelde voorstellen</div>
+          </div>
+          <div id="departmentParticipationTable" class="table-scroll"></div>
+        </section>
+      </div>
+      <div id="expertisePanel" class="analysis-panel expertise-panel" hidden>
+        <section class="analysis-card expertise-summary-card">
+          <div class="convergence-heading">
+            <h3>Expertise zoeken</h3>
+            <div class="subtle">Relevantie met netwerkpositie</div>
+          </div>
+          <div id="expertiseSummary"></div>
+        </section>
+        <section class="analysis-card expertise-results-card">
+          <div class="convergence-heading">
+            <h3>Top matches</h3>
+            <div class="subtle">Maximaal 50 personen in het netwerk</div>
+          </div>
+          <div id="expertiseResults" class="expertise-results"></div>
+        </section>
+      </div>
       <div class="network-stage">
         <div id="network"></div>
         <div id="networkEmpty" class="network-empty" hidden></div>
@@ -172,6 +213,9 @@ __VIS_JS__
 __TOM_SELECT_JS__
   </script>
   <script id="sna-data" type="application/json">__SNA_DATA__</script>
+  <script>
+__SEARCH_JS__
+  </script>
   <script>
 __DASHBOARD_JS__
   </script>
